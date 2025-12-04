@@ -1,0 +1,23 @@
+---
+title: '入出力高速化'
+date: 2024-07-29T22:01:37+09:00
+description: "romophic-library"
+categories: ["c++", "competitive programming"]
+authors: ['romophic']
+---
+## 用途
+
+cin/coutはC由来のstdioと出力する順番が実行順と異ならないように勝手にバッファをフラッシュするので, これを無効化する.ついでに小数点以下16ケタまで出力するようにした.  
+`main()`の中に書きたくないので, 構造体のコンストラクタとして呼び出すとこれを回避できるテクを使う:
+
+## 実装
+
+```cpp
+struct init {
+  init() {
+    cin.tie(0)->sync_with_stdio(0);
+    ios::sync_with_stdio(false);
+    cout << fixed << setprecision(16);
+  }
+} init;
+```

@@ -1,0 +1,43 @@
+---
+title: '二分探索'
+date: 2024-07-29T22:01:37+09:00
+description: "romophic-library"
+categories: ["c++", "competitive programming"]
+authors: ['romophic']
+---
+
+## 用途
+
+二分探索する.
+
+## 計算量
+
+$O(\log n)$
+
+## 使い方
+
+`dichotomy(探索下限, 探索上限, λ:int -> boolのlambda)`でλがtrueになる最小の数が返される. 探索範囲は半開区間で渡し, 区間にλがtrueになるものがなかった場合は探索上限値を返す.
+例えば
+
+```cpp
+dichotomy(0, 100, [](int n){
+  return 50 < n;
+});
+```
+
+の返り値は$ 50 < n $を満たす最小のnで51が返される.
+
+## 実装
+
+```cpp
+int dichotomy(int ng, int ok, const function<bool(int)> &discriminant) {
+  ng--;
+  while (ok - ng > 1)
+    (discriminant((ng + ok) / 2) ? ok : ng) = (ng + ok) / 2;
+  return ok;
+}
+```
+
+## Verify
+
+https://atcoder.jp/contests/typical-algorithm/submissions/59723946

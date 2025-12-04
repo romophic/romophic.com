@@ -1,0 +1,42 @@
+---
+title: '素因数分解'
+date: 2024-07-29T22:01:37+09:00
+description: "romophic-library"
+categories: ["c++", "competitive programming"]
+authors: ['romophic']
+---
+## 用途
+
+与えられた自然数を素因数分解する.
+
+## 計算量
+
+$ O\left(\dfrac{n}{\ln n}\right) $
+
+## 使い方
+
+例えば`primeFactrize(12)`をすると, `{(2,2),(3,1)}`が返ってくる.これは$ 2^2 
+\cdot 
+3^1 = 12 $を意味している.
+
+## 実装
+
+```cpp
+vector<pair<int, int>> primeFactorize(int n) {
+  vector<pair<int, int>> res;
+  for (int a = 2; a * a <= n; ++a) {
+    if (n % a == 0) {
+      res.push_back({a, 0});
+      while (n % a == 0)
+        ++res.back().second, n /= a;
+    }
+  }
+  if (n != 1)
+    res.push_back({n, 1});
+  return res;
+}
+```
+
+## Verify
+
+//TODO

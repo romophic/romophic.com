@@ -1,0 +1,39 @@
+---
+title: '約数列挙'
+date: 2024-07-29T22:01:37+09:00
+description: "romophic-library"
+categories: ["c++", "competitive programming"]
+authors: ['romophic']
+---
+## 用途
+
+与えられた自然数の約数を列挙する.
+
+## 計算量
+
+$ O(\sqrt{n}) $
+
+## 使い方
+
+例えば`divisor(12)`をすると, `vector<int>{1,2,3,4,6,12}`が返ってくる. 昇順であることが保証される.
+
+## 実装
+
+```cpp
+vector<int> divisor(int n) {
+  vector<int> head, tail;
+  for (int i = 1; i * i <= n; i++) {
+    if (n % i == 0) {
+      head.push_back(i);
+      if (i * i != n)
+        tail.push_back(n / i);
+    }
+  }
+  head.insert(head.end(), tail.rbegin(), tail.rend());
+  return head;
+}
+```
+
+## Verify
+
+//TODO

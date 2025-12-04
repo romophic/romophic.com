@@ -1,0 +1,83 @@
+---
+title: 'romophic-library'
+date: 2024-07-30T22:01:37+09:00
+description: "Library for Competitive Programming"
+authors: ['romophic']
+---
+元々は[github.com/romophic/Compro](https://github.com/romophic/Compro)にまとめていたライブラリを適当にまとめたものです. 盆栽を勧められたので始めました.  
+前提テンプレート:
+
+```cpp
+#pragma GCC optimize("Ofast")
+#include <bits/stdc++.h>
+#define int long long
+#define double long double
+#define uint unsigned long long
+#define int128 __int128
+#define uint128 unsigned __int128
+using namespace std;
+constexpr int INF = 1LL << 60;
+template <class T>
+bool chmax(T &a, const T &b) { return a < b ? a = b, 1 : 0; }
+template <class T>
+bool chmin(T &a, const T &b) { return a > b ? a = b, 1 : 0; }
+```
+
+## アルゴリズム
+
+### グラフ
+
+- [DirectedGraph](romophic-library/lib/directedgraph)
+  - [WarshallFloyd](romophic-library/lib/warshallfloyd/)
+  - [Dijkstra](romophic-library/lib/dijkstra/)
+  - [BellmanFord](romophic-library/lib/bellmanFord/)
+  - [TopologicalSort](romophic-library/lib/topologicalSort/)
+  - [getFarthestVertex(最遠頂点を求める)](romophic-library/lib/getfarthestvertex/)
+  - [getGraphDiameter(木の頂点を求める)](romophic-library/lib/getgraphdiameter/)
+- [UndirectedGraph](romophic-library/lib/undirectedgraph/)
+  - [Kruskal](romophic-library/lib/kruskal/)
+- [強連結成分分解(SCC)](romophic-library/lib/scc/)
+
+### データ構造
+
+- [UnionFind](romophic-library/lib/unionfind/)
+- [WeightedUnionFind](romophic-library/lib/weightedunionfind/)
+- [SegmentTree](romophic-library/lib/segmenttree/)
+- [LazySegmentTree](romophic-library/lib/lazysegmenttree/)
+
+### 数学
+
+- [素因数分解](romophic-library/lib/素因数分解/)
+- [約数列挙](romophic-library/lib/約数列挙/)
+- [繰り返し二乗法](romophic-library/lib/繰り返し二乗法/)
+- [ModInt](romophic-library/lib/modint/)
+- [進数変換](romophic-library/lib/convnotation/)
+- ["Euler's totient function"](romophic-library/lib/Euler\'s totient function)
+- [多倍長整数](romophic-library/lib/bigint/)
+
+### 文字列
+
+- [文字列のith以降で文字cが出現する最小のindex](romophic-library/lib/nextcharindex/)
+- [RollingHash](romophic-library/lib/rollinghash/)
+- [SuffixArray](romophic-library/lib/suffixarray/)
+
+### その他
+
+- [二分探索](romophic-librarromophic-library/lib/二分探索/)
+- [chmaromophic-library/chmin](./lib/chmaxchmin/)
+- [STLデータ構造にそのままciromophic-library/coutするやつ](../STLデータ構造をistream,ostream-compatibleにする/)
+- [入出力高速化](romophic-library/lib/入出力高速化/)
+- [Mo's Algorithm](romophic-library/lib/mo/)
+- [累積和(1d,2d,3d)](romophic-library/lib/Cumulate/)
+- [インデックス変換(1d,2d,3d)](romophic-library/lib/ConvIndex/)
+
+## ヒューリスティック
+
+- [SimulatedAnnealing](romophic-library/lib/simulatedannealing/)
+
+## お世話になったライブラリ
+
+自由に使って良いとあるところからのみ参考にさせて頂いて実装しました.
+
+- https://ei1333.github.io/luzhiled
+- https://github.com/tatyam-prime/kyopro_library

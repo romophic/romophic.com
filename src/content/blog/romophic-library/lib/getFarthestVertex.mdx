@@ -1,0 +1,63 @@
+---
+title: 'getFarthestVertex(最遠頂点を求める)'
+date: 2024-07-30T22:01:37+09:00
+description: "romophic-library"
+categories: ["c++", "competitive programming"]
+authors: ['romophic']
+---
+## 用途
+
+木において指定した頂点からもっとも遠い頂点を得る.
+
+## 計算量
+
+$ O(n) $
+
+## Depends
+
+- **[DirectedGraph](../DirectedGraph/)**
+
+## 使い方
+
+### 宣言
+
+```cpp
+auto res = getFarthestVertex(g,s);
+```
+
+`res.v`で最も遠い頂点の頂点番号を得る. `res.cost`で最も遠い頂点までの距離を得る.
+
+## 実装
+
+```cpp
+struct getFarthestVertex_return {
+  int v, cost;
+};
+getFarthestVertex_return getFarthestVertex(DirectedGraph &_g, int _v) {
+  queue<pair<int, int>> q;
+  vector<int> t(_g.n, -1);
+  q.push({_v, 0});
+  getFarthestVertex_return res = {-1, -1};
+  while (!q.empty()) {
+    auto p = q.front();
+    q.pop();
+    bool tr = true;
+    for (auto &i : _g.g[p.first])
+      if (t[i.to] == -1) {
+        tr = false;
+        q.push({i.to, p.second + i.cost});
+        t[i.to] = p.second + i.cost;
+      }
+    if (tr)
+      res = {p.first, p.second};
+  }
+  return res;
+}
+```
+
+## Depended on
+
+- **[getGraphDiameter(グラフの直径を求める)](../getGraphDiameter/)**
+
+### Verify👍
+https://atcoder.jp/contests/typical90/submissions/57586680

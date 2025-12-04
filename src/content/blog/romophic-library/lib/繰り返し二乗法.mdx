@@ -1,0 +1,40 @@
+---
+title: '繰り返し二乗法'
+date: 2024-07-29T22:01:37+09:00
+description: "romophic-library"
+categories: ["c++", "competitive programming"]
+authors: ['romophic']
+---
+
+## 用途
+
+$a^n \ \ (\text{mod}\ \ mod)$を$O(\log(n))$で求める.
+
+## 計算量
+
+$O(\log n)$
+
+## 使い方
+
+`mop(a,b,mod)`で$a^n \ \ (\text{mod}\ \ mod)$が返る.
+
+## 実装
+
+```cpp
+int mop(int a, int n, int mod = LLONG_MAX) {
+  int res = 1;
+  while (n > 0) {
+    if (n & 1)
+      res = res * a % mod;
+    a = a * a % mod;
+    n >>= 1;
+  }
+  return res;
+}
+```
+
+## Verify
+
+//TODO
+
+```
