@@ -1,12 +1,9 @@
-+++
-title = 'STLデータ構造をistream,ostream-compatibleにする'
-date = 2024-06-09T22:01:37+09:00
-description = "Guide to making STL data structures istream/ostream-compatible"
-categories = [
-  "c++",
-  "competitive programming"
-]
-+++
+---
+title: 'STLデータ構造をistream,ostream-compatibleにする'
+date: 2024-06-09T22:01:37+09:00
+description: "Guide to making STL data structures istream/ostream-compatible"
+authors: ['romophic']
+---
 # tldr
 
 下の[Source](#source)をコピペすると C++ で vector や tuple などをそのまま cin や cout できます。
@@ -140,4 +137,4 @@ template <class T, class Y>
 istream &operator>>(istream &_istr, pair<T, Y> &_v) { return _istr >> _v.first >> _v.second; }
 ```
 
-<https://github.com/romophic/stldumper/blob/main/stldumper.hpp>
+https://github.com/romophic/stldumper/blob/main/stldumper.hpp
