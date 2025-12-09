@@ -4,6 +4,7 @@ import mdx from '@astrojs/mdx'
 import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
 import icon from 'astro-icon'
+import AstroPWA from '@vite-pwa/astro'
 
 import { rehypeHeadingIds } from '@astrojs/markdown-remark'
 import expressiveCode from 'astro-expressive-code'
@@ -20,6 +21,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   site: 'https://romophic.com',
+  prefetch: true,
   integrations: [
     expressiveCode({
       themes: ['github-light', 'github-dark'],
@@ -31,9 +33,9 @@ export default defineConfig({
         collapseStyle: 'collapsible-auto',
         overridesByLang: {
           'ansi,bat,bash,batch,cmd,console,powershell,ps,ps1,psd1,psm1,sh,shell,shellscript,shellsession,text,zsh':
-            {
-              showLineNumbers: false,
-            },
+          {
+            showLineNumbers: false,
+          },
         },
       },
       styleOverrides: {
@@ -54,7 +56,6 @@ export default defineConfig({
           frameBoxShadowCssValue: 'none',
           terminalBackground:
             'color-mix(in oklab, var(--muted) 25%, transparent)',
-          terminalTitlebarBackground: 'transparent',
           terminalTitlebarBorderBottomColor: 'transparent',
           terminalTitlebarForeground: 'var(--muted-foreground)',
         },
@@ -68,6 +69,38 @@ export default defineConfig({
     react(),
     sitemap(),
     icon(),
+    AstroPWA({
+      registerType: 'autoUpdate',
+      manifest: {
+        name: 'astro-erudite',
+        short_name: 'astro-erudite',
+        theme_color: '#ffffff',
+        background_color: '#000000',
+        display: 'standalone',
+        icons: [
+          {
+            src: '/web-app-manifest-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+          {
+            src: '/web-app-manifest-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+        ],
+      },
+      workbox: {
+        navigateFallback: '/404',
+        globPatterns: ['**/*.{css,js,html,svg,png,ico,txt}'],
+      },
+      devOptions: {
+        enabled: true,
+        navigateFallbackAllowlist: [/^\/404$/],
+      },
+    }),
   ],
   vite: {
     plugins: [tailwindcss()],
@@ -90,7 +123,13 @@ export default defineConfig({
         },
       ],
       rehypeHeadingIds,
-      rehypeKatex,
+      [
+        rehypeKatex,
+        {
+          output: 'htmlAndMathml',
+          throwOnError: false,
+        },
+      ],
       [
         rehypePrettyCode,
         {
