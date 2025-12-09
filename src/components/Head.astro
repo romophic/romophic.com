@@ -34,7 +34,6 @@ import Favicons from './Favicons.astro'
   />
 
   <link rel="sitemap" href="/sitemap-index.xml" />
-  <link rel="manifest" href="/site.webmanifest" />
   <link
     rel="alternate"
     type="application/rss+xml"
@@ -43,6 +42,27 @@ import Favicons from './Favicons.astro'
   />
 
   <Favicons />
+  <script is:inline>
+    function setDarkMode() {
+      const theme = (() => {
+        const stored = localStorage?.getItem('theme') ?? ''
+        if (['dark', 'light'].includes(stored)) return stored
+        return window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light'
+      })()
+
+      document.documentElement.setAttribute('data-theme', theme)
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+    }
+
+    setDarkMode()
+    document.addEventListener('astro:after-swap', setDarkMode)
+  </script>
   <ClientRouter />
 
   <slot />
