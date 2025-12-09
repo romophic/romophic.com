@@ -1,0 +1,43 @@
+---
+---
+
+<scroll-progress class="fixed top-0 left-0 z-[60] h-1 w-full pointer-events-none">
+  <div
+    class="h-full bg-primary/80 transition-all duration-100 ease-out origin-left"
+    style="width: 0%"
+  >
+  </div>
+</scroll-progress>
+
+<script>
+  class ScrollProgress extends HTMLElement {
+    constructor() {
+      super()
+    }
+
+    connectedCallback() {
+      const progressBar = this.querySelector('div')
+      if (!progressBar) return
+
+      const updateProgress = () => {
+        const scrollTop = window.scrollY || document.documentElement.scrollTop
+        const height =
+          document.documentElement.scrollHeight -
+          document.documentElement.clientHeight
+        const scrolled = (scrollTop / height) * 100
+        progressBar.style.width = `${scrolled}%`
+      }
+
+      window.addEventListener('scroll', updateProgress)
+      
+      // Initial update
+      updateProgress()
+      
+      // Cleanup on disconnect seems unnecessary for singleton in layout, 
+      // but strictly speaking good practice if it were removed.
+      // However, disconnectedCallback isn't fired on nav in Astro unless component is removed.
+    }
+  }
+
+  customElements.define('scroll-progress', ScrollProgress)
+</script>

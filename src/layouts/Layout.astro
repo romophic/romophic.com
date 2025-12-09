@@ -8,6 +8,9 @@ import Head from '@/components/Head.astro'
 import Header from '@/components/Header.astro'
 import { SITE } from '@/consts'
 import { cn } from '@/lib/utils'
+import PageLoader from '@/components/PageLoader.astro'
+import ReloadPrompt from '@/components/ReloadPrompt.astro'
+import ScrollProgress from '@/components/ScrollProgress.astro'
 
 interface Props {
   class?: string
@@ -25,6 +28,7 @@ const { class: className } = Astro.props
     <slot name="head" />
   </Head>
   <body class="flex h-fit min-h-screen flex-col gap-y-6 font-sans">
+    <ScrollProgress />
     <header
       class="bg-background/50 sticky top-0 z-50 divide-y backdrop-blur-sm xl:divide-none"
     >
@@ -32,11 +36,13 @@ const { class: className } = Astro.props
       <slot name="subposts-navigation" />
       <slot name="table-of-contents" />
     </header>
-    <main
-      class={cn('w-full mx-auto flex grow flex-col gap-y-6 px-4', className)}
-    >
-      <slot />
+    <main class="w-full mx-auto flex grow flex-col">
+      <div class={cn('flex flex-col gap-y-6 w-full mx-auto px-4', className)}>
+        <slot />
+      </div>
     </main>
     <Footer />
+    <PageLoader />
+  <ReloadPrompt />
   </body>
 </html>

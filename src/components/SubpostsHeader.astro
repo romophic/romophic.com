@@ -44,7 +44,7 @@ const currentSubpostDetails = isCurrentSubpost
 
 {
   activePost && subposts.length > 0 && (
-    <div id="mobile-subposts-container" class="w-full xl:hidden">
+    <mobile-subposts id="mobile-subposts-container" class="w-full xl:hidden block">
       <details class="group">
         <summary class="flex w-full cursor-pointer items-center justify-between">
           <div class="mx-auto flex w-full max-w-3xl items-center px-4 py-3">
@@ -187,128 +187,104 @@ const currentSubpostDetails = isCurrentSubpost
           </div>
         </ScrollArea>
       </details>
-    </div>
+    </mobile-subposts>
   )
 }
 
 <script>
-  class SubpostsState {
-    scrollArea: HTMLElement | null = null
-    detailsElement: HTMLDetailsElement | null = null
-    headerScrollArea: HTMLElement | null = null
+  class MobileSubposts extends HTMLElement {
+    private scrollArea: HTMLElement | null = null
+    private detailsElement: HTMLDetailsElement | null = null
+    private headerScrollArea: HTMLElement | null = null
 
-    reset() {
-      this.scrollArea = null
-      this.detailsElement = null
-      this.headerScrollArea = null
+    constructor() {
+      super()
+      this.updateScrollMask = this.updateScrollMask.bind(this)
     }
-  }
 
-  const state = new SubpostsState()
+    connectedCallback() {
+      this.init()
+    }
 
-  class SubpostsHeaderScrollMask {
-    static update() {
-      if (!state.scrollArea || !state.headerScrollArea) return
+    disconnectedCallback() {
+      if (this.scrollArea) {
+        this.scrollArea.removeEventListener('scroll', this.updateScrollMask)
+      }
+    }
 
-      const { scrollTop, scrollHeight, clientHeight } = state.scrollArea
+    init() {
+      this.scrollArea = this.querySelector('[data-radix-scroll-area-viewport]')
+      this.detailsElement = this.querySelector('details')
+      this.headerScrollArea = this.querySelector('[data-subposts-header-scroll]')
+
+      this.setupInteraction()
+    }
+
+    updateScrollMask() {
+      if (!this.scrollArea || !this.headerScrollArea) return
+
+      const { scrollTop, scrollHeight, clientHeight } = this.scrollArea
       const threshold = 5
       const isAtTop = scrollTop <= threshold
       const isAtBottom = scrollTop >= scrollHeight - clientHeight - threshold
 
-      state.headerScrollArea.classList.toggle('mask-t-from-80%', !isAtTop)
-      state.headerScrollArea.classList.toggle('mask-b-from-80%', !isAtBottom)
+      this.headerScrollArea.classList.toggle('mask-t-from-80%', !isAtTop)
+      this.headerScrollArea.classList.toggle('mask-b-from-80%', !isAtBottom)
     }
-  }
 
-  class SubpostsScroll {
-    static toActive() {
-      if (!state.scrollArea) return
+    scrollToActive() {
+      if (!this.scrollArea) return
 
-      const activeItem = state.scrollArea.querySelector(
+      const activeItem = this.scrollArea.querySelector(
         '.mobile-subposts-active-item',
       )
       if (!activeItem) return
 
       const { top: areaTop, height: areaHeight } =
-        state.scrollArea.getBoundingClientRect()
+        this.scrollArea.getBoundingClientRect()
       const { top: itemTop, height: itemHeight } =
         activeItem.getBoundingClientRect()
 
-      const currentItemTop = itemTop - areaTop + state.scrollArea.scrollTop
+      const currentItemTop = itemTop - areaTop + this.scrollArea.scrollTop
       const targetScroll = Math.max(
         0,
         Math.min(
           currentItemTop - (areaHeight - itemHeight) / 2,
-          state.scrollArea.scrollHeight - state.scrollArea.clientHeight,
+          this.scrollArea.scrollHeight - this.scrollArea.clientHeight,
         ),
       )
 
-      state.scrollArea.scrollTop = targetScroll
+      this.scrollArea.scrollTop = targetScroll
     }
 
-    static setupInteraction() {
-      const container = document.getElementById('mobile-subposts-container')
-      if (!container) return
-
-      state.scrollArea = container.querySelector(
-        '[data-radix-scroll-area-viewport]',
-      )
-      state.detailsElement = container.querySelector('details')
-      state.headerScrollArea = container.querySelector(
-        '[data-subposts-header-scroll]',
-      )
-      const links = container.querySelectorAll('.mobile-subposts-link')
-
-      if (state.scrollArea) {
-        state.scrollArea.addEventListener(
+    setupInteraction() {
+      if (this.scrollArea) {
+        this.scrollArea.addEventListener(
           'scroll',
-          SubpostsHeaderScrollMask.update,
+          this.updateScrollMask,
           { passive: true },
         )
       }
 
-      if (state.detailsElement) {
-        state.detailsElement.addEventListener('toggle', () => {
-          if (state.detailsElement?.open) {
+      if (this.detailsElement) {
+        this.detailsElement.addEventListener('toggle', () => {
+          if (this.detailsElement?.open) {
             requestAnimationFrame(() => {
-              SubpostsScroll.toActive()
-              setTimeout(SubpostsHeaderScrollMask.update, 100)
+              this.scrollToActive()
+              setTimeout(this.updateScrollMask, 100)
             })
           }
         })
       }
 
+      const links = this.querySelectorAll('.mobile-subposts-link')
       links.forEach((link) => {
         link.addEventListener('click', () => {
-          if (state.detailsElement) state.detailsElement.open = false
+          if (this.detailsElement) this.detailsElement.open = false
         })
       })
     }
   }
 
-  class SubpostsController {
-    static init() {
-      state.reset()
-      SubpostsScroll.setupInteraction()
-    }
-
-    static cleanup() {
-      if (state.scrollArea) {
-        state.scrollArea.removeEventListener(
-          'scroll',
-          SubpostsHeaderScrollMask.update,
-        )
-      }
-      state.reset()
-    }
-  }
-
-  document.addEventListener('astro:page-load', () => SubpostsController.init())
-  document.addEventListener('astro:after-swap', () => {
-    SubpostsController.cleanup()
-    SubpostsController.init()
-  })
-  document.addEventListener('astro:before-swap', () =>
-    SubpostsController.cleanup(),
-  )
+  customElements.define('mobile-subposts', MobileSubposts)
 </script>
