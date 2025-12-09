@@ -43,7 +43,7 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
+  --background: #f2f1f5;
   --foreground: oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
@@ -52,9 +52,11 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
+  --skeleton-base: oklch(0.95 0 0);
+  --skeleton-shine: oklch(1 0 0);
 }
 
-[data-theme='dark'] {
+:root[data-theme='dark'] {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
@@ -64,14 +66,43 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --ring: oklch(0.556 0 0);
+  --skeleton-base: oklch(0.2 0 0);
+  --skeleton-shine: oklch(0.269 0 0);
 }
 
 @layer base {
+
   *,
   ::after,
   ::before,
   ::backdrop,
   ::file-selector-button {
     @apply border-border outline-ring/50 tracking-tight;
+  }
+
+  mark {
+    @apply bg-primary/20 text-foreground rounded-xs px-0.5;
+  }
+}
+
+@layer utilities {
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-muted-foreground/30 hover:bg-muted-foreground/50 border-2 border-background;
+  }
+
+  /* Custom Selection */
+  ::selection {
+    @apply bg-primary/20 text-foreground;
   }
 }
