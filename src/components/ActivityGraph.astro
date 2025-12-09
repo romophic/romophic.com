@@ -1,0 +1,83 @@
+---
+import { getAllPostsAndSubposts } from '@/lib/data-utils'
+import { cn } from '@/lib/utils'
+
+const posts = await getAllPostsAndSubposts()
+
+// 1. Create a map of date string (YYYY-MM-DD) -> count
+const activityMap = new Map<string, number>()
+posts.forEach((post) => {
+  const dateObj = post.data.date
+  const dateStr = dateObj.toISOString().split('T')[0]
+  activityMap.set(dateStr, (activityMap.get(dateStr) || 0) + 1)
+})
+
+// 2. Generate the last 365 days
+const today = new Date()
+const days = []
+// Start from 52 weeks ago (approx 1 year) to align weeks nicely, or just 365 days.
+// GitHub usually shows exactly 1 year or 52-53 weeks.
+// Let's aim for 52 full columns + current partial week.
+// To keep it simple, let's just generate the last 365 days.
+for (let i = 364; i >= 0; i--) {
+  const d = new Date(today)
+  d.setDate(d.getDate() - i)
+  days.push(d)
+}
+
+// 3. Helper to determine level (0-4)
+const getLevel = (count: number) => {
+  if (count === 0) return 0
+  if (count === 1) return 1
+  if (count === 2) return 2
+  if (count <= 4) return 3
+  return 4
+}
+---
+
+<div class="rounded-xl border p-6 bg-card">
+  <div class="mb-4 flex items-center justify-between">
+    <h3 class="font-medium text-lg">Activity</h3>
+    <span class="text-xs text-muted-foreground">{posts.length} contributions in the last year</span>
+  </div>
+
+  <div class="overflow-x-auto pb-2">
+    <div class="min-w-fit">
+      <div 
+        class="grid grid-rows-7 grid-flow-col gap-1 w-fit"
+      >
+        {days.map((date) => {
+          const dateStr = date.toISOString().split('T')[0]
+          const count = activityMap.get(dateStr) || 0
+          const level = getLevel(count)
+          
+          return (
+            <div
+              class={cn(
+                "size-3 rounded-sm transition-colors",
+                level === 0 && "bg-muted",
+                level === 1 && "bg-primary/30",
+                level === 2 && "bg-primary/50",
+                level === 3 && "bg-primary/75",
+                level === 4 && "bg-primary"
+              )}
+              title={`${count} posts on ${dateStr}`}
+            />
+          )
+        })}
+      </div>
+    </div>
+  </div>
+  
+  <div class="mt-4 flex items-center justify-end gap-2 text-xs text-muted-foreground">
+    <span>Less</span>
+    <div class="flex gap-1">
+      <div class="size-3 rounded-sm bg-muted" />
+      <div class="size-3 rounded-sm bg-primary/30" />
+      <div class="size-3 rounded-sm bg-primary/50" />
+      <div class="size-3 rounded-sm bg-primary/75" />
+      <div class="size-3 rounded-sm bg-primary" />
+    </div>
+    <span>More</span>
+  </div>
+</div>
