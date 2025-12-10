@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro check && astro build",
+    "build": "astro check && astro build && pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
+    "lint": "eslint .",
     "prettier": "prettier --write **/*.{ts,tsx,css,astro} --ignore-path .gitignore",
     "postinstall": "patch-package"
   },
@@ -22,6 +23,7 @@
     "@expressive-code/plugin-collapsible-sections": "^0.40.2",
     "@expressive-code/plugin-line-numbers": "^0.40.2",
     "@iconify-json/lucide": "^1.2.26",
+    "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.0.7",
     "@types/react": "19.0.0",
     "@types/react-dom": "19.0.0",
@@ -41,16 +43,27 @@
     "rehype-pretty-code": "^0.14.1",
     "remark-emoji": "^5.0.1",
     "remark-math": "^6.0.0",
+    "satori": "^0.18.3",
     "sharp": "^0.34.5",
     "tailwind-merge": "^3.3.0",
     "tailwindcss": "^4.1.7",
     "typescript": "^5.8.3"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@vite-pwa/astro": "^1.2.0",
+    "astro-eslint-parser": "^1.2.2",
+    "eslint": "^9.39.1",
+    "eslint-plugin-astro": "^1.5.0",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^16.5.0",
+    "pagefind": "^1.4.0",
     "prettier": "^3.5.1",
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-astro-organize-imports": "^0.4.11",
-    "prettier-plugin-tailwindcss": "^0.6.11"
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "typescript-eslint": "^8.48.1",
+    "workbox-window": "^7.4.0"
   },
   "prettier": {
     "semi": false,

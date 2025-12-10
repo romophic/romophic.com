@@ -1,0 +1,61 @@
+<div
+  id="pwa-toast"
+  role="alert"
+  aria-labelledby="toast-message"
+  class="fixed bottom-4 right-4 z-50 translate-y-[150%] rounded-lg border bg-background p-4 text-foreground shadow-lg transition-transform duration-300 data-[open=true]:translate-y-0 dark:border-zinc-800"
+>
+  <div class="flex items-start gap-3">
+    <div class="flex-1">
+      <h3 id="toast-message" class="font-medium text-sm">Update available</h3>
+      <p class="mt-1 text-muted-foreground text-xs">
+        New content is available, click on reload button to update.
+      </p>
+    </div>
+    <div class="flex flex-col gap-2">
+      <button
+        id="pwa-refresh"
+        type="button"
+        class="inline-flex items-center justify-center rounded-md bg-primary px-3 py-1.5 font-medium text-primary-foreground text-xs shadow hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+      >
+        Reload
+      </button>
+      <button
+        id="pwa-close"
+        type="button"
+        class="inline-flex items-center justify-center rounded-md border bg-transparent px-3 py-1.5 font-medium text-muted-foreground text-xs shadow-sm hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // @ts-ignore
+  import { registerSW } from 'virtual:pwa-register'
+
+  const updateSW = registerSW({
+    onNeedRefresh() {
+      const toast = document.getElementById('pwa-toast')
+      if (toast) {
+        toast.dataset.open = 'true'
+      }
+    },
+    onOfflineReady() {
+      console.log('App ready to work offline')
+    },
+  })
+
+  const refreshButton = document.getElementById('pwa-refresh')
+  refreshButton?.addEventListener('click', () => {
+    updateSW(true)
+  })
+
+  const closeButton = document.getElementById('pwa-close')
+  closeButton?.addEventListener('click', () => {
+    const toast = document.getElementById('pwa-toast')
+    if (toast) {
+      toast.dataset.open = 'false'
+    }
+  })
+</script>
