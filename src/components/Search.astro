@@ -71,7 +71,28 @@ import { Icon } from 'astro-icon/components'
 </style>
 
 <script>
-  let pagefind: any
+  interface PagefindRawResult {
+    data: () => Promise<PagefindResultData>
+  }
+
+  interface PagefindSearchResponse {
+    results: PagefindRawResult[]
+  }
+
+  interface PagefindResultData {
+    url: string
+    meta: {
+      title: string
+    }
+    excerpt: string
+  }
+
+  interface PagefindModule {
+    init: () => Promise<void>
+    search: (query: string) => Promise<PagefindSearchResponse>
+  }
+
+  let pagefind: PagefindModule | undefined
 
   class SiteSearch extends HTMLElement {
     constructor() {
@@ -129,7 +150,7 @@ import { Icon } from 'astro-icon/components'
 
         const search = await pagefind.search(query)
         const fiveResults = await Promise.all(
-          search.results.slice(0, 5).map((r: any) => r.data()),
+          search.results.slice(0, 5).map((r) => r.data()),
         )
 
         if (fiveResults.length === 0) {
@@ -140,7 +161,7 @@ import { Icon } from 'astro-icon/components'
 
         resultsContainer.innerHTML = fiveResults
           .map(
-            (r: any) => `
+            (r) => `
           <a href="${r.url}" class="group block rounded-md border border-transparent p-3 hover:border-border hover:bg-muted/50 transition-colors">
             <div class="flex items-center justify-between">
                 <div class="font-medium text-sm text-foreground group-hover:underline decoration-muted-foreground underline-offset-4 decoration-2">${r.meta.title}</div>

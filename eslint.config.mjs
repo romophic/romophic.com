@@ -7,7 +7,7 @@ import react from 'eslint-plugin-react';
 
 export default tseslint.config(
     {
-        ignores: ['dist/', '.astro/', 'node_modules/', '.git/']
+        ignores: ['dist/', 'dev-dist/', '.astro/', 'node_modules/', '.git/']
     },
     js.configs.recommended,
     ...tseslint.configs.recommended,

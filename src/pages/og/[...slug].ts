@@ -1,4 +1,4 @@
-import { getCollection } from 'astro:content'
+import { getCollection, type CollectionEntry } from 'astro:content'
 import { Resvg } from '@resvg/resvg-js'
 import satori from 'satori'
 import { SITE } from '@/consts'
@@ -11,7 +11,7 @@ export async function getStaticPaths() {
     }))
 }
 
-export const GET = async ({ props }: { props: { post: any } }) => {
+export const GET = async ({ props }: { props: { post: CollectionEntry<'blog'> } }) => {
     const { post } = props
 
     // Load a font (Inter Bold)
@@ -82,6 +82,7 @@ export const GET = async ({ props }: { props: { post: any } }) => {
                     }
                 ],
             },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any,
         {
             width: 1200,
@@ -101,7 +102,7 @@ export const GET = async ({ props }: { props: { post: any } }) => {
     const pngData = resvg.render()
     const pngBuffer = pngData.asPng()
 
-    return new Response(pngBuffer as any, {
+    return new Response(pngBuffer, {
         headers: {
             'Content-Type': 'image/png',
         },

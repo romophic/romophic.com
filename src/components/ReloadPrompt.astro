@@ -31,7 +31,7 @@
 </div>
 
 <script>
-  // @ts-ignore
+  // @ts-expect-error virtual:pwa-register is a virtual module
   import { registerSW } from 'virtual:pwa-register'
 
   const updateSW = registerSW({
