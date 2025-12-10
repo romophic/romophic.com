@@ -59,7 +59,7 @@ const tocSections = await getTOCSections(currentPostId)
 ---
 
 <Layout>
-  <PostHead slot="head" post={post} />
+  <PostHead slot="head" post={post} image={`/og/${post.id}`} />
   {
     (hasChildPosts || isCurrentSubpost) && (
       <SubpostsHeader
@@ -116,6 +116,7 @@ const tocSections = await getTOCSections(currentPostId)
           width={1200}
           height={630}
           class="col-span-full mx-auto w-full max-w-5xl object-cover"
+          transition:name={`image-${post.id}`}
         />
       )
     }
@@ -283,14 +284,4 @@ const tocSections = await getTOCSections(currentPostId)
   </script>
 </Layout>
 
-<script>
-  if (document.querySelector('.katex')) {
-    if (!document.querySelector('link[href*="katex.min.css"]')) {
-      const link = document.createElement('link')
-      link.rel = 'stylesheet'
-      link.href =
-        'https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css'
-      document.head.appendChild(link)
-    }
-  }
-</script>
+

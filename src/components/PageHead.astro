@@ -4,6 +4,7 @@ import { SITE } from '@/consts'
 interface Props {
   title?: string
   description?: string
+  image?: string
   noindex?: boolean
 }
 
@@ -11,8 +12,10 @@ const {
   title = SITE.title,
   description = SITE.description,
   noindex = false,
+  image = '/static/1200x630.png',
 } = Astro.props
-const image = new URL('/static/1200x630.png', Astro.site)
+
+const imageUrl = new URL(image, Astro.site)
 ---
 
 <title>{`${title} | ${SITE.title}`}</title>
@@ -22,7 +25,7 @@ const image = new URL('/static/1200x630.png', Astro.site)
 
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
-<meta property="og:image" content={image} />
+<meta property="og:image" content={imageUrl} />
 <meta property="og:image:alt" content={title} />
 <meta property="og:type" content="website" />
 <meta property="og:locale" content={SITE.locale} />
@@ -31,6 +34,6 @@ const image = new URL('/static/1200x630.png', Astro.site)
 
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />
-<meta name="twitter:image" content={image} />
+<meta name="twitter:image" content={imageUrl} />
 <meta name="twitter:image:alt" content={title} />
 <meta name="twitter:card" content="summary_large_image" />

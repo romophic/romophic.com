@@ -1,26 +1,73 @@
 ---
-import { Separator } from '@/components/ui/separator'
-import { SOCIAL_LINKS } from '@/consts'
-import Link from './Link.astro'
-import SocialIcons from './SocialIcons.astro'
+import Link from '@/components/Link.astro'
+import { NAV_LINKS, SITE, SOCIAL_LINKS, ICON_MAP } from '@/consts'
+import { Icon } from 'astro-icon/components'
 ---
 
-<footer
-  class="mx-auto mb-8 flex w-full max-w-3xl flex-col items-center justify-center gap-y-2 px-4 sm:mb-4 sm:flex-row sm:justify-between"
->
-  <div class="flex flex-wrap items-center justify-center gap-x-2 text-center">
-    <span class="text-muted-foreground text-sm">
-      &copy; {new Date().getFullYear()} All rights reserved.
-    </span>
-    <Separator orientation="vertical" className="hidden h-4! sm:block" />
-    <p class="text-muted-foreground text-sm">
-      Made with 🤍 by <Link
-        href="https://github.com/jktrn"
-        class="text-foreground"
-        external
-        underline>enscribe</Link
-      >!
-    </p>
+<footer class="mt-auto border-t py-12 bg-muted/20">
+  <div class="mx-auto max-w-3xl px-4">
+    <div class="grid grid-cols-1 gap-8 sm:grid-cols-3">
+      <!-- Brand & Copyright -->
+      <div class="flex flex-col gap-4">
+        <Link href="/" class="flex items-center gap-2">
+          <span class="text-xl font-bold tracking-tight">{SITE.title}</span>
+        </Link>
+        <p class="text-sm text-muted-foreground">
+          Built with Astro, Tailwind, and a passion for clean design.
+        </p>
+        <p class="text-xs text-muted-foreground mt-auto">
+          &copy; {new Date().getFullYear()} {SITE.title}. All rights reserved.
+        </p>
+      </div>
+
+      <!-- Navigation -->
+      <div class="flex flex-col gap-4">
+        <h3 class="font-medium">Navigation</h3>
+        <nav class="flex flex-col gap-2 text-sm text-muted-foreground">
+          {
+            NAV_LINKS.map((item) => (
+              <Link
+                href={item.href}
+                class="hover:text-foreground transition-colors w-fit"
+              >
+                {item.label}
+              </Link>
+            ))
+          }
+           <Link href="/rss.xml" class="hover:text-foreground transition-colors w-fit">
+            RSS Feed
+          </Link>
+        </nav>
+      </div>
+
+      <!-- Socials -->
+      <div class="flex flex-col gap-4">
+        <h3 class="font-medium">Connect</h3>
+        <div class="flex flex-wrap gap-2">
+          {
+            SOCIAL_LINKS.map((link) => (
+              <a
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex size-9 items-center justify-center rounded-md border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                aria-label={link.label}
+              >
+                <Icon name={ICON_MAP[link.label] || 'lucide:link'} class="size-4" />
+              </a>
+            ))
+          }
+        </div>
+        <div class="mt-4">
+           <p class="text-xs text-muted-foreground">
+            Made with 🤍 by <Link
+              href="https://github.com/jktrn"
+              class="text-foreground hover:underline"
+              external>enscribe</Link
+            >
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
-  <SocialIcons links={SOCIAL_LINKS} />
 </footer>
