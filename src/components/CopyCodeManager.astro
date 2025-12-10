@@ -1,4 +1,5 @@
 ---
+
 ---
 
 <copy-code-manager></copy-code-manager>
@@ -17,7 +18,7 @@
       const codeBlocks = document.querySelectorAll('pre')
 
       codeBlocks.forEach((codeBlock) => {
-        if (codeBlock.parentElement?.classList.contains('group')) return 
+        if (codeBlock.parentElement?.classList.contains('group')) return
 
         const wrapper = document.createElement('div')
         wrapper.className = 'relative group'
@@ -45,9 +46,9 @@
         })
 
         if (codeBlock.parentNode) {
-            codeBlock.parentNode.insertBefore(wrapper, codeBlock);
-            wrapper.appendChild(codeBlock);
-            wrapper.appendChild(copyButton);
+          codeBlock.parentNode.insertBefore(wrapper, codeBlock)
+          wrapper.appendChild(codeBlock)
+          wrapper.appendChild(copyButton)
         }
       })
     }

@@ -1,7 +1,6 @@
 ---
-import { Icon } from 'astro-icon/components'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { Icon } from 'astro-icon/components'
 ---
 
 <site-search class="contents">
@@ -19,7 +18,7 @@ import { cn } from '@/lib/utils'
 
   <dialog
     id="search-dialog"
-    class="backdrop:bg-background/80 fixed left-[50%] top-[20%] z-50 w-full max-w-lg translate-x-[-50%] rounded-lg border bg-background p-0 shadow-lg backdrop-blur-sm sm:top-[20%]"
+    class="backdrop:bg-background/80 bg-background fixed top-[20%] left-[50%] z-50 w-full max-w-lg translate-x-[-50%] rounded-lg border p-0 shadow-lg backdrop-blur-sm sm:top-[20%]"
   >
     <div class="flex flex-col gap-4 p-4">
       <div class="flex items-center gap-2 border-b px-2 pb-2">
@@ -41,7 +40,7 @@ import { cn } from '@/lib/utils'
           <Icon name="lucide:x" class="size-4" />
         </Button>
       </div>
-      <div id="search-results" class="max-h-[60vh] overflow-y-auto space-y-2">
+      <div id="search-results" class="max-h-[60vh] space-y-2 overflow-y-auto">
         <!-- Results will be injected here -->
         <div class="text-muted-foreground py-4 text-center text-sm">
           No results found.
@@ -92,7 +91,8 @@ import { cn } from '@/lib/utils'
         if (!dialog.open) {
           dialog.showModal()
           input.value = ''
-          resultsContainer.innerHTML = '<div class="text-muted-foreground py-4 text-center text-sm">Type to search...</div>'
+          resultsContainer.innerHTML =
+            '<div class="text-muted-foreground py-4 text-center text-sm">Type to search...</div>'
           input.focus()
 
           if (!pagefind) {
@@ -128,7 +128,9 @@ import { cn } from '@/lib/utils'
         }
 
         const search = await pagefind.search(query)
-        const fiveResults = await Promise.all(search.results.slice(0, 5).map((r: any) => r.data()))
+        const fiveResults = await Promise.all(
+          search.results.slice(0, 5).map((r: any) => r.data()),
+        )
 
         if (fiveResults.length === 0) {
           resultsContainer.innerHTML =

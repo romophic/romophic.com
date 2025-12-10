@@ -13,7 +13,7 @@ const { headings } = Astro.props
 
 {
   headings && headings.length > 0 && (
-    <mobile-toc id="mobile-toc-container" class="w-full xl:hidden block">
+    <mobile-toc id="mobile-toc-container" class="block w-full xl:hidden">
       <details class="group">
         <summary class="flex w-full cursor-pointer items-center justify-between">
           <div class="mx-auto flex w-full max-w-3xl items-center px-4 py-3">
@@ -129,7 +129,9 @@ const { headings } = Astro.props
 
     init() {
       this.progressCircle = this.querySelector('#mobile-toc-progress-circle')
-      this.currentSectionText = this.querySelector('#mobile-toc-current-section')
+      this.currentSectionText = this.querySelector(
+        '#mobile-toc-current-section',
+      )
       this.detailsElement = this.querySelector('details')
       this.listElement = this.querySelector('#mobile-table-of-contents')
       this.scrollArea = this.querySelector('[data-radix-scroll-area-viewport]')
@@ -147,7 +149,9 @@ const { headings } = Astro.props
 
       if (this.headings.length === 0) {
         this.currentSectionText.textContent = INITIAL_OVERVIEW_TEXT
-        window.addEventListener('scroll', this.updateProgressCircle, { passive: true })
+        window.addEventListener('scroll', this.updateProgressCircle, {
+          passive: true,
+        })
         this.updateProgressCircle()
         return
       }

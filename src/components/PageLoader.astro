@@ -105,28 +105,28 @@
     const toUrl = new URL(event.to)
     const pathname = toUrl.pathname
 
-    // Logic: 
+    // Logic:
     // - Detail view: /blog/slug (where slug is not empty and not 'page/x' if doing pagination)
     // - List view: /, /blog, /authors, /tags
-    
+
     // Simple heuristic:
     // If it starts with /blog/ and has more segments, it's likely a post.
     // EXCEPT /blog itself.
     // Also handle possible trailing slashes.
     const cleanPath = pathname.replace(/\/$/, '')
-    
+
     const isBlogDetail = cleanPath.startsWith('/blog/') && cleanPath !== '/blog'
-    
+
     // You might want to exclude /blog/page/2 etc if you use that structure,
     // but the current router seems to use params for pages?
     // Let's assume /blog/something is a detail page.
-    
+
     if (isBlogDetail) {
       main.innerHTML = getDetailSkeleton()
     } else {
       main.innerHTML = getListSkeleton()
     }
-    
+
     main.setAttribute('aria-busy', 'true')
   })
 

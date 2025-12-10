@@ -4,38 +4,44 @@ import { Icon } from 'astro-icon/components'
 import Link from './Link.astro'
 ---
 
-<section class="relative overflow-hidden rounded-xl border bg-background py-16 sm:py-24">
+<section
+  class="bg-background relative overflow-hidden rounded-xl border py-16 sm:py-24"
+>
   <!-- Aurora Background -->
   <div class="pointer-events-none absolute inset-0 opacity-40 dark:opacity-30">
     <div
-      class="absolute -top-24 -left-24 size-96 rounded-full bg-primary/30 blur-3xl filter animate-blob"
+      class="bg-primary/30 animate-blob absolute -top-24 -left-24 size-96 rounded-full blur-3xl filter"
     >
     </div>
     <div
-      class="absolute top-24 -right-24 size-96 rounded-full bg-purple-500/30 blur-3xl filter animate-blob animation-delay-2000"
+      class="animate-blob animation-delay-2000 absolute top-24 -right-24 size-96 rounded-full bg-purple-500/30 blur-3xl filter"
     >
     </div>
     <div
-      class="absolute -bottom-32 left-24 size-96 rounded-full bg-blue-500/30 blur-3xl filter animate-blob animation-delay-4000"
+      class="animate-blob animation-delay-4000 absolute -bottom-32 left-24 size-96 rounded-full bg-blue-500/30 blur-3xl filter"
     >
     </div>
   </div>
 
-  <div class="relative z-10 mx-auto flex max-w-2xl flex-col items-center px-6 text-center">
+  <div
+    class="relative z-10 mx-auto flex max-w-2xl flex-col items-center px-6 text-center"
+  >
     <div
-      class="mb-4 inline-flex items-center rounded-full border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur-sm"
+      class="bg-muted/50 text-muted-foreground mb-4 inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium backdrop-blur-sm"
     >
       <span>🚀 Redefining Digital Experience</span>
     </div>
     <h1
-      class="mb-6 bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent sm:text-6xl"
+      class="from-foreground to-foreground/60 mb-6 bg-gradient-to-r bg-clip-text text-4xl font-extrabold tracking-tight text-transparent sm:text-6xl"
     >
       Design. Build. <br class="hidden sm:block" />
-      <span class="bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
+      <span
+        class="from-primary bg-gradient-to-r to-purple-500 bg-clip-text text-transparent"
+      >
         Innovate.
       </span>
     </h1>
-    <p class="mb-8 max-w-md text-lg text-muted-foreground sm:text-xl">
+    <p class="text-muted-foreground mb-8 max-w-md text-lg sm:text-xl">
       A collection of thoughts, stories, and ideas about modern web development,
       design systems, and the future of tech.
     </p>
@@ -58,10 +64,18 @@ import Link from './Link.astro'
 
 <style>
   @keyframes blob {
-    0% { transform: translate(0px, 0px) scale(1); }
-    33% { transform: translate(30px, -50px) scale(1.1); }
-    66% { transform: translate(-20px, 20px) scale(0.9); }
-    100% { transform: translate(0px, 0px) scale(1); }
+    0% {
+      transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+    100% {
+      transform: translate(0px, 0px) scale(1);
+    }
   }
   .animate-blob {
     animation: blob 7s infinite;

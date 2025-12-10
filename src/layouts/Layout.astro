@@ -6,11 +6,11 @@ import 'katex/dist/katex.min.css'
 import Footer from '@/components/Footer.astro'
 import Head from '@/components/Head.astro'
 import Header from '@/components/Header.astro'
-import { SITE } from '@/consts'
-import { cn } from '@/lib/utils'
 import PageLoader from '@/components/PageLoader.astro'
 import ReloadPrompt from '@/components/ReloadPrompt.astro'
 import ScrollProgress from '@/components/ScrollProgress.astro'
+import { SITE } from '@/consts'
+import { cn } from '@/lib/utils'
 
 interface Props {
   class?: string
@@ -36,13 +36,13 @@ const { class: className } = Astro.props
       <slot name="subposts-navigation" />
       <slot name="table-of-contents" />
     </header>
-    <main class="w-full mx-auto flex grow flex-col">
+    <main class="mx-auto flex w-full grow flex-col">
       <div class={cn('flex flex-col gap-y-6 w-full mx-auto px-4', className)}>
         <slot />
       </div>
     </main>
     <Footer />
     <PageLoader />
-  <ReloadPrompt />
+    <ReloadPrompt />
   </body>
 </html>

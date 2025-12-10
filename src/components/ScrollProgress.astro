@@ -1,9 +1,12 @@
 ---
+
 ---
 
-<scroll-progress class="fixed top-0 left-0 z-[60] h-1 w-full pointer-events-none">
+<scroll-progress
+  class="pointer-events-none fixed top-0 left-0 z-[60] h-1 w-full"
+>
   <div
-    class="h-full bg-primary/80 transition-all duration-100 ease-out origin-left"
+    class="bg-primary/80 h-full origin-left transition-all duration-100 ease-out"
     style="width: 0%"
   >
   </div>
@@ -29,11 +32,11 @@
       }
 
       window.addEventListener('scroll', updateProgress)
-      
+
       // Initial update
       updateProgress()
-      
-      // Cleanup on disconnect seems unnecessary for singleton in layout, 
+
+      // Cleanup on disconnect seems unnecessary for singleton in layout,
       // but strictly speaking good practice if it were removed.
       // However, disconnectedCallback isn't fired on nav in Astro unless component is removed.
     }

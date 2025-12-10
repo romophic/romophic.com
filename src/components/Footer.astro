@@ -1,10 +1,10 @@
 ---
 import Link from '@/components/Link.astro'
-import { NAV_LINKS, SITE, SOCIAL_LINKS, ICON_MAP } from '@/consts'
+import { ICON_MAP, NAV_LINKS, SITE, SOCIAL_LINKS } from '@/consts'
 import { Icon } from 'astro-icon/components'
 ---
 
-<footer class="mt-auto border-t py-12 bg-muted/20">
+<footer class="bg-muted/20 mt-auto border-t py-12">
   <div class="mx-auto max-w-3xl px-4">
     <div class="grid grid-cols-1 gap-8 sm:grid-cols-3">
       <!-- Brand & Copyright -->
@@ -12,29 +12,33 @@ import { Icon } from 'astro-icon/components'
         <Link href="/" class="flex items-center gap-2">
           <span class="text-xl font-bold tracking-tight">{SITE.title}</span>
         </Link>
-        <p class="text-sm text-muted-foreground">
+        <p class="text-muted-foreground text-sm">
           Built with Astro, Tailwind, and a passion for clean design.
         </p>
-        <p class="text-xs text-muted-foreground mt-auto">
-          &copy; {new Date().getFullYear()} {SITE.title}. All rights reserved.
+        <p class="text-muted-foreground mt-auto text-xs">
+          &copy; {new Date().getFullYear()}
+          {SITE.title}. All rights reserved.
         </p>
       </div>
 
       <!-- Navigation -->
       <div class="flex flex-col gap-4">
         <h3 class="font-medium">Navigation</h3>
-        <nav class="flex flex-col gap-2 text-sm text-muted-foreground">
+        <nav class="text-muted-foreground flex flex-col gap-2 text-sm">
           {
             NAV_LINKS.map((item) => (
               <Link
                 href={item.href}
-                class="hover:text-foreground transition-colors w-fit"
+                class="hover:text-foreground w-fit transition-colors"
               >
                 {item.label}
               </Link>
             ))
           }
-           <Link href="/rss.xml" class="hover:text-foreground transition-colors w-fit">
+          <Link
+            href="/rss.xml"
+            class="hover:text-foreground w-fit transition-colors"
+          >
             RSS Feed
           </Link>
         </nav>
@@ -50,16 +54,19 @@ import { Icon } from 'astro-icon/components'
                 href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex size-9 items-center justify-center rounded-md border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                class="bg-background text-muted-foreground hover:bg-muted hover:text-foreground inline-flex size-9 items-center justify-center rounded-md border transition-colors"
                 aria-label={link.label}
               >
-                <Icon name={ICON_MAP[link.label] || 'lucide:link'} class="size-4" />
+                <Icon
+                  name={ICON_MAP[link.label] || 'lucide:link'}
+                  class="size-4"
+                />
               </a>
             ))
           }
         </div>
         <div class="mt-4">
-           <p class="text-xs text-muted-foreground">
+          <p class="text-muted-foreground text-xs">
             Made with 🤍 by <Link
               href="https://github.com/jktrn"
               class="text-foreground hover:underline"

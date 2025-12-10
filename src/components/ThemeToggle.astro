@@ -28,7 +28,7 @@ import { Icon } from 'astro-icon/components'
   class ThemeToggle extends HTMLElement {
     connectedCallback() {
       const button = this.querySelector('button')
-      
+
       const handleToggleClick = () => {
         const element = document.documentElement
         const currentTheme = element.getAttribute('data-theme')
@@ -41,7 +41,7 @@ import { Icon } from 'astro-icon/components'
         } else {
           element.classList.remove('dark')
         }
-        
+
         // Force reflow
         window.getComputedStyle(element).getPropertyValue('opacity')
 

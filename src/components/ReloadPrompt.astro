@@ -2,12 +2,12 @@
   id="pwa-toast"
   role="alert"
   aria-labelledby="toast-message"
-  class="fixed bottom-4 right-4 z-50 translate-y-[150%] rounded-lg border bg-background p-4 text-foreground shadow-lg transition-transform duration-300 data-[open=true]:translate-y-0 dark:border-zinc-800"
+  class="bg-background text-foreground fixed right-4 bottom-4 z-50 translate-y-[150%] rounded-lg border p-4 shadow-lg transition-transform duration-300 data-[open=true]:translate-y-0 dark:border-zinc-800"
 >
   <div class="flex items-start gap-3">
     <div class="flex-1">
-      <h3 id="toast-message" class="font-medium text-sm">Update available</h3>
-      <p class="mt-1 text-muted-foreground text-xs">
+      <h3 id="toast-message" class="text-sm font-medium">Update available</h3>
+      <p class="text-muted-foreground mt-1 text-xs">
         New content is available, click on reload button to update.
       </p>
     </div>
@@ -15,14 +15,14 @@
       <button
         id="pwa-refresh"
         type="button"
-        class="inline-flex items-center justify-center rounded-md bg-primary px-3 py-1.5 font-medium text-primary-foreground text-xs shadow hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        class="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring inline-flex items-center justify-center rounded-md px-3 py-1.5 text-xs font-medium shadow focus-visible:ring-1 focus-visible:outline-none"
       >
         Reload
       </button>
       <button
         id="pwa-close"
         type="button"
-        class="inline-flex items-center justify-center rounded-md border bg-transparent px-3 py-1.5 font-medium text-muted-foreground text-xs shadow-sm hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        class="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring inline-flex items-center justify-center rounded-md border bg-transparent px-3 py-1.5 text-xs font-medium shadow-sm focus-visible:ring-1 focus-visible:outline-none"
       >
         Close
       </button>

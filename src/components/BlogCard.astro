@@ -26,10 +26,10 @@ const subpostCount = !isSubpost(entry.id) ? await getSubpostCount(entry.id) : 0
 ---
 
 <div
-  class="group relative overflow-hidden rounded-xl border p-4 transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_-5px_var(--color-primary)]/10"
+  class="group hover:border-primary/50 relative overflow-hidden rounded-xl border p-4 transition-all duration-300 hover:shadow-[0_0_30px_-5px_var(--color-primary)]/10"
 >
   <div
-    class="absolute inset-0 -z-10 bg-gradient-to-br from-primary/0 via-primary/0 to-primary/0 opacity-0 transition-opacity duration-500 group-hover:from-primary/5 group-hover:to-purple-500/5 group-hover:opacity-100"
+    class="from-primary/0 via-primary/0 to-primary/0 group-hover:from-primary/5 absolute inset-0 -z-10 bg-gradient-to-br opacity-0 transition-opacity duration-500 group-hover:to-purple-500/5 group-hover:opacity-100"
   >
   </div>
   <Link
