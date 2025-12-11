@@ -3,7 +3,7 @@ import '@/styles/global.css'
 import '@/styles/typography.css'
 import 'katex/dist/katex.min.css'
 
-import { ViewTransitions } from 'astro:transitions'
+import { ClientRouter } from 'astro:transitions'
 
 import Footer from '@/components/Footer.astro'
 import Head from '@/components/Head.astro'
@@ -27,7 +27,7 @@ const { class: className } = Astro.props
   lang={SITE.locale}
 >
   <Head>
-    <ViewTransitions />
+    <ClientRouter />
     <slot name="head" />
   </Head>
   <body class="flex h-fit min-h-screen flex-col gap-y-6 font-sans">

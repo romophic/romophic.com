@@ -41,7 +41,6 @@ export const GET = async ({ props }: { props: { post: CollectionEntry<'blog'> } 
 		).then((res) => res.arrayBuffer())
 	}
 
-	// @ts-expect-error - satori expects a ReactNode, but we are passing a valid object structure.
 	const svg = await satori(
 		{
 			type: 'div',
@@ -109,7 +108,7 @@ export const GET = async ({ props }: { props: { post: CollectionEntry<'blog'> } 
 					},
 				],
 			},
-		},
+		} as any,
 		{
 			width: 1200,
 			height: 630,
@@ -128,7 +127,7 @@ export const GET = async ({ props }: { props: { post: CollectionEntry<'blog'> } 
     const pngData = resvg.render()
     const pngBuffer = pngData.asPng()
 
-    return new Response(pngBuffer.buffer, {
+    return new Response(pngBuffer, {
         headers: {
             'Content-Type': 'image/png',
         },
