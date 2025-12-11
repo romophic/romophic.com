@@ -143,55 +143,27 @@ Static assets served at the root path (`/`).
   - 最終的に、Giscusの標準テーマを使用するように変更しました。Lightモード時は `'light'` テーマ、Darkモード時は `'transparent_dark'` テーマが適用されます。
   - 不要になったカスタムCSSファイル (`public/giscus-light.css`, `public/giscus-dark.css`) は削除済みです。
 
-## Future Improvements & Optimization Plan
+### 3. Performance & Bandwidth Optimization
 
-### 1. Performance & Bandwidth Optimization
+- **Item:** Astro Prefetching
+- **Status:** Completed
+- **Details:**
+  - `astro.config.ts` で `prefetch: { defaultStrategy: 'viewport' }` を設定し、リンクがビューポートに入った時点で自動的にプリフェッチされるようにしました。
+  - これにより、ページ遷移の体感速度が向上します。
 
-| Item                          | Description                                                                                                                                | Priority |
-| :---------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- | :------- |
-| **Image Optimization (AVIF)** | Enforce AVIF format for `astro:assets` to reduce file size compared to WebP.                                                               | High     |
-| **Responsive Images**         | Implement `<picture>` tags with `srcset` and `sizes` to serve appropriately sized images for mobile vs. desktop (Art Direction).           | Medium   |
-| **Font Subsetting**           | Create subset woff2 files for `Geist` font containing only used glyphs (English, Japanese, Symbols) to reduce initial download size.       | Medium   |
-| **Font Display Strategy**     | Ensure `font-display: swap` is applied globally to prevent FOIT (Flash of Invisible Text).                                                 | High     |
-| **React Reduction**           | Rewrite simple interactive components (like `ThemeToggle`) to Vanilla JS or Web Components to remove unnecessary React hydration overhead. | Medium   |
-| **Partytown Integration**     | Offload third-party scripts (Analytics, etc.) to a web worker using `@astrojs/partytown`.                                                  | Low      |
-| **Astro Prefetching**         | Enable Astro's view transition prefetching (`prefetch: true`) for instant page loads on hover/viewport visibility.                         | High     |
+- **Item:** React Reduction (ThemeToggle)
+- **Status:** Completed
+- **Details:**
+  - `ThemeToggle` コンポーネントは既にWeb ComponentsとVanilla JSで実装されており、Reactハイドレーションのオーバーヘッドがないことを確認しました。
 
-### 2. User Experience (UX) & Features
+### 4. SEO Enhancement
 
-| Item                         | Description                                                                                                                  | Priority |
-| :--------------------------- | :--------------------------------------------------------------------------------------------------------------------------- | :------- |
-| **Command Palette (Cmd+K)**  | Implement a global search modal accessible via keyboard shortcut (Cmd+K) for quick navigation.                               | High     |
-| **Sticky Table of Contents** | Make the TOC in the sidebar sticky and highlight the active section while scrolling.                                         | Medium   |
-| **Reading Progress Bar**     | Add a visual progress indicator at the top of the page for long blog posts.                                                  | Low      |
-| **Rich Diagrams (Mermaid)**  | Support `mermaid.js` in Markdown for rendering flowcharts and diagrams natively.                                             | Low      |
-| **Link Previews**            | Show a tooltip preview (Wikipedia-style) when hovering over internal links.                                                  | Low      |
-| **Optimized Embeds**         | Use lightweight facades (e.g., `lite-youtube-embed`) for YouTube/Twitter embeds to avoid loading heavy iframes on page load. | Medium   |
-| **Citation Tool**            | Add a "Cite this post" button to copy BibTeX or text citations.                                                              | Low      |
-
-### 3. Accessibility (a11y)
-
-| Item                          | Description                                                                      | Priority |
-| :---------------------------- | :------------------------------------------------------------------------------- | :------- |
-| **Skip Link**                 | Add a "Skip to Content" link for keyboard users to bypass navigation.            | High     |
-| **Enhanced Focus Indicators** | Improve `:focus-visible` styles to be highly visible yet aesthetically pleasing. | Medium   |
-| **Dark Mode Image Dimming**   | Apply a brightness filter to images in dark mode to reduce eye strain.           | Low      |
-
-### 4. SEO & Security
-
-| Item                              | Description                                                                                                         | Priority |
-| :-------------------------------- | :------------------------------------------------------------------------------------------------------------------ | :------- |
-| **Structured Data (JSON-LD)**     | Implement full Schema.org structured data (Article, BreadcrumbList, Person) for better search engine understanding. | High     |
-| **Content Security Policy (CSP)** | Configure strict CSP headers to prevent XSS and unauthorized resource loading.                                      | Medium   |
-| **Security Headers**              | Implement HSTS, X-Content-Type-Options, and X-Frame-Options headers.                                                | Medium   |
-
-### 5. DevOps & Code Quality
-
-| Item                      | Description                                                                                       | Priority |
-| :------------------------ | :------------------------------------------------------------------------------------------------ | :------- |
-| **Git Hooks (Lefthook)**  | Introduce `lefthook` to enforce `lint` and `prettier` checks before every commit automatically.   | High     |
-| **Dependency Automation** | Set up Renovate or Dependabot to keep dependencies up-to-date automatically.                      | Medium   |
-| **Migration to Biome**    | Consider migrating from ESLint/Prettier to Biome for faster linting and formatting in the future. | Low      |
+- **Item:** Structured Data (JSON-LD)
+- **Status:** Completed
+- **Details:**
+  - `schema-dts` パッケージを導入し、型安全なJSON-LD生成を実現しました。
+  - ブログ記事ページ (`src/components/PostHead.astro`) に `Article` と `BreadcrumbList` スキーマを追加しました。
+  - 著者プロフィールページ (`src/pages/authors/[...id].astro`) に `Person` スキーマを追加しました。
 
 ## Development Guidelines
 

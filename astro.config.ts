@@ -21,7 +21,9 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   site: 'https://romophic.com',
-  prefetch: true,
+  prefetch: {
+    defaultStrategy: 'viewport',
+  },
   integrations: [
     expressiveCode({
       themes: ['github-light', 'github-dark'],

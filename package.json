@@ -65,6 +65,7 @@
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-astro-organize-imports": "^0.4.11",
     "prettier-plugin-tailwindcss": "^0.6.11",
+    "schema-dts": "^1.1.5",
     "typescript-eslint": "^8.48.1",
     "workbox-window": "^7.4.0"
   },

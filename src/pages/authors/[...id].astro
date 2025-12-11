@@ -5,6 +5,7 @@ import Breadcrumbs from '@/components/Breadcrumbs.astro'
 import PageHead from '@/components/PageHead.astro'
 import Layout from '@/layouts/Layout.astro'
 import { getAllAuthors, getPostsByAuthor } from '@/lib/data-utils'
+import type { Person, WithContext } from 'schema-dts'
 
 export async function getStaticPaths() {
   const authors = await getAllAuthors()
@@ -16,6 +17,15 @@ export async function getStaticPaths() {
 
 const { author } = Astro.props
 const authorPosts = await getPostsByAuthor(author.id)
+
+const personSchema: WithContext<Person> = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: author.data.name,
+  description: author.data.bio,
+  image: new URL(author.data.avatar, Astro.site).toString(),
+  url: Astro.url.toString(),
+}
 ---
 
 <Layout class="max-w-3xl">
@@ -24,6 +34,12 @@ const authorPosts = await getPostsByAuthor(author.id)
     title={`${author.data.name} (Author)`}
     description={author.data.bio || `Profile of ${author.data.name}.`}
     noindex
+  />
+  <script
+    is:inline
+    type="application/ld+json"
+    slot="head"
+    set:html={JSON.stringify(personSchema)}
   />
   <Breadcrumbs
     items={[
