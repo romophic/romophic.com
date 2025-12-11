@@ -53,3 +53,17 @@ export const ICON_MAP: IconMap = {
   Email: 'lucide:mail',
   RSS: 'lucide:rss',
 }
+
+export const READING_SPEED_WPM = 200
+export const SCROLL_TO_TOP_THRESHOLD = 300
+
+export const ICONS = {
+  arrowUp: 'lucide:arrow-up',
+  hash: 'lucide:hash',
+  fileText: 'lucide:file-text',
+  bookOpen: 'lucide:book-open',
+  bookOpenText: 'lucide:book-open-text',
+  libraryBig: 'lucide:library-big',
+  user: 'lucide:user',
+  users: 'lucide:users',
+}

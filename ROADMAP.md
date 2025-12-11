@@ -165,6 +165,20 @@ Static assets served at the root path (`/`).
   - ブログ記事ページ (`src/components/PostHead.astro`) に `Article` と `BreadcrumbList` スキーマを追加しました。
   - 著者プロフィールページ (`src/pages/authors/[...id].astro`) に `Person` スキーマを追加しました。
 
+## Refactoring Plan
+
+### 1. Component Decomposition & Logic Extraction
+| Task | Description | Status |
+| :--- | :--- | :--- |
+| **Decompose Blog Post Page** | Extract `PostHeader` (title, metadata) and `ScrollToTop` components from `src/pages/blog/[...id].astro` to reduce file size and improve readability. | Pending |
+| **Centralize Data Fetching** | Create a unified `getPostPageData` function in `src/lib/data-utils.ts` to handle the complex data fetching logic currently residing in `[...id].astro`. | Pending |
+
+### 2. Code Quality & Maintenance
+| Task | Description | Status |
+| :--- | :--- | :--- |
+| **Manage Constants** | Move magic numbers (reading speed, scroll thresholds) and hardcoded strings (icon names) to `src/consts.ts`. | In Progress |
+| **Enhance Type Safety** | Define explicit types for data structures like `Author` to replace implicit types or `any`. | Pending |
+
 ## Development Guidelines
 
 ### Workflow

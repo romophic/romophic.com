@@ -1,3 +1,4 @@
+import { READING_SPEED_WPM, SITE } from '@/consts'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -6,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatDate(date: Date) {
-  return Intl.DateTimeFormat('en-US', {
+  return Intl.DateTimeFormat(SITE.locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -22,7 +23,10 @@ export function calculateWordCountFromHtml(
 }
 
 export function readingTime(wordCount: number): string {
-  const readingTimeMinutes = Math.max(1, Math.round(wordCount / 200))
+  const readingTimeMinutes = Math.max(
+    1,
+    Math.round(wordCount / READING_SPEED_WPM),
+  )
   return `${readingTimeMinutes} min read`
 }
 
