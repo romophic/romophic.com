@@ -4,4 +4,3 @@
 interface ServiceWorkerGlobalScope {
   __WB_MANIFEST: (string | { url: string; revision: string | null })[]
 }
-

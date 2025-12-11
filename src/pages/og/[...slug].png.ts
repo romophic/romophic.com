@@ -41,6 +41,7 @@ export const GET = async ({ props }: { props: { post: CollectionEntry<'blog'> } 
 		).then((res) => res.arrayBuffer())
 	}
 
+	/* eslint-disable @typescript-eslint/no-explicit-any */
 	const svg = await satori(
 		{
 			type: 'div',
@@ -122,6 +123,7 @@ export const GET = async ({ props }: { props: { post: CollectionEntry<'blog'> } 
 			],
 		},
 	)
+	/* eslint-enable @typescript-eslint/no-explicit-any */
 
     const resvg = new Resvg(svg)
     const pngData = resvg.render()

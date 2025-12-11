@@ -8,7 +8,13 @@ interface Props extends Omit<HTMLAttributes<'a'>, 'children'> {
   underline?: boolean
 }
 
-const { href, external, class: className, underline, ...rest } = Astro.props as Props
+const {
+  href,
+  external,
+  class: className,
+  underline,
+  ...rest
+} = Astro.props as Props
 ---
 
 <a

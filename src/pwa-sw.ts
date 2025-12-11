@@ -92,7 +92,7 @@ self.addEventListener('message', (event) => {
         })
 
         // Helper to post progress messages to the client
-        const postProgress = (payload: any) => {
+        const postProgress = (payload: Record<string, unknown>) => {
           for (const client of allClients) {
             client.postMessage({ type: 'CACHE_PROGRESS', payload })
           }
@@ -133,14 +133,17 @@ const navigationHandler = async ({ request }: { request: Request }) => {
     const cache = await caches.open(CONTENT_CACHE)
     cache.put(request, networkResponse.clone())
     return networkResponse
-  } catch (error) {
+  } catch { // Changed from `catch (error)` to `catch`
     // 3. If network fails, try to serve from the cache
     const cachedResponse = await caches.match(request)
     return cachedResponse
   }
 }
 
-registerRoute(({ request }: { request: Request }) => request.mode === 'navigate', navigationHandler)
+registerRoute(
+  ({ request }: { request: Request }) => request.mode === 'navigate',
+  navigationHandler,
+)
 
 // Global fallback for any failed fetch requests (e.g., page not in cache and network offline)
 setCatchHandler(async ({ request }: { request: Request }) => {
