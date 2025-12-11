@@ -133,7 +133,8 @@ const navigationHandler = async ({ request }: { request: Request }) => {
     const cache = await caches.open(CONTENT_CACHE)
     cache.put(request, networkResponse.clone())
     return networkResponse
-  } catch { // Changed from `catch (error)` to `catch`
+  } catch {
+    // Changed from `catch (error)` to `catch`
     // 3. If network fails, try to serve from the cache
     const cachedResponse = await caches.match(request)
     return cachedResponse

@@ -153,3 +153,4 @@ Static assets served at the root path (`/`).
     - `pnpm lint` (to check for code quality issues)
 3.  **Fix Issues:** Resolve any errors or warnings reported by the linters.
 4.  **Commit:** Stage and commit the changes only after they pass the checks.
+5.  **Push:** Push commits to the remote repository after verifying locally.
