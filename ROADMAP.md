@@ -170,14 +170,14 @@ Static assets served at the root path (`/`).
 ### 1. Component Decomposition & Logic Extraction
 | Task | Description | Status |
 | :--- | :--- | :--- |
-| **Decompose Blog Post Page** | Extract `PostHeader` (title, metadata) and `ScrollToTop` components from `src/pages/blog/[...id].astro` to reduce file size and improve readability. | Pending |
+| **Decompose Blog Post Page** | Extract `PostHeader` (title, metadata) and `ScrollToTop` components from `src/pages/blog/[...id].astro` to reduce file size and improve readability. | Completed |
 | **Centralize Data Fetching** | Create a unified `getPostPageData` function in `src/lib/data-utils.ts` to handle the complex data fetching logic currently residing in `[...id].astro`. | Pending |
 
 ### 2. Code Quality & Maintenance
 | Task | Description | Status |
 | :--- | :--- | :--- |
 | **Manage Constants** | Move magic numbers (reading speed, scroll thresholds) and hardcoded strings (icon names) to `src/consts.ts`. | In Progress |
-| **Enhance Type Safety** | Define explicit types for data structures like `Author` to replace implicit types or `any`. | Pending |
+| **Enhance Type Safety** | Define explicit types for data structures like `Author` to replace implicit types or `any`. | In Progress |
 
 ## Development Guidelines
 

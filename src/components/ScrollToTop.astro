@@ -1,0 +1,42 @@
+---
+import { Button } from '@/components/ui/button'
+import { ICONS, SCROLL_TO_TOP_THRESHOLD } from '@/consts'
+import { Icon } from 'astro-icon/components'
+---
+
+<Button
+  variant="outline"
+  size="icon"
+  className="group fixed right-8 bottom-8 z-50 hidden"
+  id="scroll-to-top"
+  title="Scroll to top"
+  aria-label="Scroll to top"
+>
+  <Icon
+    name={ICONS.arrowUp}
+    class="mx-auto size-4 transition-all group-hover:-translate-y-0.5"
+  />
+</Button>
+
+<script is:inline define:vars={{ SCROLL_TO_TOP_THRESHOLD }}>
+  document.addEventListener('astro:page-load', () => {
+    const scrollToTopButton = document.getElementById('scroll-to-top')
+    const footer = document.querySelector('footer')
+
+    if (scrollToTopButton && footer) {
+      scrollToTopButton.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      })
+
+      window.addEventListener('scroll', () => {
+        const footerRect = footer.getBoundingClientRect()
+        const isFooterVisible = footerRect.top <= window.innerHeight
+
+        scrollToTopButton.classList.toggle(
+          'hidden',
+          window.scrollY <= SCROLL_TO_TOP_THRESHOLD || isFooterVisible,
+        )
+      })
+    }
+  })
+</script>

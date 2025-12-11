@@ -16,3 +16,10 @@ export type SocialLink = {
 export type IconMap = {
   [key: string]: string
 }
+
+export type Author = {
+  id: string
+  name: string
+  avatar: string
+  isRegistered: boolean
+}
