@@ -1,5 +1,5 @@
-import { getCollection, render, type CollectionEntry } from 'astro:content'
 import { readingTime, calculateWordCountFromHtml } from '@/lib/utils'
+import { getCollection, render, type CollectionEntry } from 'astro:content'
 
 export async function getAllAuthors(): Promise<CollectionEntry<'authors'>[]> {
   return await getCollection('authors')
@@ -301,4 +301,44 @@ export async function getTOCSections(postId: string): Promise<TOCSection[]> {
   }
 
   return sections
+}
+
+export async function getPostPageData(post: CollectionEntry<'blog'>) {
+  const currentPostId = post.id
+  const isCurrentSubpost = isSubpost(currentPostId)
+
+  const [
+    authors,
+    navigation,
+    parentPost,
+    hasChildPosts,
+    subpostCount,
+    postReadingTime,
+    tocSections,
+  ] = await Promise.all([
+    parseAuthors(post.data.authors ?? []),
+    getAdjacentPosts(currentPostId),
+    isCurrentSubpost ? getParentPost(currentPostId) : null,
+    hasSubposts(currentPostId),
+    !isCurrentSubpost ? getSubpostCount(currentPostId) : 0,
+    getPostReadingTime(currentPostId),
+    getTOCSections(currentPostId),
+  ])
+
+  const combinedReadingTime =
+    hasChildPosts && !isCurrentSubpost
+      ? await getCombinedReadingTime(currentPostId)
+      : null
+
+  return {
+    authors,
+    isCurrentSubpost,
+    navigation,
+    parentPost,
+    hasChildPosts,
+    subpostCount,
+    postReadingTime,
+    combinedReadingTime,
+    tocSections,
+  }
 }

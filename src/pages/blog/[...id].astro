@@ -12,17 +12,9 @@ import TOCSidebar from '@/components/TOCSidebar.astro'
 import { ICONS } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import {
-  getAdjacentPosts,
   getAllPostsAndSubposts,
-  getCombinedReadingTime,
   getParentId,
-  getParentPost,
-  getPostReadingTime,
-  getSubpostCount,
-  getTOCSections,
-  hasSubposts,
-  isSubpost,
-  parseAuthors,
+  getPostPageData,
 } from '@/lib/data-utils'
 import { Image } from 'astro:assets'
 import { render } from 'astro:content'
@@ -38,23 +30,18 @@ export async function getStaticPaths() {
 const post = Astro.props
 const currentPostId = Astro.params.id
 const { Content, headings } = await render(post)
-const authors = await parseAuthors(post.data.authors ?? [])
 
-const isCurrentSubpost = isSubpost(currentPostId)
-const navigation = await getAdjacentPosts(currentPostId)
-const parentPost = isCurrentSubpost ? await getParentPost(currentPostId) : null
-
-const hasChildPosts = await hasSubposts(currentPostId)
-const subpostCount = !isCurrentSubpost
-  ? await getSubpostCount(currentPostId)
-  : 0
-const postReadingTime = await getPostReadingTime(currentPostId)
-const combinedReadingTime =
-  hasChildPosts && !isCurrentSubpost
-    ? await getCombinedReadingTime(currentPostId)
-    : null
-
-const tocSections = await getTOCSections(currentPostId)
+const {
+  authors,
+  isCurrentSubpost,
+  navigation,
+  parentPost,
+  hasChildPosts,
+  subpostCount,
+  postReadingTime,
+  combinedReadingTime,
+  tocSections,
+} = await getPostPageData(post)
 ---
 
 <Layout>
