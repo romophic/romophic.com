@@ -1,11 +1,10 @@
-
 import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import eslintPluginAstro from 'eslint-plugin-astro';
 import react from 'eslint-plugin-react';
 
-export default tseslint.config(
+export default [
     {
         ignores: ['dist/', 'dev-dist/', '.astro/', 'node_modules/', '.git/']
     },
@@ -52,4 +51,4 @@ export default tseslint.config(
             '@typescript-eslint/triple-slash-reference': 'off'
         }
     }
-);
+];
