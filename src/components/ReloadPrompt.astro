@@ -1,8 +1,9 @@
+<!-- "Update Available" Toast for subsequent updates -->
 <div
   id="pwa-toast"
   role="alert"
   aria-labelledby="toast-message"
-  class="bg-background text-foreground fixed right-4 bottom-4 z-50 translate-y-[150%] rounded-lg border p-4 shadow-lg transition-transform duration-300 data-[open=true]:translate-y-0 dark:border-zinc-800"
+  class="bg-background text-foreground fixed right-4 bottom-4 z-50 w-full max-w-sm translate-y-[150%] rounded-lg border p-4 shadow-lg transition-transform duration-300 data-[open=true]:translate-y-0 dark:border-zinc-800"
 >
   <div class="flex items-start gap-3">
     <div class="flex-1">
@@ -30,32 +31,105 @@
   </div>
 </div>
 
+<!-- "Downloading for Offline" Progress for initial install in standalone mode -->
+<div
+  id="pwa-progress-wrapper"
+  role="status"
+  aria-live="polite"
+  data-open="false"
+  class="bg-background text-foreground fixed left-4 bottom-4 z-50 w-full max-w-sm translate-y-[150%] rounded-lg border p-4 shadow-lg transition-transform duration-300 data-[open=true]:translate-y-0 dark:border-zinc-800"
+>
+  <div class="flex items-center justify-between">
+    <p class="text-sm font-medium">Downloading for offline use...</p>
+    <p id="pwa-progress-text" class="text-muted-foreground text-xs"></p>
+  </div>
+  <div class="bg-muted mt-2 h-2 w-full overflow-hidden rounded-full">
+    <div
+      id="pwa-progress-bar"
+      class="bg-primary h-full w-0 transition-width duration-300"
+    ></div>
+  </div>
+</div>
+
+<script>
+  const CACHE_COMPLETED_KEY = 'content-cached-v1.1' // Matches SW cache version
+
+  // --- UI Elements ---
+  const progressWrapper = document.getElementById('pwa-progress-wrapper')
+  const progressBar = document.getElementById('pwa-progress-bar')
+  const progressText = document.getElementById('pwa-progress-text')
+
+  // --- Logic for "Update Available" Toast ---
+  async function runPwaInstallLogic() {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    const isCached = localStorage.getItem(CACHE_COMPLETED_KEY) === 'true'
+
+    // Only run this logic if in PWA mode and content isn't cached yet
+    if (!isStandalone || isCached) {
+      return
+    }
+
+    try {
+      const reg = await navigator.serviceWorker.ready
+      if (!reg.active) {
+        console.log('No active service worker found. Caching will be handled on next load.')
+        return
+      }
+
+      console.log('PWA is in standalone mode and content is not cached. Starting download.')
+
+      // Show the progress UI
+      progressWrapper?.setAttribute('data-open', 'true')
+
+      // Listen for progress messages from the Service Worker
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'CACHE_PROGRESS' && progressBar && progressText) {
+          const { filesCached, totalFiles, done } = event.data.payload
+          const percent = totalFiles > 0 ? (filesCached / totalFiles) * 100 : 0
+          
+          progressBar.style.width = `${percent}%`
+          progressText.textContent = `${filesCached} / ${totalFiles}`
+
+          if (done) {
+            localStorage.setItem(CACHE_COMPLETED_KEY, 'true')
+            console.log('Content caching complete.')
+            // Hide the progress bar after it hits 100%
+            setTimeout(() => {
+              progressWrapper?.setAttribute('data-open', 'false')
+            }, 500)
+          }
+        }
+      })
+
+      // Tell the Service Worker to start caching
+      reg.active.postMessage({ type: 'CACHE_ALL_CONTENT' })
+
+    } catch (e) {
+        console.error('Error during PWA install logic:', e);
+        progressWrapper?.setAttribute('data-open', 'false');
+    }
+  }
+
+  runPwaInstallLogic()
+</script>
+
 <script>
   // @ts-expect-error virtual:pwa-register is a virtual module
   import { registerSW } from 'virtual:pwa-register'
 
+  const toast = document.getElementById('pwa-toast')
+
   const updateSW = registerSW({
     onNeedRefresh() {
-      const toast = document.getElementById('pwa-toast')
-      if (toast) {
-        toast.dataset.open = 'true'
-      }
-    },
-    onOfflineReady() {
-      console.log('App ready to work offline')
+      toast?.setAttribute('data-open', 'true')
     },
   })
 
-  const refreshButton = document.getElementById('pwa-refresh')
-  refreshButton?.addEventListener('click', () => {
+  document.getElementById('pwa-refresh')?.addEventListener('click', () => {
     updateSW(true)
   })
 
-  const closeButton = document.getElementById('pwa-close')
-  closeButton?.addEventListener('click', () => {
-    const toast = document.getElementById('pwa-toast')
-    if (toast) {
-      toast.dataset.open = 'false'
-    }
+  document.getElementById('pwa-close')?.addEventListener('click', () => {
+    toast?.setAttribute('data-open', 'false')
   })
 </script>

@@ -71,6 +71,8 @@ export default defineConfig({
     icon(),
     AstroPWA({
       registerType: 'autoUpdate',
+      srcDir: 'src',
+      filename: 'pwa-sw.ts',
       manifest: {
         name: 'astro-erudite',
         short_name: 'astro-erudite',
@@ -92,8 +94,7 @@ export default defineConfig({
           },
         ],
       },
-      workbox: {
-        navigateFallback: '/404',
+      injectManifest: {
         globPatterns: ['**/*.{css,js,html,svg,png,ico,txt}'],
       },
       devOptions: {
