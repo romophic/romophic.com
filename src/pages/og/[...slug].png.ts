@@ -115,7 +115,7 @@ export const GET = async ({ props }: { props: { post: CollectionEntry<'blog'> } 
 			fonts: [
 				{
 					name: 'Inter',
-					data: fontDataCache,
+					data: fontDataCache!,
 					weight: 700,
 					style: 'normal',
 				},
@@ -127,7 +127,7 @@ export const GET = async ({ props }: { props: { post: CollectionEntry<'blog'> } 
     const pngData = resvg.render()
     const pngBuffer = pngData.asPng()
 
-    return new Response(pngBuffer, {
+    return new Response(new Uint8Array(pngBuffer), {
         headers: {
             'Content-Type': 'image/png',
         },
