@@ -1,0 +1,55 @@
+---
+---
+<div id="comments-section" class="mt-10">
+  <giscus-widget
+    id="comments"
+    repo="romophic/romophic.com"
+    repo-id="R_kgDOQil8lA"
+    category="Announcements"
+    category-id="DIC_kwDOQil8lM4Czpc3"
+    mapping="pathname"
+    strict="0"
+    reactions-enabled="1"
+    emit-metadata="0"
+    input-position="bottom"
+    lang="ja"
+    loading="lazy"
+    crossorigin="anonymous"
+    async
+  ></giscus-widget>
+</div>
+
+<script>
+  import 'giscus';
+
+  // Define the type for the giscus-widget element
+  interface GiscusWidget extends HTMLElement {
+    theme: string;
+  }
+
+  function updateGiscusTheme() {
+    const giscus = document.querySelector('giscus-widget') as GiscusWidget;
+    if (!giscus) return;
+    
+    // Check both class and data-attribute for robustness
+    const isDark = document.documentElement.classList.contains('dark') || 
+                   document.documentElement.getAttribute('data-theme') === 'dark';
+
+    // Always use standard themes, custom CSS is no longer used
+    giscus.theme = isDark ? 'transparent_dark' : 'light';
+  }
+
+  // Initial theme update when the component loads
+  updateGiscusTheme();
+
+  // Observe changes to the 'dark' class on the document element to switch themes dynamically
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.attributeName === 'class') {
+        updateGiscusTheme();
+      }
+    });
+  });
+  
+  observer.observe(document.documentElement, { attributes: true });
+</script>

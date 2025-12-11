@@ -1,5 +1,6 @@
 ---
 import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import GiscusComments from '@/components/GiscusComments.astro'
 import Link from '@/components/Link.astro'
 import PostHead from '@/components/PostHead.astro'
 import PostNavigation from '@/components/PostNavigation.astro'
@@ -227,6 +228,11 @@ const tocSections = await getTOCSections(currentPostId)
     <article class="prose col-start-2 max-w-none">
       <Content />
     </article>
+
+    <div class="col-start-2 max-w-none">
+      <GiscusComments />
+    </div>
+
 
     {
       (hasChildPosts || isCurrentSubpost) && (
