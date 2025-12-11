@@ -156,44 +156,31 @@ Static assets served at the root path (`/`).
 - **Details:**
   - `ThemeToggle` コンポーネントは既にWeb ComponentsとVanilla JSで実装されており、Reactハイドレーションのオーバーヘッドがないことを確認しました。
 
-### 4. SEO Enhancement
+### 5. Refactoring & Performance Foundation (Day 2)
 
-- **Item:** Structured Data (JSON-LD)
+- **Item:** Technical Debt & Refactoring
 - **Status:** Completed
 - **Details:**
-  - `schema-dts` パッケージを導入し、型安全なJSON-LD生成を実現しました。
-  - ブログ記事ページ (`src/components/PostHead.astro`) に `Article` と `BreadcrumbList` スキーマを追加しました。
-  - 著者プロフィールページ (`src/pages/authors/[...id].astro`) に `Person` スキーマを追加しました。
+  - **Data Fetching Validation:** Confirmed that `getCollection('blog')` in `data-utils.ts` is performant (~5ms per call) and cached by Astro, so no N+1 refactoring was needed.
+  - **Type Safety:** Removed unsafe `any` casts and non-null assertions in `src/pages/og/[...slug].png.ts`. Added robust error handling for font fetching.
+  - **TOC Script Extraction:** Moved the monolithic scroll-spy logic from `TOCSidebar.astro` to a dedicated `src/lib/toc.ts` module, improving maintainability.
+  - **CSS Cleanup:** Removed `!important` modifiers from `src/styles/typography.css` by using nested selectors to properly manage specificity.
 
-## Refactoring Plan
-
-### 1. Component Decomposition & Logic Extraction
-| Task | Description | Status |
-| :--- | :--- | :--- |
-| **Decompose Blog Post Page** | Extract `PostHeader` (title, metadata) and `ScrollToTop` components from `src/pages/blog/[...id].astro` to reduce file size and improve readability. | Completed |
-| **Centralize Data Fetching** | Create a unified `getPostPageData` function in `src/lib/data-utils.ts` to handle the complex data fetching logic currently residing in `[...id].astro`. | Completed |
-
-### 2. Code Quality & Maintenance
-| Task | Description | Status |
-| :--- | :--- | :--- |
-| **Manage Constants** | Move magic numbers (reading speed, scroll thresholds) and hardcoded strings (icon names) to `src/consts.ts`. | Completed |
-| **Enhance Type Safety** | Define explicit types for data structures like `Author` to replace implicit types or `any`. | Completed |
+- **Item:** OG Image Generation Optimization
+- **Status:** Completed
+- **Details:**
+  - **File-System Caching:** Implemented a caching mechanism in `src/pages/og/[...slug].png.ts` using MD5 content hashes.
+  - **Impact:** Reduced subsequent build times significantly (e.g., from 73s to 44s in local tests) by skipping image regeneration for unchanged content.
 
 ## Next Week's Strategy: Path to 1k Stars
 
 This section outlines the strategic roadmap to achieve 1k GitHub stars and establish this project as the de-facto standard for personal blog templates. The focus is on balancing **Extreme Performance**, **Exceptional UX**, and **Developer Experience**.
 
-### 0. Foundation & Technical Debt (Priority: Immediate)
+### 0. Foundation & Technical Debt (Completed)
 *Goal: Solidify the codebase, improve build stability, and ensure code maintainability before adding new features.*
 
 | Task | Description | Status |
 | :--- | :--- | :--- |
-| **Validate Data Fetching** | Verified that `getCollection('blog')` calls are fast (~5ms) but frequent. The primary build bottleneck is OG image generation (satori), not data fetching. | Completed |
-| **Fix OG Image Type Safety** | Removed `any` and non-null assertions (!) in `src/pages/og/[...slug].png.ts`. Added error handling for font fetching. | Completed |
-| **Markdown Image Optimization** | Confirmed that Astro automatically processes and optimizes images (to WebP) referenced in Markdown/MDX when they are in the `src` directory. | Completed |
-| **Refactor TOC Script** | Extracted the monolithic scroll-spy logic from `TOCSidebar.astro` into `src/lib/toc.ts` for better maintainability. | Completed |
-| **Fix CSS Specificity** | Removed `!important` modifiers from `src/styles/typography.css` by resolving underlying specificity issues. | Completed |
-| **Optimize OG Image Generation** | Implement file-system caching based on content hash to skip regeneration of unchanged OG images, and investigate concurrency settings to speed up the build. | Completed |
 
 ### 1. Extreme Performance (The "Speed" Pillar)
 *Goal: Minimal bandwidth usage and instant interaction, regardless of network conditions.*
