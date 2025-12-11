@@ -119,8 +119,11 @@ import { Icon } from 'astro-icon/components'
           if (!pagefind) {
             try {
               const pfPath = '/pagefind/pagefind.js'
-              pagefind = await import(/* @vite-ignore */ pfPath)
-              await pagefind.init()
+              const pfModule = (await import(
+                /* @vite-ignore */ pfPath
+              )) as PagefindModule
+              await pfModule.init()
+              pagefind = pfModule
             } catch (e) {
               console.error('Pagefind not found.', e)
               resultsContainer.innerHTML =
@@ -137,11 +140,11 @@ import { Icon } from 'astro-icon/components'
       trigger.addEventListener('click', openModal)
       close?.addEventListener('click', closeModal)
 
-      dialog.addEventListener('click', (e) => {
+      dialog.addEventListener('click', (e: MouseEvent) => {
         if (e.target === dialog) closeModal()
       })
 
-      input.addEventListener('input', async (e) => {
+      input.addEventListener('input', async (e: Event) => {
         const query = (e.target as HTMLInputElement).value
         if (!query || !pagefind) {
           resultsContainer.innerHTML = ''

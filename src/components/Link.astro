@@ -1,15 +1,14 @@
 ---
 import { cn } from '@/lib/utils'
+import type { HTMLAttributes } from 'astro/types'
 
-interface Props {
+interface Props extends Omit<HTMLAttributes<'a'>, 'children'> {
   href: string
   external?: boolean
-  class?: string
   underline?: boolean
-  [key: string]: string | boolean | number | undefined
 }
 
-const { href, external, class: className, underline, ...rest } = Astro.props
+const { href, external, class: className, underline, ...rest } = Astro.props as Props
 ---
 
 <a
