@@ -179,7 +179,56 @@ Static assets served at the root path (`/`).
 | **Manage Constants** | Move magic numbers (reading speed, scroll thresholds) and hardcoded strings (icon names) to `src/consts.ts`. | Completed |
 | **Enhance Type Safety** | Define explicit types for data structures like `Author` to replace implicit types or `any`. | Completed |
 
-## Development Guidelines
+## Next Week's Strategy: Path to 1k Stars
+
+This section outlines the strategic roadmap to achieve 1k GitHub stars and establish this project as the de-facto standard for personal blog templates. The focus is on balancing **Extreme Performance**, **Exceptional UX**, and **Developer Experience**.
+
+### 0. Foundation & Technical Debt (Priority: Immediate)
+*Goal: Solidify the codebase, improve build stability, and ensure code maintainability before adding new features.*
+
+| Task | Description | Status |
+| :--- | :--- | :--- |
+| **Validate Data Fetching** | Verified that `getCollection('blog')` calls are fast (~5ms) but frequent. The primary build bottleneck is OG image generation (satori), not data fetching. | Completed |
+| **Fix OG Image Type Safety** | Removed `any` and non-null assertions (!) in `src/pages/og/[...slug].png.ts`. Added error handling for font fetching. | Completed |
+| **Markdown Image Optimization** | Confirmed that Astro automatically processes and optimizes images (to WebP) referenced in Markdown/MDX when they are in the `src` directory. | Completed |
+| **Refactor TOC Script** | Extracted the monolithic scroll-spy logic from `TOCSidebar.astro` into `src/lib/toc.ts` for better maintainability. | Completed |
+| **Fix CSS Specificity** | Removed `!important` modifiers from `src/styles/typography.css` by resolving underlying specificity issues. | Completed |
+
+### 1. Extreme Performance (The "Speed" Pillar)
+*Goal: Minimal bandwidth usage and instant interaction, regardless of network conditions.*
+
+| Task | Description | Impact |
+| :--- | :--- | :--- |
+| **Font Subsetting & Optimization** | Generate optimized WOFF2 subsets for fonts (especially Japanese glyphs) to drastically reduce initial payload. Implement aggressive caching strategies. | High (Bandwidth/LCP) |
+| **Blurhash / LQIP Placeholders** | Generate tiny, blurred placeholders (Base64) for all images at build time. Prevents layout shifts and improves perceived performance instantly. | High (UX/CLS) |
+| **Partytown Integration** | Offload third-party scripts (Analytics, etc.) to a Web Worker using Partytown. Ensures the main thread remains free for user interactions (scrolling, clicking). | Medium (TBT) |
+
+### 2. "God-Tier" UX (The "Feel" Pillar)
+*Goal: A fluid, app-like experience that developers love.*
+
+| Task | Description | Impact |
+| :--- | :--- | :--- |
+| **Command Palette (Cmd+K)** | Implement a global command menu (using `cmdk` or similar headless UI) for search, navigation, and theme toggling without leaving the keyboard. | Very High (Wow Factor) |
+| **Smart Link Previews** | Show a "Wikipedia-style" hovering preview card when hovering over internal links. Allows users to peek at content without navigating away. | High (Engagement) |
+| **Medium-style Image Zoom** | Implement a smooth, physics-based image zoom interaction using a lightweight solution (e.g., `react-medium-image-zoom` adapted or vanilla JS). | Medium (Polish) |
+| **Copy-to-Clipboard & Diff View** | Enhance code blocks with a "Copy" button, file names, and diff highlighting support for better technical writing. | Medium (DX) |
+
+### 3. Digital Garden Features (The "Knowledge" Pillar)
+*Goal: Elevate the template from a simple blog to a knowledge management system.*
+
+| Task | Description | Impact |
+| :--- | :--- | :--- |
+| **Bi-directional Links (Backlinks)** | Automatically detect and display a list of "Pages that link to this post" at the bottom of each article. Creates a mesh network of knowledge. | High (Differentiation) |
+| **Interactive Graph View** | (Future) Visualize the connections between posts and tags in a 2D/3D graph, similar to Obsidian. | High (Visual Appeal) |
+
+### 4. Developer Experience (DX)
+*Goal: Easiest template to set up and customize.*
+
+| Task | Description | Impact |
+| :--- | :--- | :--- |
+| **CLI Scaffolding Tool** | Create a simple script (e.g., `pnpm run new-post`) to interactively generate new MDX files with pre-filled frontmatter. | Medium (Usability) |
+| **Theming Engine** | Refactor Tailwind config to allow changing the entire site's primary color via a single CSS variable or config option. | Medium (Customizability) |
+
 
 ### Workflow
 
