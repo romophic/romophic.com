@@ -193,6 +193,7 @@ This section outlines the strategic roadmap to achieve 1k GitHub stars and estab
 | **Markdown Image Optimization** | Confirmed that Astro automatically processes and optimizes images (to WebP) referenced in Markdown/MDX when they are in the `src` directory. | Completed |
 | **Refactor TOC Script** | Extracted the monolithic scroll-spy logic from `TOCSidebar.astro` into `src/lib/toc.ts` for better maintainability. | Completed |
 | **Fix CSS Specificity** | Removed `!important` modifiers from `src/styles/typography.css` by resolving underlying specificity issues. | Completed |
+| **Optimize OG Image Generation** | Implement file-system caching based on content hash to skip regeneration of unchanged OG images, and investigate concurrency settings to speed up the build. | Completed |
 
 ### 1. Extreme Performance (The "Speed" Pillar)
 *Goal: Minimal bandwidth usage and instant interaction, regardless of network conditions.*

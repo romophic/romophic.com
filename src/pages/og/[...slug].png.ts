@@ -1,6 +1,10 @@
 import { SITE } from '@/consts'
 import { Resvg } from '@resvg/resvg-js'
 import { getCollection, type CollectionEntry } from 'astro:content'
+import { createHash } from 'node:crypto'
+import { existsSync } from 'node:fs'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import path from 'node:path'
 import satori from 'satori'
 
 export async function getStaticPaths() {
@@ -46,12 +50,73 @@ async function getFontData() {
   }
 }
 
+const CACHE_DIR = path.join(process.cwd(), 'node_modules', '.cache', 'og-images')
+
+async function getCachedImage(
+  slug: string,
+  hashKey: string,
+): Promise<Buffer | null> {
+  try {
+    if (!existsSync(CACHE_DIR)) {
+      await mkdir(CACHE_DIR, { recursive: true })
+    }
+
+    const hash = createHash('md5').update(hashKey).digest('hex')
+    const safeSlug = slug.replace(/[^a-z0-9]/gi, '_')
+    const filePath = path.join(CACHE_DIR, `${safeSlug}-${hash}.png`)
+
+    if (existsSync(filePath)) {
+      return await readFile(filePath)
+    }
+    return null
+  } catch (e) {
+    console.warn('Cache read error:', e)
+    return null
+  }
+}
+
+async function saveCachedImage(
+  slug: string,
+  hashKey: string,
+  buffer: Uint8Array,
+) {
+  try {
+    if (!existsSync(CACHE_DIR)) {
+      await mkdir(CACHE_DIR, { recursive: true })
+    }
+    const hash = createHash('md5').update(hashKey).digest('hex')
+    const safeSlug = slug.replace(/[^a-z0-9]/gi, '_')
+    const filePath = path.join(CACHE_DIR, `${safeSlug}-${hash}.png`)
+    await writeFile(filePath, buffer)
+  } catch (e) {
+    console.warn('Cache write error:', e)
+  }
+}
+
 export const GET = async ({
   props,
 }: {
   props: { post: CollectionEntry<'blog'> }
 }) => {
   const { post } = props
+
+  const hashKey = JSON.stringify({
+    title: post.data.title,
+    date: post.data.date.toISOString(),
+    siteTitle: SITE.title,
+    version: 'v1',
+  })
+
+  // Try cache
+  const cachedBuffer = await getCachedImage(post.id, hashKey)
+  if (cachedBuffer) {
+    return new Response(new Uint8Array(cachedBuffer), {
+      headers: {
+        'Content-Type': 'image/png',
+      },
+    })
+  }
+
   const fontData = await getFontData()
 
   const svg = await satori(
@@ -121,7 +186,7 @@ export const GET = async ({
           },
         ],
       },
-    },
+    } as any,
     {
       width: 1200,
       height: 630,
@@ -139,6 +204,8 @@ export const GET = async ({
   const resvg = new Resvg(svg)
   const pngData = resvg.render()
   const pngBuffer = pngData.asPng()
+
+  await saveCachedImage(post.id, hashKey, new Uint8Array(pngBuffer))
 
   return new Response(new Uint8Array(pngBuffer), {
     headers: {
