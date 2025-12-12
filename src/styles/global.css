@@ -4,7 +4,7 @@
 
 @theme inline {
   --font-sans:
-    Geist, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Geist', 'Noto Sans JP Variable', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
     'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   --font-mono:
     Geist Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
@@ -71,6 +71,7 @@
 }
 
 @layer base {
+
   *,
   ::after,
   ::before,
@@ -85,6 +86,7 @@
 }
 
 @layer utilities {
+
   /* Custom Scrollbar */
   ::-webkit-scrollbar {
     width: 10px;

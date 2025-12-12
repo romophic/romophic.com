@@ -172,6 +172,41 @@ Static assets served at the root path (`/`).
   - **File-System Caching:** Implemented a caching mechanism in `src/pages/og/[...slug].png.ts` using MD5 content hashes.
   - **Impact:** Reduced subsequent build times significantly (e.g., from 73s to 44s in local tests) by skipping image regeneration for unchanged content.
 
+### 6. Extreme Performance Implementation (Day 3)
+
+- **Item:** Font Subsetting & Optimization
+- **Status:** Completed
+- **Details:**
+  - `@fontsource-variable/noto-sans-jp` を導入し、日本語フォントを最適化しました。
+  - `src/layouts/Layout.astro` でインポートすることで、Tailwind CSS処理との競合を回避しました。
+
+- **Item:** Partytown Integration
+- **Status:** Completed
+- **Details:**
+  - `@astrojs/partytown` を導入し、サードパーティスクリプトをWeb Workerにオフロードする基盤を整えました。
+
+- **Item:** Blurhash / LQIP Placeholders
+- **Status:** Skipped (Deferred)
+- **Details:**
+  - 当初計画していましたが、Astroの`<Image />`コンポーネントの型定義エラー（`Property 'placeholder' does not exist`）が発生しました。
+  - プロジェクトのビルド安定性を優先し、今回は実装を見送りました。将来的に解決策を調査します。
+
+### 7. God-Tier UX Implementation (Day 3 - Continued)
+
+- **Item:** Command Palette (Cmd+K)
+- **Status:** Completed
+- **Details:**
+  - `cmdk` と `shadcn/ui` を使用してグローバルコマンドメニューを実装しました。
+  - `Ctrl+K` (Windows) または `Cmd+K` (Mac) で呼び出し可能。ブログ記事の検索とナビゲーションを提供します。
+  - ヘッダーの検索ボタンからもアクセス可能です。
+
+- **Item:** Smart Link Previews
+- **Status:** Completed
+- **Details:**
+  - `@floating-ui/react` を使用して、記事内の内部リンクにホバー時のプレビューカードを実装しました。
+  - リンク先のOGメタデータを取得し、画像とタイトルを表示します。
+  - SSR時の `Invalid hook call` エラーを回避するため、コンポーネントを `client:only="react"` としてマウントしました。
+
 ## Next Week's Strategy: Path to 1k Stars
 
 This section outlines the strategic roadmap to achieve 1k GitHub stars and establish this project as the de-facto standard for personal blog templates. The focus is on balancing **Extreme Performance**, **Exceptional UX**, and **Developer Experience**.
@@ -196,8 +231,8 @@ This section outlines the strategic roadmap to achieve 1k GitHub stars and estab
 
 | Task | Description | Impact |
 | :--- | :--- | :--- |
-| **Command Palette (Cmd+K)** | Implement a global command menu (using `cmdk` or similar headless UI) for search, navigation, and theme toggling without leaving the keyboard. | Very High (Wow Factor) |
-| **Smart Link Previews** | Show a "Wikipedia-style" hovering preview card when hovering over internal links. Allows users to peek at content without navigating away. | High (Engagement) |
+| **Command Palette (Cmd+K)** | Implement a global command menu (using `cmdk` or similar headless UI) for search, navigation, and theme toggling without leaving the keyboard. | Very High (Wow Factor) | **Completed** (Implemented using `cmdk` + shadcn/ui) |
+| **Smart Link Previews** | Show a "Wikipedia-style" hovering preview card when hovering over internal links. Allows users to peek at content without navigating away. | High (Engagement) | **Completed** (Implemented using `@floating-ui/react`) |
 | **Medium-style Image Zoom** | Implement a smooth, physics-based image zoom interaction using a lightweight solution (e.g., `react-medium-image-zoom` adapted or vanilla JS). | Medium (Polish) |
 | **Copy-to-Clipboard & Diff View** | Enhance code blocks with a "Copy" button, file names, and diff highlighting support for better technical writing. | Medium (DX) |
 

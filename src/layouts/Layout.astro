@@ -1,18 +1,30 @@
 ---
+import '@fontsource-variable/noto-sans-jp'
 import '@/styles/global.css'
 import '@/styles/typography.css'
 import 'katex/dist/katex.min.css'
 
 import { ClientRouter } from 'astro:transitions'
 
+import { CommandMenu } from '@/components/CommandMenu'
 import Footer from '@/components/Footer.astro'
 import Head from '@/components/Head.astro'
 import Header from '@/components/Header.astro'
 import PageLoader from '@/components/PageLoader.astro'
 import ReloadPrompt from '@/components/ReloadPrompt.astro'
 import ScrollProgress from '@/components/ScrollProgress.astro'
+import { GlobalLinkPreviews } from '@/components/GlobalLinkPreviews'
 import { SITE } from '@/consts'
 import { cn } from '@/lib/utils'
+import { getCollection } from 'astro:content'
+
+const posts = await getCollection('blog')
+const cleanPosts = posts.map((post) => ({
+  id: post.id,
+  title: post.data.title,
+  description: post.data.description,
+  slug: post.id, // Assuming id is slug for now or close enough. id includes content/blog/ path? No, simple slug usually
+}))
 
 interface Props {
   class?: string
@@ -47,5 +59,7 @@ const { class: className } = Astro.props
     <Footer />
     <PageLoader />
     <ReloadPrompt />
+    <CommandMenu client:idle posts={cleanPosts} />
+    <GlobalLinkPreviews client:only="react" />
   </body>
 </html>

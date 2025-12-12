@@ -5,6 +5,7 @@ import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
 import icon from 'astro-icon'
 import AstroPWA from '@vite-pwa/astro'
+import partytown from '@astrojs/partytown'
 
 import { rehypeHeadingIds } from '@astrojs/markdown-remark'
 import expressiveCode from 'astro-expressive-code'
@@ -102,6 +103,11 @@ export default defineConfig({
       devOptions: {
         enabled: true,
         navigateFallbackAllowlist: [/^\/404$/],
+      },
+    }),
+    partytown({
+      config: {
+        forward: ['dataLayer.push'],
       },
     }),
   ],
