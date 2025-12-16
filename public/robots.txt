@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://romophic.com/sitemap-index.xml
