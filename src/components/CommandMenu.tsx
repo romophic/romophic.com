@@ -65,8 +65,8 @@ export function CommandMenu({ posts: initialPosts = [] }: Partial<Props>) {
         return
       }
       try {
-        // @ts-expect-error: Pagefind is generated at build time
-        const pagefind = await import(/* @vite-ignore */ '/pagefind/pagefind.js')
+        const pagefindUrl = '/pagefind/pagefind.js'
+        const pagefind = await import(/* @vite-ignore */ pagefindUrl)
         await pagefind.options({ showSubResults: false })
         const search = await pagefind.search(query)
         const results = await Promise.all(
