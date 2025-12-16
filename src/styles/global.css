@@ -65,7 +65,7 @@
    */
 
   --background: #f2f1f5;
-  --foreground: oklch(0.145 0 0);
+  --foreground: oklch(0.20 0.02 260);
 
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
