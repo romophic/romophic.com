@@ -1,19 +1,19 @@
 ---
-import '@fontsource-variable/noto-sans-jp'
 import '@/styles/global.css'
 import '@/styles/typography.css'
+import '@fontsource-variable/noto-sans-jp'
 import 'katex/dist/katex.min.css'
 
 import { ClientRouter } from 'astro:transitions'
 
 import { CommandMenu } from '@/components/CommandMenu'
 import Footer from '@/components/Footer.astro'
+import { GlobalLinkPreviews } from '@/components/GlobalLinkPreviews'
 import Head from '@/components/Head.astro'
 import Header from '@/components/Header.astro'
 import PageLoader from '@/components/PageLoader.astro'
 import ReloadPrompt from '@/components/ReloadPrompt.astro'
 import ScrollProgress from '@/components/ScrollProgress.astro'
-import { GlobalLinkPreviews } from '@/components/GlobalLinkPreviews'
 import { SITE } from '@/consts'
 import { cn } from '@/lib/utils'
 import { getCollection } from 'astro:content'

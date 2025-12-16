@@ -1,0 +1,36 @@
+---
+import { ZoomableImage } from '@/components/ui/ZoomableImage'
+import { getImage } from 'astro:assets'
+
+const props = Astro.props
+
+let src = props.src
+let placeholderSrc: string | undefined = undefined
+
+if (typeof props.src === 'object' && props.src !== null && 'src' in props.src) {
+  src = props.src.src
+
+  try {
+    const optimizedPlaceholder = await getImage({
+      src: props.src,
+      width: 20,
+      format: 'webp',
+      quality: 50,
+    });
+    placeholderSrc = optimizedPlaceholder.src;
+  } catch (e) {
+    console.warn('Failed to generate placeholder for', props.src, e);
+  }
+}
+
+// Ensure alt is present
+const alt = props.alt || ''
+---
+
+<ZoomableImage
+  client:load
+  {...props}
+  src={src}
+  alt={alt}
+  placeholderSrc={placeholderSrc}
+/>

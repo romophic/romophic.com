@@ -4,8 +4,8 @@
 
 @theme inline {
   --font-sans:
-    'Geist', 'Noto Sans JP Variable', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
-    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    'Geist', 'Noto Sans JP Variable', ui-sans-serif, system-ui, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   --font-mono:
     Geist Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     'Liberation Mono', 'Courier New', monospace;
@@ -16,14 +16,27 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
 
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
 
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
 
   --color-border: var(--border);
+  --color-input: var(--input);
   --color-ring: var(--ring);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
 }
 
 @font-face {
@@ -43,15 +56,42 @@
 }
 
 :root {
+  /* 
+   * Theme Configuration
+   * To change the primary color, update the --primary and --primary-foreground variables.
+   * Example (Blue):
+   * --primary: oklch(0.488 0.243 264.376);
+   * --primary-foreground: oklch(0.985 0 0);
+   */
+
   --background: #f2f1f5;
   --foreground: oklch(0.145 0 0);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
+
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
+
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+
   --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.577 0.245 27.325);
+
   --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
+
   --skeleton-base: oklch(0.95 0 0);
   --skeleton-shine: oklch(1 0 0);
 }
@@ -59,19 +99,37 @@
 :root[data-theme='dark'] {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
+
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
+
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
+
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+
   --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.577 0.245 27.325);
+
   --border: oklch(1 0 0 / 10%);
+  --input: oklch(0.269 0 0);
   --ring: oklch(0.556 0 0);
+
   --skeleton-base: oklch(0.2 0 0);
   --skeleton-shine: oklch(0.269 0 0);
 }
 
 @layer base {
-
   *,
   ::after,
   ::before,
@@ -83,10 +141,13 @@
   mark {
     @apply bg-primary/20 text-foreground rounded-xs px-0.5;
   }
+
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
 @layer utilities {
-
   /* Custom Scrollbar */
   ::-webkit-scrollbar {
     width: 10px;

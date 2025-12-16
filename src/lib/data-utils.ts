@@ -1,5 +1,6 @@
 import { readingTime, calculateWordCountFromHtml } from '@/lib/utils'
 import { getCollection, render, type CollectionEntry } from 'astro:content'
+import path from 'node:path'
 
 export async function getAllAuthors(): Promise<CollectionEntry<'authors'>[]> {
   return await getCollection('authors')
@@ -300,45 +301,214 @@ export async function getTOCSections(postId: string): Promise<TOCSection[]> {
     }
   }
 
-  return sections
-}
+      return sections
 
-export async function getPostPageData(post: CollectionEntry<'blog'>) {
-  const currentPostId = post.id
-  const isCurrentSubpost = isSubpost(currentPostId)
+    }
 
-  const [
-    authors,
-    navigation,
-    parentPost,
-    hasChildPosts,
-    subpostCount,
-    postReadingTime,
-    tocSections,
-  ] = await Promise.all([
-    parseAuthors(post.data.authors ?? []),
-    getAdjacentPosts(currentPostId),
-    isCurrentSubpost ? getParentPost(currentPostId) : null,
-    hasSubposts(currentPostId),
-    !isCurrentSubpost ? getSubpostCount(currentPostId) : 0,
-    getPostReadingTime(currentPostId),
-    getTOCSections(currentPostId),
-  ])
+    
 
-  const combinedReadingTime =
-    hasChildPosts && !isCurrentSubpost
-      ? await getCombinedReadingTime(currentPostId)
-      : null
+    export function resolveLinkToId(url: string, sourceId: string): string | null {
 
-  return {
-    authors,
-    isCurrentSubpost,
-    navigation,
-    parentPost,
-    hasChildPosts,
-    subpostCount,
-    postReadingTime,
-    combinedReadingTime,
-    tocSections,
+      const cleanUrl = url.split('#')[0].split('?')[0]
+
+    
+
+    if (
+
+      cleanUrl.startsWith('http') ||
+
+      cleanUrl.startsWith('//') ||
+
+      cleanUrl.startsWith('mailto:')
+
+    )
+
+      return null
+
+  
+
+    if (cleanUrl.startsWith('/blog/')) {
+
+      return cleanUrl.replace('/blog/', '').replace(/\/$/, '')
+
+    }
+
+  
+
+    if (
+
+      cleanUrl.startsWith('./') ||
+
+      cleanUrl.startsWith('../') ||
+
+      !cleanUrl.startsWith('/')
+
+    ) {
+
+      const sourceDir = path.posix.dirname(sourceId)
+
+      const resolved = path.posix.join(sourceDir, cleanUrl)
+
+      return resolved
+
+    }
+
+  
+
+    return null
+
   }
-}
+
+  
+
+  function isMatch(targetId: string | null, postId: string): boolean {
+
+    if (!targetId) return false
+
+    if (targetId === postId) return true
+
+  
+
+    const normalize = (id: string) =>
+
+      id.endsWith('/index') ? id.replace(/\/index$/, '') : id
+
+    return normalize(targetId) === normalize(postId)
+
+  }
+
+  
+
+  export async function getBacklinks(
+
+    postId: string,
+
+  ): Promise<CollectionEntry<'blog'>[]> {
+
+    const allPosts = await getAllPostsAndSubposts()
+
+    const backlinks: CollectionEntry<'blog'>[] = []
+
+  
+
+    for (const post of allPosts) {
+
+      if (post.id === postId) continue
+
+  
+
+      const regex = /\[.*?\]\((.*?)\)/g
+
+      let match
+
+      while ((match = regex.exec(post.body || '')) !== null) {
+
+        const url = match[1]
+
+        const targetId = resolveLinkToId(url, post.id)
+
+  
+
+        if (isMatch(targetId, postId)) {
+
+          backlinks.push(post)
+
+          break
+
+        }
+
+      }
+
+    }
+
+    return backlinks
+
+  }
+
+  
+
+  export async function getPostPageData(post: CollectionEntry<'blog'>) {
+
+    const currentPostId = post.id
+
+    const isCurrentSubpost = isSubpost(currentPostId)
+
+  
+
+    const [
+
+      authors,
+
+      navigation,
+
+      parentPost,
+
+      hasChildPosts,
+
+      subpostCount,
+
+      postReadingTime,
+
+      tocSections,
+
+      backlinks,
+
+    ] = await Promise.all([
+
+      parseAuthors(post.data.authors ?? []),
+
+      getAdjacentPosts(currentPostId),
+
+      isCurrentSubpost ? getParentPost(currentPostId) : null,
+
+      hasSubposts(currentPostId),
+
+      !isCurrentSubpost ? getSubpostCount(currentPostId) : 0,
+
+      getPostReadingTime(currentPostId),
+
+      getTOCSections(currentPostId),
+
+      getBacklinks(currentPostId),
+
+    ])
+
+  
+
+    const combinedReadingTime =
+
+      hasChildPosts && !isCurrentSubpost
+
+        ? await getCombinedReadingTime(currentPostId)
+
+        : null
+
+  
+
+    return {
+
+      authors,
+
+      isCurrentSubpost,
+
+      navigation,
+
+      parentPost,
+
+      hasChildPosts,
+
+      subpostCount,
+
+      postReadingTime,
+
+      combinedReadingTime,
+
+      tocSections,
+
+      backlinks,
+
+    }
+
+  }
+
+  

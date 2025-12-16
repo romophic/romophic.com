@@ -23,7 +23,7 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   site: 'https://romophic.com',
   prefetch: {
-    defaultStrategy: 'viewport',
+    defaultStrategy: 'hover',
   },
   integrations: [
     expressiveCode({

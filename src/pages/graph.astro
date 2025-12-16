@@ -1,0 +1,29 @@
+---
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import { GraphView } from '@/components/GraphView'
+import PageHead from '@/components/PageHead.astro'
+import { ICONS } from '@/consts'
+import Layout from '@/layouts/Layout.astro'
+---
+
+<Layout>
+  <PageHead
+    slot="head"
+    title="Knowledge Graph"
+    description="Visualize connections between posts"
+  />
+  <div class="container mx-auto max-w-5xl px-4 py-12">
+    <Breadcrumbs
+      items={[{ href: '/graph', label: 'Graph', icon: ICONS.network }]}
+    />
+
+    <div class="mt-8 mb-8">
+      <h1 class="mb-2 text-3xl font-bold">Knowledge Graph</h1>
+      <p class="text-muted-foreground">
+        Interactive visualization of connections between posts and tags.
+      </p>
+    </div>
+
+    <GraphView client:only="react" />
+  </div>
+</Layout>

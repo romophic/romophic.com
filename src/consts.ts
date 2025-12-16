@@ -64,6 +64,8 @@ export const ICONS = {
   bookOpen: 'lucide:book-open',
   bookOpenText: 'lucide:book-open-text',
   libraryBig: 'lucide:library-big',
+  link: 'lucide:link',
+  network: 'lucide:share-2',
   user: 'lucide:user',
   users: 'lucide:users',
 }
