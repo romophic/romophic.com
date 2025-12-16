@@ -55,3 +55,37 @@ This document tracks the current state of **romophic.com**, including implemente
 
 *   **Graph View Bundle:** `react-force-graph-2d` is large. Monitor bundle size.
 *   **Unit Tests:** Data utility functions (`src/lib/data-utils.ts`) handle complex logic (backlinks, path resolution) and would benefit from Vitest coverage.
+
+## 🚀 Planned Features (ToDo)
+
+### 1. AI & LLM Integration Expansion
+*   **Implement `llms-full.txt`:**
+    *   *Goal:* Provide a comprehensive, single-file Markdown representation of the entire blog's content (or key technical posts) to allow LLMs to fully ingest and understand the site's knowledge base.
+    *   *Plan:* Create `src/pages/llms-full.txt.ts`. Aggregate MDX content from `src/content/blog`. Consider token limits and potentially offer segmented files if the content grows too large.
+
+### 2. IndieWeb & Social Interactions
+*   **Webmentions Integration:**
+    *   *Goal:* Enable decentralized conversations by receiving and displaying mentions (likes, reposts, replies) from other websites and social networks (via Bridgy).
+    *   *Plan:*
+        1.  Add `<link rel="webmention" href="https://webmention.io/..." />` to `Head.astro`.
+        2.  Use `webmention.io` API to fetch mentions.
+        3.  Create a client-side (or build-time) component to display mentions at the bottom of posts.
+
+### 3. Interactive Playground
+*   **Sandpack / Live Code:**
+    *   *Goal:* Allow users to edit and run code snippets directly within technical articles.
+    *   *Plan:* Integrate `Sandpack` (by CodeSandbox) for React/Node.js snippets.
+
+### 4. Search & Discovery
+*   **Enhanced Pagefind UI:**
+    *   *Goal:* Improve the search experience with better result highlighting and snippets, potentially integrating it more deeply than the current Command Menu.
+
+### 5. Analytics & Privacy
+*   **Privacy-First Analytics:**
+    *   *Goal:* Track usage without compromising user privacy or using heavy scripts.
+    *   *Plan:* Evaluate self-hosted solutions like Umami or Plausible.
+
+### 6. Accessibility (a11y)
+*   **Automated Testing:**
+    *   *Goal:* Prevent accessibility regressions.
+    *   *Plan:* Integrate `axe-core` or similar tools into the CI/CD pipeline or pre-commit hooks.
