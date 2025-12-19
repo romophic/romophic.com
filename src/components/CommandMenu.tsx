@@ -70,10 +70,12 @@ export function CommandMenu({ posts: initialPosts = [] }: Partial<Props>) {
         await pagefind.options({ showSubResults: false })
         const search = await pagefind.search(query)
         const results = await Promise.all(
-          search.results.slice(0, 5).map((r: any) => r.data()),
+          search.results
+            .slice(0, 5)
+            .map((r: { data: () => Promise<PagefindResult> }) => r.data()),
         )
         setPagefindResults(results)
-      } catch (e) {
+      } catch {
         // Pagefind not available (dev mode)
       }
     }
