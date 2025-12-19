@@ -56,10 +56,8 @@ export function CommandMenu({ posts: initialPosts = [] }: Partial<Props>) {
 
   // Expose a global toggle function for the button in Header
   useEffect(() => {
-    // @ts-expect-error: window object extension
     window.toggleCommandMenu = () => setOpen((open) => !open)
     return () => {
-      // @ts-expect-error: window object extension
       delete window.toggleCommandMenu
     }
   }, [])
