@@ -43,10 +43,13 @@ This document tracks the current state of **romophic.com**, including implemente
 *   **Link Previews:** Hover cards for internal links using `@floating-ui/react`.
 *   **Prefetching:** Astro's prefetch enabled with `defaultStrategy: 'hover'` to balance speed and bandwidth.
 
+### 7. Search & Discovery
+*   **Enhanced Pagefind UI:**
+    *   **Description:** Improved search experience with better result highlighting and snippets, integrated deeply into the Command Menu.
+    *   **Implementation:** `src/components/CommandMenu.tsx` uses Pagefind with `sub_results` enabled for granular matches.
+
 ## 🚧 Known Issues & Technical Debt
 
-*   **Deprecated `React.ElementRef`:** Build logs show warnings for `shadcn/ui` components (`dialog.tsx`, `command.tsx`).
-    *   *Status:* Low priority. Waiting for upstream library updates.
 *   **Linting:** `cmdk-input-wrapper` attribute in `command.tsx` triggers `react/no-unknown-property`.
     *   *Status:* Suppressed via file-level `eslint-disable`.
 *   **PWA Strategy:** Currently requires "Add to Home Screen" for full offline capability. Browser-only caching is standard HTTP cache + runtime SW.
@@ -58,35 +61,6 @@ This document tracks the current state of **romophic.com**, including implemente
 
 ## 🚀 Planned Features (ToDo)
 
-### 1. AI & LLM Integration Expansion
-*   **Implement `llms-full.txt`:**
-    *   *Status:* ✅ Implemented.
-    *   *Description:* A comprehensive, single-file Markdown representation of the entire blog's content to allow LLMs to fully ingest and understand the site's knowledge base. Available at `/llms-full.txt`.
+(No pending features currently planned)
 
 
-### 2. IndieWeb & Social Interactions
-*   **Webmentions Integration:**
-    *   *Goal:* Enable decentralized conversations by receiving and displaying mentions (likes, reposts, replies) from other websites and social networks (via Bridgy).
-    *   *Plan:*
-        1.  Add `<link rel="webmention" href="https://webmention.io/..." />` to `Head.astro`.
-        2.  Use `webmention.io` API to fetch mentions.
-        3.  Create a client-side (or build-time) component to display mentions at the bottom of posts.
-
-### 3. Interactive Playground
-*   **Sandpack / Live Code:**
-    *   *Goal:* Allow users to edit and run code snippets directly within technical articles.
-    *   *Plan:* Integrate `Sandpack` (by CodeSandbox) for React/Node.js snippets.
-
-### 4. Search & Discovery
-*   **Enhanced Pagefind UI:**
-    *   *Goal:* Improve the search experience with better result highlighting and snippets, potentially integrating it more deeply than the current Command Menu.
-
-### 5. Analytics & Privacy
-*   **Privacy-First Analytics:**
-    *   *Goal:* Track usage without compromising user privacy or using heavy scripts.
-    *   *Plan:* Evaluate self-hosted solutions like Umami or Plausible.
-
-### 6. Accessibility (a11y)
-*   **Automated Testing:**
-    *   *Goal:* Prevent accessibility regressions.
-    *   *Plan:* Integrate `axe-core` or similar tools into the CI/CD pipeline or pre-commit hooks.

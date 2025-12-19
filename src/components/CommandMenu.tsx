@@ -21,6 +21,12 @@ interface Props {
   }[]
 }
 
+interface PagefindSubResult {
+  title: string
+  url: string
+  excerpt: string
+}
+
 interface PagefindResult {
   id: string
   url: string
@@ -28,6 +34,7 @@ interface PagefindResult {
     title: string
   }
   excerpt: string
+  sub_results: PagefindSubResult[]
 }
 
 export function CommandMenu({ posts: initialPosts = [] }: Partial<Props>) {
@@ -67,7 +74,7 @@ export function CommandMenu({ posts: initialPosts = [] }: Partial<Props>) {
       try {
         const pagefindUrl = '/pagefind/pagefind.js'
         const pagefind = await import(/* @vite-ignore */ pagefindUrl)
-        await pagefind.options({ showSubResults: false })
+        await pagefind.options({ showSubResults: true })
         const search = await pagefind.search(query)
         const results = await Promise.all(
           search.results
@@ -140,13 +147,34 @@ export function CommandMenu({ posts: initialPosts = [] }: Partial<Props>) {
                         setOpen(false)
                         window.location.href = result.url
                       }}
+                      className="items-start"
                     >
                       <div className="flex flex-col gap-1">
                         <span className="font-medium">{result.meta.title}</span>
                         <span
-                          className="text-muted-foreground line-clamp-2 text-xs"
+                          className="text-muted-foreground line-clamp-2 text-xs [&>mark]:bg-yellow-200 [&>mark]:text-black dark:[&>mark]:bg-yellow-800 dark:[&>mark]:text-white"
                           dangerouslySetInnerHTML={{ __html: result.excerpt }}
                         />
+                        {result.sub_results && result.sub_results.length > 0 && (
+                          <div className="mt-1 flex flex-col gap-1 border-l-2 pl-2">
+                            {result.sub_results.slice(0, 3).map((sub) => (
+                              <div key={sub.url} className="text-xs">
+                                <span className="font-medium opacity-80">
+                                  {sub.title}
+                                </span>
+                                <span className="text-muted-foreground mx-1">
+                                  &mdash;
+                                </span>
+                                <span
+                                  className="text-muted-foreground inline [&>mark]:bg-yellow-200 [&>mark]:text-black dark:[&>mark]:bg-yellow-800 dark:[&>mark]:text-white"
+                                  dangerouslySetInnerHTML={{
+                                    __html: sub.excerpt,
+                                  }}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </CommandItem>
                   ))}
