@@ -21,18 +21,18 @@ async function main() {
       type: 'text',
       name: 'title',
       message: 'Post Title:',
-      validate: (value) => (value.length > 0 ? true : 'Title is required'),
+      validate: (value: string) => (value.length > 0 ? true : 'Title is required'),
     },
     {
       type: 'text',
       name: 'slug',
       message: 'Slug (file name without extension):',
-      initial: (prev) =>
+      initial: (prev: string) =>
         prev
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/^-|-$/g, ''),
-      validate: (value) =>
+      validate: (value: string) =>
         /^[a-z0-9-_]+$/.test(value) ? true : 'Invalid slug format',
     },
     {
@@ -56,10 +56,10 @@ async function main() {
       ],
     },
     {
-      type: (prev) => (prev === '__NEW__' ? 'text' : null),
+      type: (prev: string) => (prev === '__NEW__' ? 'text' : null),
       name: 'newDirectory',
       message: 'New folder name:',
-      validate: (value) =>
+      validate: (value: string) =>
         /^[a-z0-9-_]+$/.test(value) ? true : 'Invalid folder name',
     },
   ])

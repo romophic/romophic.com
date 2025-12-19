@@ -60,8 +60,9 @@ This document tracks the current state of **romophic.com**, including implemente
 
 ### 1. AI & LLM Integration Expansion
 *   **Implement `llms-full.txt`:**
-    *   *Goal:* Provide a comprehensive, single-file Markdown representation of the entire blog's content (or key technical posts) to allow LLMs to fully ingest and understand the site's knowledge base.
-    *   *Plan:* Create `src/pages/llms-full.txt.ts`. Aggregate MDX content from `src/content/blog`. Consider token limits and potentially offer segmented files if the content grows too large.
+    *   *Status:* ✅ Implemented.
+    *   *Description:* A comprehensive, single-file Markdown representation of the entire blog's content to allow LLMs to fully ingest and understand the site's knowledge base. Available at `/llms-full.txt`.
+
 
 ### 2. IndieWeb & Social Interactions
 *   **Webmentions Integration:**
