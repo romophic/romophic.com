@@ -22,7 +22,6 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   site: 'https://romophic.com',
-  trailingSlash: 'always',
   prefetch: {
     defaultStrategy: 'hover',
   },
