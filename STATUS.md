@@ -48,23 +48,25 @@ This document tracks the current state of **romophic.com**, including implemente
     *   **Description:** Improved search experience with better result highlighting and snippets, integrated deeply into the Command Menu.
     *   **Implementation:** `src/components/CommandMenu.tsx` uses Pagefind with `sub_results` enabled for granular matches.
 
-### 8. Internal Link Standardization
-*   **Description:** Standardized internal links within complex nested content (e.g., `romophic-library`).
+### 8. Internal Link Standardization & File Normalization
+*   **Description:** Standardized internal links and filenames within complex nested content (e.g., `romophic-library`).
 *   **Implementation:** 
-    *   Converted all library links to **lowercase absolute paths** (`/blog/romophic-library/lib/...`) to ensure robustness against varying base paths in dev/prod.
-    *   Applied URL encoding for special characters and spaces (e.g., `Euler's%20totient%20function`).
+    *   Renamed files to **kebab-case** (e.g., `DirectedGraph.mdx` -> `directed-graph.mdx`) for URL consistency.
+    *   Updated all internal links to match new filenames.
+    *   Added `pnpm check:links` script to verify link integrity.
 
+### 9. Code Quality & Testing
+*   **Unit Tests:** Added **Vitest** for testing core logic (`src/lib/content`).
+*   **Link Checking:** Automated internal link validation script (`scripts/check-links.cjs`).
+
+### 10. Performance Optimization
+*   **Graph View:** Implemented `React.lazy` and `Suspense` for `react-force-graph-2d` to reduce initial bundle size.
 
 ## 🚧 Known Issues & Technical Debt
 
 *   **Linting:** `cmdk-input-wrapper` attribute in `command.tsx` triggers `react/no-unknown-property`.
     *   *Status:* Suppressed via file-level `eslint-disable`.
 *   **PWA Strategy:** Currently requires "Add to Home Screen" for full offline capability. Browser-only caching is standard HTTP cache + runtime SW.
-
-## 📉 Pending Refactoring
-
-*   **Graph View Bundle:** `react-force-graph-2d` is large. Monitor bundle size.
-*   **Unit Tests:** Data utility functions (`src/lib/data-utils.ts`) handle complex logic (backlinks, path resolution) and would benefit from Vitest coverage.
 
 ## 🚀 Planned Features (ToDo)
 
