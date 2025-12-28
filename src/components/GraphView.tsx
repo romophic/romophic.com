@@ -1,5 +1,6 @@
-import { useEffect, useState, useRef } from 'react'
-import ForceGraph2D from 'react-force-graph-2d'
+import { useEffect, useState, useRef, lazy, Suspense } from 'react'
+
+const ForceGraph2D = lazy(() => import('react-force-graph-2d'))
 
 interface GraphNode {
   id: string
@@ -72,25 +73,35 @@ export function GraphView() {
       ref={containerRef}
       className="bg-background h-[600px] w-full overflow-hidden rounded-lg border"
     >
-      <ForceGraph2D
-        width={width}
-        height={height}
-        graphData={data}
-        nodeLabel="name"
-        nodeColor={(node: GraphNode) =>
-          node.group === 'tag' ? '#a855f7' : isDark ? '#e2e8f0' : '#1e293b'
+      <Suspense
+        fallback={
+          <div className="text-muted-foreground flex h-full items-center justify-center">
+            Loading graph...
+          </div>
         }
-        backgroundColor={isDark ? '#020817' : '#ffffff'}
-        linkColor={() => (isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)')}
-        nodeRelSize={6}
-        linkDirectionalParticles={2}
-        linkDirectionalParticleSpeed={0.005}
-        onNodeClick={(node: GraphNode) => {
-          if (node.group === 'post') {
-            window.location.href = `/blog/${node.id}`
+      >
+        <ForceGraph2D
+          width={width}
+          height={height}
+          graphData={data}
+          nodeLabel="name"
+          nodeColor={(node: GraphNode) =>
+            node.group === 'tag' ? '#a855f7' : isDark ? '#e2e8f0' : '#1e293b'
           }
-        }}
-      />
+          backgroundColor={isDark ? '#020817' : '#ffffff'}
+          linkColor={() =>
+            isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'
+          }
+          nodeRelSize={6}
+          linkDirectionalParticles={2}
+          linkDirectionalParticleSpeed={0.005}
+          onNodeClick={(node: GraphNode) => {
+            if (node.group === 'post') {
+              window.location.href = `/blog/${node.id}`
+            }
+          }}
+        />
+      </Suspense>
     </div>
   )
 }
