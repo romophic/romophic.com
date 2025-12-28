@@ -79,7 +79,7 @@ export default defineConfig({
       manifest: {
         name: 'astro-erudite',
         short_name: 'astro-erudite',
-        theme_color: '#ffffff',
+        theme_color: '#f2f1f5',
         background_color: '#000000',
         display: 'standalone',
         icons: [

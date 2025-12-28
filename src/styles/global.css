@@ -67,10 +67,10 @@
   --background: #f2f1f5;
   --foreground: oklch(0.20 0.02 260);
 
-  --card: oklch(1 0 0);
+  --card: #f2f1f5;
   --card-foreground: oklch(0.145 0 0);
 
-  --popover: oklch(1 0 0);
+  --popover: #f2f1f5;
   --popover-foreground: oklch(0.145 0 0);
 
   --primary: oklch(0.205 0 0);
@@ -93,7 +93,7 @@
   --ring: oklch(0.708 0 0);
 
   --skeleton-base: oklch(0.95 0 0);
-  --skeleton-shine: oklch(1 0 0);
+  --skeleton-shine: #f2f1f5;
 }
 
 :root[data-theme='dark'] {
