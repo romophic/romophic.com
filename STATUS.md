@@ -62,6 +62,11 @@ This document tracks the current state of **romophic.com**, including implemente
 ### 10. Performance Optimization
 *   **Graph View:** Implemented `React.lazy` and `Suspense` for `react-force-graph-2d` to reduce initial bundle size.
 
+### 11. UI/UX Refinement
+*   **Background Normalization:** Removed hardcoded `#ffffff` backgrounds from `GraphView` and updated CSS variables (`--card`, `--popover`, `--skeleton-shine`) to match the site's light mode background (`#f2f1f5`).
+*   **Comments:** Disabled the reaction system in Giscus comments for a cleaner look.
+*   **Theme Meta:** Synchronized `theme-color` meta tags and PWA configuration with the actual background colors.
+
 ## 🚧 Known Issues & Technical Debt
 
 *   **Linting:** `cmdk-input-wrapper` attribute in `command.tsx` triggers `react/no-unknown-property`.
