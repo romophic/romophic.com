@@ -26,10 +26,10 @@ export const GET: APIRoute = async ({ site }) => {
     content += `Date: ${post.data.date.toISOString().split('T')[0]}\n`
     content += `URL: ${new URL(`/blog/${post.id}`, site)}\n`
     if (post.data.description) {
-        content += `Description: ${post.data.description}\n`
+      content += `Description: ${post.data.description}\n`
     }
     if (post.data.tags) {
-        content += `Tags: ${post.data.tags.join(', ')}\n`
+      content += `Tags: ${post.data.tags.join(', ')}\n`
     }
     content += `\n`
 

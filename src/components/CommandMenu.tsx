@@ -153,26 +153,27 @@ export function CommandMenu({ posts: initialPosts = [] }: Partial<Props>) {
                           className="text-muted-foreground line-clamp-2 text-xs [&>mark]:bg-yellow-200 [&>mark]:text-black dark:[&>mark]:bg-yellow-800 dark:[&>mark]:text-white"
                           dangerouslySetInnerHTML={{ __html: result.excerpt }}
                         />
-                        {result.sub_results && result.sub_results.length > 0 && (
-                          <div className="mt-1 flex flex-col gap-1 border-l-2 pl-2">
-                            {result.sub_results.slice(0, 3).map((sub) => (
-                              <div key={sub.url} className="text-xs">
-                                <span className="font-medium opacity-80">
-                                  {sub.title}
-                                </span>
-                                <span className="text-muted-foreground mx-1">
-                                  &mdash;
-                                </span>
-                                <span
-                                  className="text-muted-foreground inline [&>mark]:bg-yellow-200 [&>mark]:text-black dark:[&>mark]:bg-yellow-800 dark:[&>mark]:text-white"
-                                  dangerouslySetInnerHTML={{
-                                    __html: sub.excerpt,
-                                  }}
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                        {result.sub_results &&
+                          result.sub_results.length > 0 && (
+                            <div className="mt-1 flex flex-col gap-1 border-l-2 pl-2">
+                              {result.sub_results.slice(0, 3).map((sub) => (
+                                <div key={sub.url} className="text-xs">
+                                  <span className="font-medium opacity-80">
+                                    {sub.title}
+                                  </span>
+                                  <span className="text-muted-foreground mx-1">
+                                    &mdash;
+                                  </span>
+                                  <span
+                                    className="text-muted-foreground inline [&>mark]:bg-yellow-200 [&>mark]:text-black dark:[&>mark]:bg-yellow-800 dark:[&>mark]:text-white"
+                                    dangerouslySetInnerHTML={{
+                                      __html: sub.excerpt,
+                                    }}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          )}
                       </div>
                     </CommandItem>
                   ))}

@@ -21,7 +21,8 @@ async function main() {
       type: 'text',
       name: 'title',
       message: 'Post Title:',
-      validate: (value: string) => (value.length > 0 ? true : 'Title is required'),
+      validate: (value: string) =>
+        value.length > 0 ? true : 'Title is required',
     },
     {
       type: 'text',

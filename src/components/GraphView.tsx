@@ -85,6 +85,7 @@ export function GraphView() {
           height={height}
           graphData={data}
           nodeLabel="name"
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           nodeColor={(node: any) =>
             node.group === 'tag' ? '#a855f7' : isDark ? '#e2e8f0' : '#1e293b'
           }
@@ -95,6 +96,7 @@ export function GraphView() {
           nodeRelSize={6}
           linkDirectionalParticles={2}
           linkDirectionalParticleSpeed={0.005}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           onNodeClick={(node: any) => {
             if (node.group === 'post') {
               window.location.href = `/blog/${node.id}`

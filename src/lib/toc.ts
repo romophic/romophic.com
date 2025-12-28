@@ -1,9 +1,7 @@
 const HEADER_OFFSET = 150
 
 class TOCState {
-  links: NodeListOf<Element> = document.querySelectorAll(
-    '[data-heading-link]',
-  )
+  links: NodeListOf<Element> = document.querySelectorAll('[data-heading-link]')
   activeIds: string[] = []
   headings: HTMLElement[] = []
   regions: { id: string; start: number; end: number }[] = []
@@ -189,11 +187,7 @@ export class TOCController {
     const options = { passive: true }
     window.addEventListener('scroll', this.handleScroll, options)
     window.addEventListener('resize', this.handleResize, options)
-    state.scrollArea?.addEventListener(
-      'scroll',
-      this.handleTOCScroll,
-      options,
-    )
+    state.scrollArea?.addEventListener('scroll', this.handleTOCScroll, options)
   }
 
   static cleanup() {

@@ -13,7 +13,9 @@ export async function getPostsByAuthor(
   return posts.filter((post) => post.data.authors?.includes(authorId))
 }
 
-export async function parseAuthors(authorIds: string[] = []): Promise<Author[]> {
+export async function parseAuthors(
+  authorIds: string[] = [],
+): Promise<Author[]> {
   if (!authorIds.length) return []
 
   const allAuthors = await getAllAuthors()

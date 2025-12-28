@@ -96,9 +96,7 @@ export async function getAdjacentPosts(currentId: string): Promise<{
   return {
     newer: currentIndex > 0 ? allPosts[currentIndex - 1] : null,
     older:
-      currentIndex < allPosts.length - 1
-        ? allPosts[currentIndex + 1]
-        : null,
+      currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null,
     parent: null,
   }
 }

@@ -16,10 +16,10 @@ if (typeof props.src === 'object' && props.src !== null && 'src' in props.src) {
       width: 20,
       format: 'webp',
       quality: 50,
-    });
-    placeholderSrc = optimizedPlaceholder.src;
+    })
+    placeholderSrc = optimizedPlaceholder.src
   } catch (e) {
-    console.warn('Failed to generate placeholder for', props.src, e);
+    console.warn('Failed to generate placeholder for', props.src, e)
   }
 }
 

@@ -50,7 +50,12 @@ async function getFontData() {
   }
 }
 
-const CACHE_DIR = path.join(process.cwd(), 'node_modules', '.cache', 'og-images')
+const CACHE_DIR = path.join(
+  process.cwd(),
+  'node_modules',
+  '.cache',
+  'og-images',
+)
 
 async function getCachedImage(
   slug: string,
