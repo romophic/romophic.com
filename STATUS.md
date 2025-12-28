@@ -48,6 +48,13 @@ This document tracks the current state of **romophic.com**, including implemente
     *   **Description:** Improved search experience with better result highlighting and snippets, integrated deeply into the Command Menu.
     *   **Implementation:** `src/components/CommandMenu.tsx` uses Pagefind with `sub_results` enabled for granular matches.
 
+### 8. Internal Link Standardization
+*   **Description:** Standardized internal links within complex nested content (e.g., `romophic-library`).
+*   **Implementation:** 
+    *   Converted all library links to **lowercase absolute paths** (`/blog/romophic-library/lib/...`) to ensure robustness against varying base paths in dev/prod.
+    *   Applied URL encoding for special characters and spaces (e.g., `Euler's%20totient%20function`).
+
+
 ## 🚧 Known Issues & Technical Debt
 
 *   **Linting:** `cmdk-input-wrapper` attribute in `command.tsx` triggers `react/no-unknown-property`.

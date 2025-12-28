@@ -46,6 +46,8 @@ To maintain speed and quality, follow this loop for every feature or fix:
 *   **Styling:** Use `src/styles/global.css` variables for theming. Avoid hardcoded hex values.
 *   **State Management:** Local state (`useState`) preferred. Use URL state for shareable UI states.
 *   **Images:** Always use `src/components/MDXImage.astro` or `ZoomableImage` for content images to ensure optimization and LQIP.
+*   **Internal Links:** Use absolute paths (e.g., `/blog/my-post`) for internal links, especially in nested structures like `romophic-library`, to ensure consistency across different viewing contexts. Prefer lowercase for slugs in links.
+*   **URL Encoding:** Ensure spaces in filenames/URLs are correctly encoded (e.g., `%20`) to prevent broken Markdown links.
 
 ## 🔮 Future Goals (The "Ideal" State)
 
