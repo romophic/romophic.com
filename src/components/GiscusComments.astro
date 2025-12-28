@@ -26,11 +26,15 @@
   // Define the type for the giscus-widget element
   interface GiscusWidget extends HTMLElement {
     theme: string
+    reactionsEnabled: string
   }
 
-  function updateGiscusTheme() {
+  function updateGiscusConfig() {
     const giscus = document.querySelector('giscus-widget') as GiscusWidget
     if (!giscus) return
+
+    // Ensure reactions are disabled via JS property as well
+    giscus.reactionsEnabled = '0'
 
     // Check both class and data-attribute for robustness
     const isDark =
@@ -42,13 +46,13 @@
   }
 
   // Initial theme update when the component loads
-  updateGiscusTheme()
+  updateGiscusConfig()
 
   // Observe changes to the 'dark' class on the document element to switch themes dynamically
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       if (mutation.attributeName === 'class') {
-        updateGiscusTheme()
+        updateGiscusConfig()
       }
     })
   })
