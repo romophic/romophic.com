@@ -108,46 +108,40 @@ The project implements a custom "Subpost" pattern to support book-like content (
 - **Definition:** A post is considered a "Subpost" if its ID contains a forward slash (`/`).
   - `isSubpost(id)`: `id.includes('/')`
 - **Parent Resolution:**
-  - `getParentId(id)`: Returns `id.split('/')[0]`.
-  - **Constraint:** This logic assumes a flat 2-level hierarchy (Root -> Child). Deeply nested paths (Root -> Child -> Grandchild) will currently map to the _Root_ as the parent, not the immediate predecessor.
+  - `getParentId(id)`: Returns the immediate parent path (e.g., `a/b/c` -> `a/b`).
+  - **Support:** Fully supports multi-level nested hierarchies.
 - **Navigation (`getAdjacentPosts`):**
-  - **Subposts:** Navigation is restricted to siblings sharing the same Parent ID. Sorted by `date` (descending) or `order` (ascending).
+  - **Subposts:** Navigation is restricted to siblings sharing the same immediate Parent ID. Sorted by `order` (ascending) first, then `date` (descending).
   - **Top-level:** Navigation is across all top-level posts.
 - **Reading Time:**
-  - For Parent posts, `getCombinedReadingTime` aggregates the reading time of the parent _plus_ all its subposts.
+  - For Parent posts, `getCombinedReadingTime` aggregates the reading time of the parent _plus_ all its recursive subposts.
 
 ### 3.3. Knowledge Graph & Backlinks Engine
 
 The project features a bi-directional linking system and a visualization graph.
 
 - **Backlink Logic (`src/lib/content/links.ts`):**
-  - **Method:** Regex Scanning.
+  - **Method:** Inverted Index Map (`_backlinksMap`).
   - **Pattern:** `/\[.*?\]\((.*?)\)/g` (Standard Markdown links).
-  - **Scope:** Iterates through _every_ post's `body` content to find links pointing to the `targetId`.
+  - **Scope:** Scans all posts once to build a `Map<TargetID, SourcePosts[]>`.
   - **Resolution (`resolveLinkToId`):**
     - Handles absolute paths (`/blog/foo`).
-    - Handles relative paths (`../foo`, `./foo`) using `path.posix.join` relative to the source file.
-    - Normalizes `index` files (treats `foo/index` as `foo`).
-  - **Complexity:** $O(N^2)$ (where N is the number of posts). This happens at build time.
+    - Handles relative paths (`../foo`, `./foo`).
+    - Normalizes IDs (removes trailing `/index`).
+  - **Complexity:** $O(N)$ where N is the total number of posts. Cached during build.
 
 - **Graph Generation (`src/pages/graph.json.ts`):**
   - Generates a JSON object `{ nodes: [], links: [] }`.
-  - **Nodes:**
-    - Type `post`: Value = 2.
-    - Type `tag`: Value = 1.
-  - **Links:**
-    - `Post -> Tag`: Value = 1.
-    - `Post -> Post`: Value = 2 (Derived from the same Regex logic as Backlinks).
-  - **Client-Side Rendering:** `GraphView.tsx` uses `react-force-graph-2d` to render this JSON. It uses a `MutationObserver` to detect theme changes (`data-theme`) and update node colors dynamically.
+  - **Nodes:** Type `post` or `tag`.
+  - **Links:** `Post -> Tag` and `Post -> Post`.
+  - **Client-Side Optimization:** `GraphView.tsx` uses `cooldownTicks` to limit simulation time and dynamically disables particle effects if the graph is too complex (> 100 links).
 
 ### 3.4. Search Architecture
 
 - **Engine:** **Pagefind** (Static Search).
 - **Indexing:** Runs post-build (`pagefind --site dist`).
 - **Integration:** `CommandMenu.tsx`.
-  - Lazy-loads `/pagefind/pagefind.js` when the user types.
-  - `options({ showSubResults: true })`: Enables searching specifically for headings within posts, not just whole pages.
-  - **UI:** Renders search results with highlighted excerpts using `dangerouslySetInnerHTML`.
+  - **UI:** Thematic highlighting using `bg-primary/20` and semantic colors. Supports keyboard navigation (Cmd+K).
 
 ### 3.5. Image Optimization Pipeline (LQIP)
 
@@ -163,38 +157,25 @@ The project features a bi-directional linking system and a visualization graph.
 ### 3.6. Table of Contents (Client-Side Logic)
 
 - **Source:** `src/lib/toc.ts`
-- **Pattern:** Active Scroll Spy.
+- **Pattern:** Active Scroll Spy with `requestAnimationFrame` optimization.
 - **Initialization:** `TOCController.init()` called in `Layout` or `TOCSidebar`.
-- **Calculations:**
-  - `HeadingRegions.build()`: Maps every H2/H3/etc. to a start/end Y-coordinate on the page.
-- **Event Loop:**
-  - On `scroll`: Calculates which regions are currently in the viewport.
-  - Updates the DOM of the Sidebar links (adds `text-foreground` class) to reflect the active section.
-  - Handles "Scroll Masking" (fading effect) on the sidebar container itself if it overflows.
+- **Performance:** Throttled scroll handling to prevent layout thrashing.
 
 ## 4. Development Standards & Conventions
 
 ### 4.1. The "Vibe Loop"
 
 1.  **Plan:** Check `GEMINI.md` and codebase.
-
 2.  **Code:** `pnpm dev` (Port 1234).
-
 3.  **Verify:** `pnpm lint`, `pnpm prettier`, `pnpm check:links`.
-
 4.  **Test:** `pnpm test` (Vitest) for logic.
+5.  **Finalize:** **Run `pnpm build`**.
 
-5.  **Finalize:** **Run `pnpm build`**. You MUST ensure the build completes without errors (including `astro check` diagnostics) before considering a task finished.
+### 4.2. File Naming & Environment
 
-
-
-### 4.2. File Naming & Linking
-
-- **Filenames:** Kebab-case (e.g., `directed-graph.mdx`, `graph-view.tsx`).
-- **Link Integrity:**
-  - Internal links **MUST** be resolvable.
-  - Prefer absolute paths (`/blog/my-post`) for robustness, but relative paths are supported by the resolver.
-  - **Avoid:** Renaming files without running `pnpm check:links`.
+- **Filenames:** Kebab-case for EVERYTHING (e.g., `directed-graph.mdx`, `scc-scs.png`, `graph-view.tsx`).
+- **Line Endings:** Force **LF** (standardized via `.gitattributes` and `.editorconfig`).
+- **Link Integrity:** Internal links must be resolvable. Run `pnpm check:links` before committing.
 
 ### 4.3. Styling (Tailwind v4)
 
