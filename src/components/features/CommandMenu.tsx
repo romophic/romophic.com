@@ -7,9 +7,9 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from './ui/command'
+} from '../ui/command'
 
-import { Dialog, DialogContent, DialogTitle } from './ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '../ui/dialog'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 
 interface Props {
