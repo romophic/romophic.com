@@ -1,8 +1,16 @@
 import { getCollection, type CollectionEntry } from 'astro:content'
 import { readingTime, calculateWordCountFromHtml } from '@/lib/utils'
 
+let _postsCache: CollectionEntry<'blog'>[] | null = null
+
+async function getCachedPosts(): Promise<CollectionEntry<'blog'>[]> {
+  if (_postsCache) return _postsCache
+  _postsCache = await getCollection('blog')
+  return _postsCache
+}
+
 export async function getAllPosts(): Promise<CollectionEntry<'blog'>[]> {
-  const posts = await getCollection('blog')
+  const posts = await getCachedPosts()
   return posts
     .filter((post) => !post.data.draft && !isSubpost(post.id))
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
@@ -11,7 +19,7 @@ export async function getAllPosts(): Promise<CollectionEntry<'blog'>[]> {
 export async function getAllPostsAndSubposts(): Promise<
   CollectionEntry<'blog'>[]
 > {
-  const posts = await getCollection('blog')
+  const posts = await getCachedPosts()
   return posts
     .filter((post) => !post.data.draft)
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
@@ -44,7 +52,7 @@ export async function getPostById(
 export async function getSubpostsForParent(
   parentId: string,
 ): Promise<CollectionEntry<'blog'>[]> {
-  const posts = await getCollection('blog')
+  const posts = await getCachedPosts()
   return posts
     .filter(
       (post) =>
@@ -53,12 +61,12 @@ export async function getSubpostsForParent(
         getParentId(post.id) === parentId,
     )
     .sort((a, b) => {
-      const dateDiff = a.data.date.valueOf() - b.data.date.valueOf()
-      if (dateDiff !== 0) return dateDiff
-
       const orderA = a.data.order ?? 0
       const orderB = b.data.order ?? 0
-      return orderA - orderB
+      const orderDiff = orderA - orderB
+      if (orderDiff !== 0) return orderDiff
+
+      return a.data.date.valueOf() - b.data.date.valueOf()
     })
 }
 

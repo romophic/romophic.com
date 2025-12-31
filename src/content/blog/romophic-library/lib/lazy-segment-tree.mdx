@@ -1,10 +1,11 @@
 ---
 title: 'LazySegmentTree'
 date: 2024-07-29T22:01:37+09:00
-description: "romophic-library"
-categories: ["c++", "competitive programming"]
+description: 'romophic-library'
+categories: ['c++', 'competitive programming']
 authors: ['romophic']
 ---
+
 ## 用途
 
 [SegmentTree](/blog/romophic-library/lib/segment-tree)の一点更新を区間更新として$O(\log n)$で行う.
@@ -42,8 +43,8 @@ lseg.query(a,b)
 
 例として区間和を求める場合、`update(a,b,x)`の動作を
 
-- 区間更新: $ \text{seg}_i \rightarrow x$
-- 区間加算: $ \text{seg}_i \rightarrow \text{seg}_i + x $
+- 区間更新: $ \text{seg}\_i \rightarrow x$
+- 区間加算: $ \text{seg}\_i \rightarrow \text{seg}\_i + x $
 
 にするかで実装が異なる
 
@@ -174,5 +175,7 @@ LazySegmentTree<int> lseg(n, [](int a, int b){ return a+b; }, 0);
 ```
 
 の様にlambdaをおけばよい.
+
+```
 
 ```
