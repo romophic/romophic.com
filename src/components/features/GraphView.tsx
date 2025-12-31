@@ -116,7 +116,21 @@ export function GraphView() {
       ctx.beginPath()
       ctx.arc(node.x!, node.y!, radius, 0, 2 * Math.PI, false)
       ctx.fillStyle = hoverNode && !shouldHighlight ? dimmedColor : nodeColor
+      
+      // Glow effect
+      if (shouldHighlight) {
+        ctx.shadowBlur = 15
+        ctx.shadowColor = nodeColor
+      } else {
+        ctx.shadowBlur = 0
+        ctx.shadowColor = 'transparent'
+      }
+      
       ctx.fill()
+      
+      // Reset shadow for text and other elements
+      ctx.shadowBlur = 0
+      ctx.shadowColor = 'transparent'
 
       // Highlight ring
       if (shouldHighlight) {
@@ -134,7 +148,7 @@ export function GraphView() {
       if (shouldHighlight || globalScale > 1.5) {
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
-        ctx.fillStyle = isDark ? '#fff' : '#000'
+        
         // Draw text background for readability
         const textWidth = ctx.measureText(label).width
         const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2)
@@ -154,7 +168,7 @@ export function GraphView() {
   )
 
   const paintNodePointerArea = useCallback((node: GraphNode, color: string, ctx: CanvasRenderingContext2D) => {
-    const radius = node.val * 3 + 6 // +6px padding for easier clicking
+    const radius = node.val * 3 + 12 // Significantly increased padding (+12px) for easier clicking
     ctx.beginPath()
     ctx.arc(node.x!, node.y!, radius, 0, 2 * Math.PI, false)
     ctx.fillStyle = color
@@ -178,7 +192,7 @@ export function GraphView() {
           height={height}
           graphData={data}
           cooldownTicks={100}
-          backgroundColor={isDark ? '#262626' : '#f2f1f5'}
+          backgroundColor={isDark ? '#1a1a1a' : '#f8fafc'} // Slightly darker/lighter for better contrast
           
           // Node styling
           nodeCanvasObject={paintNode}
@@ -192,6 +206,8 @@ export function GraphView() {
             )
             return isConnected ? 2 : 1
           }}
+          linkDirectionalArrowLength={3.5}
+          linkDirectionalArrowRelPos={1}
           linkDirectionalParticles={data.links.length > 100 ? 0 : 2}
           linkDirectionalParticleSpeed={0.005}
           
