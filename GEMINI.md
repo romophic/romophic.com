@@ -47,12 +47,12 @@ root/
 ├── src/
 │   ├── components/
 │   │   ├── ui/              # Atomic Design Components (Shadcn-like)
-│   │   │   ├── button.tsx, dialog.tsx, command.tsx ...
-│   │   ├── CommandMenu.tsx  # Global Cmd+K Search & Nav
-│   │   ├── GraphView.tsx    # Interactive Force Graph
-│   │   ├── GlobalLinkPreviews.tsx # Hover cards for links
-│   │   ├── MDXImage.astro   # Astro wrapper for ZoomableImage
-│   │   └── ...              # Domain components (Header, Footer, PostHead)
+│   │   ├── layout/          # Structural components (Header, Footer, Head)
+│   │   ├── blog/            # Blog-specific components (PostHeader, TOC)
+│   │   ├── features/        # Complex interactive features (Graph, Search)
+│   │   │   ├── CommandMenu.tsx, GraphView.tsx, ...
+│   │   ├── common/          # Reusable UI blocks (Link, Image, Card)
+│   │   └── ...
 │   ├── content/             # Content Collections (Single Source of Truth)
 │   │   ├── blog/            # MDX Posts (supports nested folders like 'romophic-library')
 │   │   ├── authors/         # Author metadata
@@ -160,6 +160,12 @@ The project features a bi-directional linking system and a visualization graph.
 - **Pattern:** Active Scroll Spy with `requestAnimationFrame` optimization.
 - **Initialization:** `TOCController.init()` called in `Layout` or `TOCSidebar`.
 - **Performance:** Throttled scroll handling to prevent layout thrashing.
+
+### 3.7. Icon System
+
+- **Master Source:** `public/icon.webp`.
+- **Generation:** Run `npx tsx scripts/generate-icons.ts` to regenerate all derived icons (favicons, PWA icons) from the master source.
+- **Constraints:** The project does NOT use SVG favicons to ensure consistency with the generated raster assets.
 
 ## 4. Development Standards & Conventions
 
