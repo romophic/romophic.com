@@ -188,7 +188,7 @@ The project features a bi-directional linking system and a visualization graph.
 
 ### 4.2. File Naming & Environment
 
-- **Filenames:** Kebab-case for EVERYTHING (e.g., `directed-graph.mdx`, `scc-scs.png`, `graph-view.tsx`).
+- **Filenames:** Kebab-case for EVERYTHING without exception (e.g., `binary-search.mdx`, `scc-scs.png`, `graph-view.tsx`). All legacy Japanese filenames have been migrated to English kebab-case.
 - **Line Endings:** Force **LF** (standardized via `.gitattributes` and `.editorconfig`).
 - **Link Integrity:** Internal links must be resolvable. Run `pnpm check:links` before committing.
 
@@ -218,7 +218,7 @@ The project features a bi-directional linking system and a visualization graph.
   - `mdx`: Standard support.
   - `react`: For islands.
   - `sitemap`: SEO.
-  - `AstroPWA`: Offline capabilities.
+  - `AstroPWA`: Offline capabilities (`romophic.com` branding).
   - `partytown`: Third-party script offloading.
 
 ### `package.json` Scripts
@@ -229,4 +229,4 @@ The project features a bi-directional linking system and a visualization graph.
 
 ---
 
-_Context Generated: 2025-12-31_
+_Context Updated: 2025-12-31 (End of Year Cleanup Completed)_
