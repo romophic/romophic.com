@@ -85,9 +85,12 @@ export function GraphView() {
           height={height}
           graphData={data}
           nodeLabel="name"
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          nodeColor={(node: any) =>
-            node.group === 'tag' ? '#a855f7' : isDark ? '#e2e8f0' : '#1e293b'
+          nodeColor={(node) =>
+            (node as GraphNode).group === 'tag'
+              ? '#a855f7'
+              : isDark
+                ? '#e2e8f0'
+                : '#1e293b'
           }
           backgroundColor={isDark ? '#262626' : '#f2f1f5'}
           linkColor={() =>
@@ -96,10 +99,10 @@ export function GraphView() {
           nodeRelSize={6}
           linkDirectionalParticles={2}
           linkDirectionalParticleSpeed={0.005}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onNodeClick={(node: any) => {
-            if (node.group === 'post') {
-              window.location.href = `/blog/${node.id}`
+          onNodeClick={(node) => {
+            const n = node as GraphNode
+            if (n.group === 'post') {
+              window.location.href = `/blog/${n.id}`
             }
           }}
         />
