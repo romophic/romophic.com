@@ -3,7 +3,7 @@ import type { IconMap, SocialLink, Site } from '@/types'
 export const SITE: Site = {
   title: 'romophic',
   description:
-    'astro-erudite is a opinionated, unstyled blogging template—built with Astro, Tailwind, and shadcn/ui.',
+    'romophic.com is a technical digital garden built with Astro, React, and Tailwind CSS.',
   href: 'https://romophic.com',
   author: 'romophic',
   locale: 'en-US',
@@ -19,6 +19,10 @@ export const NAV_LINKS: SocialLink[] = [
   {
     href: '/authors',
     label: 'authors',
+  },
+  {
+    href: '/graph',
+    label: 'graph',
   },
   {
     href: '/about',
