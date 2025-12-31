@@ -22,6 +22,12 @@ This document provides a comprehensive and deep technical overview of **romophic
 
 ## 2. Technical Architecture & Tech Stack
 
+### Navigation Structure
+- **Blog:** Chronological list of posts.
+- **Authors:** Contributor profiles.
+- **Graph:** Knowledge graph visualization of post connections.
+- **About:** Personal introduction and site philosophy.
+
 ### Framework & Core Libraries
 
 - **Framework:** [Astro v5](https://astro.build/) (SSG, Islands Architecture)
@@ -134,7 +140,10 @@ The project features a bi-directional linking system and a visualization graph.
   - Generates a JSON object `{ nodes: [], links: [] }`.
   - **Nodes:** Type `post` or `tag`.
   - **Links:** `Post -> Tag` and `Post -> Post`.
-  - **Client-Side Optimization:** `GraphView.tsx` uses `cooldownTicks` to limit simulation time and dynamically disables particle effects if the graph is too complex (> 100 links).
+  - **Client-Side Optimization:**
+    - `GraphView.tsx` uses `cooldownTicks` to limit simulation time.
+    - **Visuals:** Directional arrows for links, glow effects (`shadowBlur`) for active nodes, and dynamic particle reduction.
+    - **Interaction:** Custom `nodePointerAreaPaint` ensures labels and nodes are easily clickable (`hit-test`).
 
 ### 3.4. Search Architecture
 
