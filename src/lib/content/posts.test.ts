@@ -15,11 +15,15 @@ describe('posts utils', () => {
   })
 
   describe('getParentId', () => {
-    it('extracts parent id from subpost id', () => {
+    it('extracts immediate parent id from subpost id', () => {
       expect(getParentId('parent/child')).toBe('parent')
       expect(getParentId('romophic-library/lib/directed-graph')).toBe(
-        'romophic-library',
+        'romophic-library/lib',
       )
+    })
+
+    it('handles deep nesting', () => {
+      expect(getParentId('a/b/c/d')).toBe('a/b/c')
     })
   })
 })

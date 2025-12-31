@@ -39,7 +39,9 @@ export function isSubpost(postId: string): boolean {
 }
 
 export function getParentId(subpostId: string): string {
-  return subpostId.split('/')[0]
+  const lastSlashIndex = subpostId.lastIndexOf('/')
+  if (lastSlashIndex === -1) return ''
+  return subpostId.substring(0, lastSlashIndex)
 }
 
 export async function getPostById(

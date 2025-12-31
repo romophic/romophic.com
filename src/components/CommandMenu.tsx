@@ -150,7 +150,7 @@ export function CommandMenu({ posts: initialPosts = [] }: Partial<Props>) {
                       <div className="flex flex-col gap-1">
                         <span className="font-medium">{result.meta.title}</span>
                         <span
-                          className="text-muted-foreground line-clamp-2 text-xs [&>mark]:bg-yellow-200 [&>mark]:text-black dark:[&>mark]:bg-yellow-800 dark:[&>mark]:text-white"
+                          className="text-muted-foreground line-clamp-2 text-xs [&>mark]:bg-primary/20 [&>mark]:text-foreground [&>mark]:font-semibold"
                           dangerouslySetInnerHTML={{ __html: result.excerpt }}
                         />
                         {result.sub_results &&
@@ -165,7 +165,7 @@ export function CommandMenu({ posts: initialPosts = [] }: Partial<Props>) {
                                     &mdash;
                                   </span>
                                   <span
-                                    className="text-muted-foreground inline [&>mark]:bg-yellow-200 [&>mark]:text-black dark:[&>mark]:bg-yellow-800 dark:[&>mark]:text-white"
+                                    className="text-muted-foreground inline [&>mark]:bg-primary/20 [&>mark]:text-foreground [&>mark]:font-semibold"
                                     dangerouslySetInnerHTML={{
                                       __html: sub.excerpt,
                                     }}

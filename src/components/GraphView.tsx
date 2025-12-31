@@ -84,6 +84,7 @@ export function GraphView() {
           width={width}
           height={height}
           graphData={data}
+          cooldownTicks={100}
           nodeLabel="name"
           nodeColor={(node) =>
             (node as GraphNode).group === 'tag'
@@ -97,7 +98,7 @@ export function GraphView() {
             isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'
           }
           nodeRelSize={6}
-          linkDirectionalParticles={2}
+          linkDirectionalParticles={data.links.length > 100 ? 0 : 2}
           linkDirectionalParticleSpeed={0.005}
           onNodeClick={(node) => {
             const n = node as GraphNode

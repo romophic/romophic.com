@@ -7,6 +7,7 @@ class TOCState {
   regions: { id: string; start: number; end: number }[] = []
   scrollArea: HTMLElement | null = null
   tocScrollArea: HTMLElement | null = null
+  ticking: boolean = false
 
   reset() {
     this.links = document.querySelectorAll(
@@ -150,12 +151,18 @@ class TOCLinks {
 
 export class TOCController {
   static handleScroll = () => {
-    const newActiveIds = HeadingRegions.getVisibleIds()
+    if (state.ticking) return
+    state.ticking = true
 
-    if (JSON.stringify(newActiveIds) !== JSON.stringify(state.activeIds)) {
-      state.activeIds = newActiveIds
-      TOCLinks.update(state.activeIds)
-    }
+    requestAnimationFrame(() => {
+      const newActiveIds = HeadingRegions.getVisibleIds()
+
+      if (JSON.stringify(newActiveIds) !== JSON.stringify(state.activeIds)) {
+        state.activeIds = newActiveIds
+        TOCLinks.update(state.activeIds)
+      }
+      state.ticking = false
+    })
   }
 
   static handleTOCScroll = () => TOCScrollMask.update()
