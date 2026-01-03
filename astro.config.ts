@@ -76,8 +76,8 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'pwa-sw.ts',
       manifest: {
-        name: 'astro-erudite',
-        short_name: 'astro-erudite',
+        name: 'romophic.com',
+        short_name: 'romophic.com',
         theme_color: '#f2f1f5',
         background_color: '#000000',
         display: 'standalone',
