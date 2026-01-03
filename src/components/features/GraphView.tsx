@@ -9,8 +9,6 @@ interface GraphNode extends d3.SimulationNodeDatum {
   x?: number
   y?: number
   degree?: number
-  color?: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   category?: number
 }
 
@@ -34,7 +32,6 @@ export function GraphView() {
   const [isVisible, setIsVisible] = useState(false)
 
   const hoverNodeRef = useRef<GraphNode | null>(null)
-
   const simulationRef = useRef<d3.Simulation<GraphNode, GraphLink> | null>(null)
   const transformRef = useRef<d3.ZoomTransform>(d3.zoomIdentity)
 
@@ -56,28 +53,8 @@ export function GraphView() {
         const nodeMap = new Map(nodes.map((n) => [n.id, n]))
         const links: GraphLink[] = []
 
-        const colorPalette = isDark
-          ? [
-              '#a855f7',
-              '#3b82f6',
-              '#10b981',
-              '#f59e0b',
-              '#ef4444',
-              '#6366f1',
-              '#ec4899',
-            ]
-          : [
-              '#7e22ce',
-              '#1d4ed8',
-              '#047857',
-              '#b45309',
-              '#b91c1c',
-              '#4338ca',
-              '#be185d',
-            ]
-
-        const tagColors = new Map<string, string>()
-        let colorIdx = 0
+        let categoryIdx = 0
+        const tagToCategory = new Map<string, number>()
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fetchedData.links.forEach((l: any) => {
@@ -95,10 +72,9 @@ export function GraphView() {
 
         nodes.forEach((n) => {
           if (n.group === 'tag') {
-            const color = colorPalette[colorIdx % colorPalette.length]
-            tagColors.set(n.id, color)
-            n.color = color
-            colorIdx++
+            tagToCategory.set(n.id, categoryIdx % 7)
+            n.category = categoryIdx % 7
+            categoryIdx++
           }
         })
 
@@ -113,7 +89,7 @@ export function GraphView() {
                 connectedTag.source === n.id
                   ? connectedTag.target
                   : connectedTag.source
-              n.color = tagColors.get(tagId as string)
+              n.category = tagToCategory.get(tagId as string)
             }
           }
         })
@@ -121,7 +97,7 @@ export function GraphView() {
         const initialX = 400
         const initialY = 300
         const initialRadius = 10
-        nodes.forEach((n) => {
+        nodes.forEach(n => {
           n.x = initialX + (Math.random() - 0.5) * initialRadius
           n.y = initialY + (Math.random() - 0.5) * initialRadius
         })
@@ -129,7 +105,7 @@ export function GraphView() {
         setData({ nodes: nodes, links })
         setTimeout(() => setIsVisible(true), 100)
       })
-  }, [isDark])
+  }, [])
 
   // 2. Theme Detection
   useEffect(() => {
@@ -161,8 +137,6 @@ export function GraphView() {
     const dpr = window.devicePixelRatio || 1
     canvas.width = width * dpr
     canvas.height = height * dpr
-    canvas.style.width = `${width}px`
-    canvas.style.height = `${height}px`
     ctx.scale(dpr, dpr)
 
     const simulation = d3
@@ -181,6 +155,32 @@ export function GraphView() {
       .force('collide', d3.forceCollide().radius(15))
 
     simulationRef.current = simulation
+
+    const darkPalette = [
+      '#a855f7',
+      '#3b82f6',
+      '#10b981',
+      '#f59e0b',
+      '#ef4444',
+      '#6366f1',
+      '#ec4899',
+    ]
+    const lightPalette = [
+      '#7e22ce',
+      '#1d4ed8',
+      '#059669',
+      '#d97706',
+      '#dc2626',
+      '#4f46e5',
+      '#db2777',
+    ]
+
+    const getNodeColor = (node: GraphNode, dark: boolean) => {
+      if (node.category !== undefined) {
+        return dark ? darkPalette[node.category] : lightPalette[node.category]
+      }
+      return dark ? '#e2e8f0' : 'rgba(0, 0, 0, 0.85)'
+    }
 
     const drawArrow = (
       ctx: CanvasRenderingContext2D,
@@ -211,7 +211,6 @@ export function GraphView() {
     let animationFrameId: number
 
     const render = () => {
-      // Clear Canvas fully (remove trail effect)
       ctx.clearRect(0, 0, width, height)
 
       const transform = transformRef.current
@@ -221,16 +220,15 @@ export function GraphView() {
 
       const currentHover = hoverNodeRef.current
 
-      // Grid Background
+      // Grid
       if (isDark) {
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)'
         ctx.lineWidth = 1 / transform.k
         const gridSize = 50
-        const xStart = -width * 2
-        const xEnd = width * 2
-        const yStart = -height * 2
-        const yEnd = height * 2
-
+        const xStart = -width * 2,
+          xEnd = width * 2,
+          yStart = -height * 2,
+          yEnd = height * 2
         ctx.beginPath()
         for (let x = xStart; x < xEnd; x += gridSize) {
           ctx.moveTo(x, yStart)
@@ -245,8 +243,8 @@ export function GraphView() {
 
       // Links
       data.links.forEach((link) => {
-        const source = link.source as GraphNode
-        const target = link.target as GraphNode
+        const source = link.source as GraphNode,
+          target = link.target as GraphNode
         const isRelated =
           currentHover &&
           (source.id === currentHover.id || target.id === currentHover.id)
@@ -269,10 +267,9 @@ export function GraphView() {
           drawArrow(ctx, source.x!, source.y!, target.x!, target.y!, 8)
         }
 
-        // Particle Flow
+        // Particles
         if (!link.particles) link.particles = []
         if (Math.random() < 0.005) link.particles.push(0)
-
         ctx.fillStyle = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'
         for (let i = link.particles.length - 1; i >= 0; i--) {
           link.particles[i] += 0.008
@@ -303,10 +300,7 @@ export function GraphView() {
 
         const baseRadius = node.group === 'tag' ? 4 : 6
         const radius = isHover ? baseRadius * 1.5 : baseRadius
-
-        // Final color logic: solid white in dark mode, solid black in light mode (plus cluster colors)
-        const nodeColor =
-          node.color || (isDark ? '#e2e8f0' : 'rgba(0, 0, 0, 0.85)')
+        const nodeColor = getNodeColor(node, isDark)
 
         // Halo
         if (isHover || isNeighbor) {
@@ -325,12 +319,11 @@ export function GraphView() {
         ctx.beginPath()
         ctx.arc(node.x!, node.y!, radius, 0, 2 * Math.PI)
 
-        // Glow effect for both modes
+        // Glow effect
         if (isDark) {
           ctx.shadowColor = nodeColor
           ctx.shadowBlur = isHover ? 20 : 6
         } else {
-          // Stronger shadow/glow for light mode
           ctx.shadowColor = 'rgba(0, 0, 0, 0.3)'
           ctx.shadowBlur = isHover ? 15 : 8
         }
@@ -354,9 +347,6 @@ export function GraphView() {
           ctx.font = `${isHover || isImportant ? '600' : 'normal'} 12px Sans-Serif`
           const textWidth = ctx.measureText(label).width
 
-          // Glassmorphism Label Background
-          // Dark mode: semi-transparent black
-          // Light mode: semi-transparent white (frosted glass)
           ctx.fillStyle = isDark
             ? 'rgba(0, 0, 0, 0.6)'
             : 'rgba(255, 255, 255, 0.65)'
@@ -379,7 +369,6 @@ export function GraphView() {
           ctx.quadraticCurveTo(px, py, px + pr, py)
           ctx.fill()
 
-          // Border for extra definition in light mode
           if (!isDark) {
             ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)'
             ctx.lineWidth = 0.5
@@ -454,8 +443,6 @@ export function GraphView() {
 
     if (hovered?.id !== hoverNodeRef.current?.id) {
       hoverNodeRef.current = hovered || null
-      // Use state only if you need to trigger external UI updates (none now)
-      // setHoverNode(hovered || null)
     }
 
     document.body.style.cursor = hovered ? 'pointer' : 'default'
