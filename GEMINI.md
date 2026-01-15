@@ -40,46 +40,68 @@ This document provides a comprehensive and deep technical overview of **romophic
   - **Rehype Plugins:** `rehype-katex` (Math rendering), `rehype-pretty-code` (Code highlighting), `rehype-external-links`, `rehype-heading-ids`.
 - **Search:** [Pagefind](https://pagefind.app/) (Static search index)
 - **Visualization:**
-  - `d3-force`, `d3-drag`, `d3-zoom`, `d3-selection` (Custom Canvas Implementation).
-  - `react-medium-image-zoom` (Image interaction).
+  - **Core Architecture:** `d3-force` + `d3-zoom` + `d3-drag` driving a raw HTML5 Canvas.
+  - **Custom Interaction:** Manual hit-testing and coordinate transformation for 100% reliability.
 - **PWA:** `@vite-pwa/astro` (Offline support, installable).
 
 ### Directory Structure & Key Files
 
 ```text
 root/
-├── astro.config.ts          # Core Astro config (Integrations, Markdown, PWA)
+├── astro.config.ts          # Core Astro config (Integrations: MDX, React, PWA, Tailwind)
 ├── package.json             # Scripts & Dependencies
 ├── src/
 │   ├── components/
-│   │   ├── ui/              # Atomic Design Components (Shadcn-like)
-│   │   ├── layout/          # Structural components (Header, Footer, Head)
-│   │   ├── blog/            # Blog-specific components (PostHeader, TOC)
-│   │   ├── features/        # Complex interactive features (Graph, Search)
-│   │   │   ├── CommandMenu.tsx, GraphView.tsx, ...
-│   │   ├── common/          # Reusable UI blocks (Link, Image, Card)
-│   │   └── ...
-│   ├── content/             # Content Collections (Single Source of Truth)
-│   │   ├── blog/            # MDX Posts (supports nested folders like 'romophic-library')
-│   │   ├── authors/         # Author metadata
-│   │   └── projects/        # Project portfolio
+│   │   ├── blog/            # Blog-specific UI components
+│   │   │   ├── Backlinks.astro      # Lists posts linking to the current post
+│   │   │   ├── BlogCard.astro       # Preview card for post lists
+│   │   │   ├── PostHeader.astro     # Title, date, tags, reading time
+│   │   │   ├── PostNavigation.astro # Next/Prev post links
+│   │   │   ├── SubpostsSidebar.astro# Sidebar for nested post series
+│   │   │   └── TOCSidebar.astro     # Table of Contents sidebar
+│   │   ├── common/          # Reusable, domain-agnostic components
+│   │   │   ├── AppScript.astro      # Global client-side logic (Theme, Giscus) via astro:page-load
+│   │   │   ├── AuthorCard.astro     # Author profile display
+│   │   │   ├── Callout.astro        # Alert/Info boxes for MDX
+│   │   │   ├── Hero.astro           # Homepage introduction section
+│   │   │   ├── Link.astro           # Wrapper for <a> with prefetching
+│   │   │   └── MDXImage.astro       # Server-side image optimization wrapper
+│   │   ├── features/        # Complex, interactive feature components
+│   │   │   ├── ActivityGraph.astro  # GitHub-style contribution heatmap
+│   │   │   ├── CommandMenu.tsx      # Cmd+K search modal (React)
+│   │   │   ├── GiscusComments.astro # Comments widget container
+│   │   │   ├── GlobalLinkPreviews.tsx # Internal link hover previews (React)
+│   │   │   └── GraphView.tsx        # D3+Canvas Knowledge Graph (React)
+│   │   ├── layout/          # Site structure components
+│   │   │   ├── Footer.astro         # Site footer
+│   │   │   ├── Head.astro           # <head> meta tags and resource links
+│   │   │   ├── Header.astro         # Top navigation bar
+│   │   │   └── ThemeToggle.astro    # Dark/Light mode switch button
+│   │   └── ui/              # Atomic UI components (Shadcn-like)
+│   │       ├── button.tsx, dialog.tsx, zoomable-image.tsx ...
+│   ├── content/             # Content Collections (Data Source)
+│   │   ├── authors/         # Author metadata (.md)
+│   │   ├── blog/            # Blog posts (.mdx), supports nested folders
+│   │   └── projects/        # Portfolio projects (.md)
 │   ├── layouts/
-│   │   └── Layout.astro     # Root layout (Html, Head, Global Providers)
+│   │   └── Layout.astro     # Master layout (<html>, <body>, providers)
 │   ├── lib/
-│   │   ├── content/         # Atomic data fetchers
-│   │   │   ├── posts.ts     # Post parsing, adjacency, subposts
-│   │   │   ├── links.ts     # Backlink regex parsing & resolution
-│   │   │   └── toc.ts       # Server-side TOC generation
-│   │   ├── data-utils.ts    # Unified Data Aggregator (getPostPageData)
-│   │   ├── toc.ts           # Client-side TOC Scroll Spy Controller
-│   │   └── utils.ts         # Helpers (cn, date, word count)
+│   │   ├── content/         # Data fetching logic
+│   │   │   ├── posts.ts     # Post loading, sorting, adjacency (Memoized)
+│   │   │   ├── links.ts     # Backlink extraction & resolution (O(N))
+│   │   │   └── toc.ts       # Server-side TOC data generation
+│   │   ├── data-utils.ts    # Main entry point for page data aggregation
+│   │   └── toc.ts           # Client-side Scroll Spy controller
 │   ├── pages/
-│   │   ├── blog/[...id].astro # Catch-all route for ALL blog posts
-│   │   ├── graph.json.ts    # JSON endpoint for GraphView data
-│   │   └── ...              # RSS, Robots, Sitemap
+│   │   ├── blog/[...id].astro # Dynamic route for individual blog posts
+│   │   ├── graph.astro        # Knowledge Graph page
+│   │   ├── graph.json.ts      # API endpoint serving graph data
+│   │   ├── index.astro        # Homepage
+│   │   ├── rss.xml.ts         # RSS Feed generator
+│   │   └── og/[...slug].png.ts # Dynamic Open Graph image generator
 │   └── styles/
-│       ├── global.css       # CSS Variables & Tailwind Theme
-│       └── typography.css   # Prose styling
+│       ├── global.css       # Global styles & Tailwind variables
+│       └── typography.css   # Prose styling configuration
 ```
 
 ## 3. Deep Dive: Architecture & Implementation Details
@@ -90,162 +112,94 @@ The entire site revolves around the `blog` content collection. The rendering pip
 
 1.  **Loading (`src/content.config.ts`):**
     - Uses `glob` loader to ingest files from `src/content/blog`.
-    - **Schema:** `title`, `description`, `date`, `order` (optional), `image` (optional), `tags`, `authors`, `draft`.
+    - **Schema:** `title`, `description`, `date`, `order`, `image`, `tags`, `authors`, `draft`.
 2.  **Route Generation (`src/pages/blog/[...id].astro`):**
-    - `getStaticPaths` calls `getAllPostsAndSubposts` (from `src/lib/data-utils.ts`).
-    - It generates routes for _every_ MDX file, preserving the file path as the ID.
+    - Generates routes for _every_ MDX file, preserving the file path as the ID.
 3.  **Data Aggregation (`getPostPageData`):**
-    - When a page is built, `getPostPageData` runs. It orchestrates multiple parallel promises:
-      - `parseAuthors`: Resolves author IDs to author data.
-      - `getAdjacentPosts`: Determines Next/Prev links based on the post's hierarchy (Top-level vs. Subpost).
-      - `hasSubposts` / `getSubpostCount`: Checks for children.
-      - `getPostReadingTime`: Calculates reading time based on word count (HTML strip).
-      - `getBacklinks`: Scans for incoming links.
+    - Orchestrates parallel fetching of authors, navigation, reading time, backlinks, and TOC.
 4.  **Rendering:**
-    - `Astro.render()` compiles the MDX to HTML.
-    - **Components:** Custom components (like `MDXImage`) are passed to the MDX renderer.
-    - **Islands:** Interactive components (`CommandMenu`, `GraphView`, `GiscusComments`) are hydrated on the client.
+    - `Astro.render()` compiles MDX to HTML. Islands (`GraphView`, `CommandMenu`) are hydrated on the client.
 
 ### 3.2. Subpost (Book/Series) Logic Specification
 
-The project implements a custom "Subpost" pattern to support book-like content (e.g., `romophic-library`).
+Supports multi-level nested hierarchies (e.g., `a/b/c`).
 
 - **Logic Location:** `src/lib/content/posts.ts`
-- **Definition:** A post is considered a "Subpost" if its ID contains a forward slash (`/`).
-  - `isSubpost(id)`: `id.includes('/')`
-- **Parent Resolution:**
-  - `getParentId(id)`: Returns the immediate parent path (e.g., `a/b/c` -> `a/b`).
-  - **Support:** Fully supports multi-level nested hierarchies.
-- **Navigation (`getAdjacentPosts`):**
-  - **Subposts:** Navigation is restricted to siblings sharing the same immediate Parent ID. Sorted by `order` (ascending) first, then `date` (descending).
-  - **Top-level:** Navigation is across all top-level posts.
-- **Reading Time:**
-  - For Parent posts, `getCombinedReadingTime` aggregates the reading time of the parent _plus_ all its recursive subposts.
+- **Parent Resolution:** `getParentId(id)` returns the immediate parent path (e.g., `a/b/c` -> `a/b`).
+- **Navigation:** Restrict `getAdjacentPosts` to siblings sharing the same Parent ID.
 
 ### 3.3. Knowledge Graph & Backlinks Engine
 
-The project features a bi-directional linking system and a visualization graph.
-
 - **Backlink Logic (`src/lib/content/links.ts`):**
   - **Method:** Inverted Index Map (`_backlinksMap`).
-  - **Pattern:** `/\[.*?\]\((.*?)\)/g` (Standard Markdown links).
-  - **Scope:** Scans all posts once to build a `Map<TargetID, SourcePosts[]>`.
-  - **Resolution (`resolveLinkToId`):**
-    - Handles absolute paths (`/blog/foo`).
-    - Handles relative paths (`../foo`, `./foo`).
-    - Normalizes IDs (removes trailing `/index`).
-  - **Complexity:** $O(N)$ where N is the total number of posts. Cached during build.
-
-- **Graph Generation (`src/pages/graph.json.ts`):**
-  - Generates a JSON object `{ nodes: [], links: [] }`.
-  - **Nodes:** Type `post` or `tag`.
-  - **Links:** `Post -> Tag` and `Post -> Post`.
-  - **Client-Side Rendering:** `GraphView.tsx` implements a custom visualization using **d3-force** and HTML5 **Canvas**.
-    - **Physics:** Custom simulation with optimized charge, centering, and collision forces.
-    - **Rendering:** `requestAnimationFrame` loop drawing nodes, links, particles, and labels directly to Canvas.
-    - **Visuals:** Particle flow on links, glow effects (shadowBlur), glassmorphism labels, and theme-aware styling.
-    - **Interaction:** Custom hit detection (distance-based) to ensure reliable clicking and hovering, bypassing library limitations.
+  - **Complexity:** $O(N)$ cached during build.
+- **Visualization (`GraphView.tsx`):**
+  - **Implementation:** Pure `d3-force` + Canvas API.
+  - **Visuals:**
+    - **Particle Flow:** Animated particles moving along links.
+    - **Dynamic Glow:** Theme-aware `shadowBlur` effects.
+    - **Glassmorphism:** Labels with semi-transparent, blurred backgrounds.
+    - **LOD:** Labels hidden/shown based on zoom and node importance (link count).
+  - **Interaction:** Manual hit-testing using coordinate inversion ensures perfect responsiveness even in dense clusters.
 
 ### 3.4. Search Architecture
 
 - **Engine:** **Pagefind** (Static Search).
-- **Indexing:** Runs post-build (`pagefind --site dist`).
-- **Integration:** `CommandMenu.tsx`.
-  - **UI:** Thematic highlighting using `bg-primary/20` and semantic colors. Supports keyboard navigation (Cmd+K).
+- **Integration:** `CommandMenu.tsx` with thematic highlighting (`bg-primary/20`).
 
 ### 3.5. Image Optimization Pipeline (LQIP)
 
-1.  **Input:** Local images in `src/content/...` or external URLs.
-2.  **Processing (`MDXImage.astro`):**
-    - Calls `getImage()` (Astro Assets) to generate a **20px wide, 50% quality WebP** version of the image. This serves as the "BlurHash" style placeholder.
+1.  **Input:** Local or external images.
+2.  **Processing:** `MDXImage.astro` generates 20px WebP placeholders.
 3.  **Client-Side (`ZoomableImage.tsx`):**
-    - **Note:** Placeholder rendering is currently disabled to prevent double-image rendering issues.
-    - Renders the full-resolution image.
-    - Uses `react-medium-image-zoom` for the zoom interaction.
+    - Uses **CSS Grid Stacking** to overlay images.
+    - **Note:** Placeholder rendering is currently **disabled** to prevent rendering issues.
 
-### 3.6. Table of Contents (Client-Side Logic)
+### 3.6. Table of Contents
 
 - **Source:** `src/lib/toc.ts`
 - **Pattern:** Active Scroll Spy with `requestAnimationFrame` optimization.
-- **Initialization:** `TOCController.init()` called in `Layout` or `TOCSidebar`.
-- **Performance:** Throttled scroll handling to prevent layout thrashing.
 
-### 3.7. Icon System
-
-- **Master Source:** `public/icon.webp`.
-- **Generation:** Run `npx tsx scripts/generate-icons.ts` to regenerate all derived icons (favicons, PWA icons) from the master source.
-- **Constraints:** The project does NOT use SVG favicons to ensure consistency with the generated raster assets.
-
-### 3.8. Global Script Management (AppScript)
+### 3.7. Global Script Management (AppScript)
 
 - **Source:** `src/components/common/AppScript.astro`
-- **Purpose:** Centralizes all global client-side logic (Theme management, Giscus configuration, etc.) to ensure reliable execution across page transitions.
-- **Pattern:** Uses `astro:page-load` event listener to re-initialize scripts after View Transitions. Replaces scattered `is:inline` scripts.
+- **Purpose:** Centralizes theme management and third-party script (Giscus) initialization to survive View Transitions.
+- **Pattern:** Uses `astro:page-load` for re-initialization.
+
+### 3.8. Icon System
+
+- **Source:** `public/icon.webp`.
+- **Generation:** `scripts/generate-icons.ts` creates all PNG/ICO variants.
 
 ## 4. Development Standards & Conventions
 
 ### 4.1. The "Vibe Loop"
 
-1.  **Plan:** Check `GEMINI.md` and codebase.
-2.  **Code:** `pnpm dev` (Port 1234).
-3.  **Verify:** `pnpm lint`, `pnpm prettier`, `pnpm check:links`.
-4.  **Test:** `pnpm test` (Vitest) for logic.
-5.  **Finalize:** **Run `pnpm build`**.
+1.  Plan -> Code (`pnpm dev`) -> Verify (`lint`, `check:links`) -> Test (`vitest`) -> Build (`pnpm build`).
 
 ### 4.2. File Naming & Environment
 
-- **Filenames:** Kebab-case for EVERYTHING without exception (e.g., `binary-search.mdx`, `scc-scs.png`, `graph-view.tsx`). All legacy Japanese filenames have been migrated to English kebab-case.
-- **Line Endings:** Force **LF** (standardized via `.gitattributes` and `.editorconfig`).
-- **Link Integrity:** Internal links must be resolvable. Run `pnpm check:links` before committing.
-
-### 4.3. Styling (Tailwind v4)
-
-- **CSS Variables:** The project heavily relies on CSS variables for theming.
-  - **DO:** Use `bg-background`, `text-muted-foreground`.
-  - **DON'T:** Use hardcoded colors like `bg-white` or `text-gray-500` (breaks dark mode).
-- **Utility First:** Use utility classes for layout and spacing.
-- **Islands:** Interactive components should isolate their styles or use `clsx`/`tailwind-merge` via the `cn()` utility.
-
-### 4.4. Component Design
-*   **Atomic Design:** Reusable UI elements live in `src/components/ui/`.
-*   **TypeScript:** **Avoid `any` types.** Always define proper interfaces (e.g., `GraphNode` in `GraphView.tsx`) to ensure type safety.
-*   **Astro vs. React:**
-  - Use **Astro** for static layout, text, and structure.
-  - Use **React** _only_ for stateful interactivity (Search, Graph, Zoom).
-  - **Hydration:** Use `client:idle` or `client:visible` to defer JS loading. Use `client:only="react"` for libraries that depend on `window` (like Force Graph).
+- **Filenames:** Kebab-case for EVERYTHING (no exceptions).
+- **Line Endings:** Force **LF** via `.gitattributes`.
+- **Link Integrity:** Run `pnpm check:links` before commit.
 
 ## 5. Configuration Reference
 
-### `astro.config.ts` Highlights
-
-- `prefetch: { defaultStrategy: 'hover' }`: Smart prefetching.
-- `integrations`:
-  - `expressiveCode`: Configured with GitHub Light/Dark themes.
-  - `mdx`: Standard support.
-  - `react`: For islands.
-  - `sitemap`: SEO.
-  - `AstroPWA`: Offline capabilities (`romophic.com` branding).
-  - `partytown`: Third-party script offloading.
-
-### `package.json` Scripts
-
-- `new-post`: `tsx scripts/new-post.ts` (CLI for creating content).
-- `check:links`: `node scripts/check-links.cjs` (Integrity check).
-- `build`: `astro check && astro build && pagefind --site dist`.
+### `astro.config.ts`
+- PWA configured for `romophic.com`.
+- Markdown uses `rehype-pretty-code` and `remark-math`.
 
 ## 6. Status & Future Roadmap
 
 ### Completed Milestones
-- [x] **Brand Identity:** Fully migrated from `astro-erudite` to `romophic.com`.
-- [x] **GraphView UX:** Implemented a high-performance, stylish Knowledge Graph using `d3-force` + Canvas (Glassmorphism, Particle Flow, Manual Hit-testing).
-- [x] **Architecture:** Refactored component structure (`layout`, `blog`, `features`, `common`) and centralized script management (`AppScript`).
-- [x] **Stability:** Solved View Transitions issues, fixed image double-rendering, and enforced strict file naming conventions.
+- [x] **GraphView UX:** High-performance D3+Canvas implementation.
+- [x] **Architecture Refactor:** Component categorization and centralised scripts.
+- [x] **Brand Refresh:** Migration from template to `romophic.com`.
 
-### Known Issues & Future Features
-- **Image Placeholders:** The LQIP (blur placeholder) feature is currently disabled in `ZoomableImage.tsx` to prevent rendering glitches. Needs a proper CSS Grid-based implementation to restore.
-- **Content Completion:** Many algorithm articles in `romophic-library` are still placeholders (`//TODO`).
-- **i18n:** Multi-language support is planned but not yet implemented.
-- **Search Ranking:** Pagefind search results could be fine-tuned for better relevance.
+### Future Features
+- [ ] Content: Complete algorithms library placeholders (`//TODO`).
+- [ ] UI: Restore Image LQIP (blur placeholders) using CSS Grid.
+- [ ] i18n: Multi-language support.
 
 ---
 
