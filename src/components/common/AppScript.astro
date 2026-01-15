@@ -1,0 +1,83 @@
+<script>
+  // --- Theme Management ---
+  function initTheme() {
+    const getTheme = () => {
+      if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+        return localStorage.getItem('theme') || 'light'
+      }
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark'
+      }
+      return 'light'
+    }
+
+    const theme = getTheme()
+    document.documentElement.setAttribute('data-theme', theme)
+    
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }
+
+  function setupThemeToggle() {
+    const handleToggleClick = () => {
+      const element = document.documentElement
+      const isDark = element.classList.contains('dark')
+      const newTheme = isDark ? 'light' : 'dark'
+      
+      element.classList.toggle('dark')
+      element.setAttribute('data-theme', newTheme)
+      localStorage.setItem('theme', newTheme)
+      
+      // Update Giscus if present
+      updateGiscusTheme()
+    }
+
+    const toggles = document.querySelectorAll('[data-theme-toggle]')
+    toggles.forEach(toggle => {
+        // Remove old listener to avoid duplicates if any
+        toggle.removeEventListener('click', handleToggleClick)
+        toggle.addEventListener('click', handleToggleClick)
+    })
+  }
+
+  // --- Giscus Management ---
+  function updateGiscusTheme() {
+    const giscus = document.querySelector('giscus-widget') as any
+    if (!giscus) return
+
+    const isDark = document.documentElement.classList.contains('dark')
+    const theme = isDark ? 'transparent_dark' : 'light'
+    
+    // Giscus web component API
+    giscus.theme = theme
+  }
+
+  function initGiscus() {
+    // Initial config update
+    updateGiscusTheme()
+  }
+
+  // --- Main Lifecycle ---
+  
+  // Run immediately to prevent flash of wrong theme (critical for UX)
+  initTheme()
+
+  // Run on every page navigation
+  document.addEventListener('astro:page-load', () => {
+    initTheme() // Re-apply theme just in case
+    setupThemeToggle()
+    initGiscus()
+  })
+
+  // Optional: Listen for system preference changes
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (_e) => {
+    if (!localStorage.getItem('theme')) {
+        initTheme()
+        updateGiscusTheme()
+    }
+  })
+
+</script>

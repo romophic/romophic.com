@@ -116,10 +116,14 @@ export function GlobalLinkPreviews() {
         doc
           .querySelector('meta[name="description"]')
           ?.getAttribute('content') || undefined
-      const image =
+      let image =
         doc
           .querySelector('meta[property="og:image"]')
           ?.getAttribute('content') || undefined
+
+      if (image && !image.startsWith('http')) {
+        image = new URL(image, window.location.origin).href
+      }
 
       const data: PreviewData = { title, description, image }
       cache.current[url] = data

@@ -17,6 +17,7 @@ import Header from '@/components/layout/Header.astro'
 import { SITE } from '@/consts'
 import { cn } from '@/lib/utils'
 import { getCollection } from 'astro:content'
+import AppScript from '@/components/common/AppScript.astro'
 
 const posts = await getCollection('blog')
 const cleanPosts = posts.map((post) => ({
@@ -61,5 +62,6 @@ const { class: className } = Astro.props
     <ReloadPrompt />
     <CommandMenu client:idle posts={cleanPosts} />
     <GlobalLinkPreviews client:only="react" />
+    <AppScript />
   </body>
 </html>

@@ -134,27 +134,37 @@ export function GraphView() {
 
     const width = containerRef.current.clientWidth
     const height = containerRef.current.clientHeight
+    const isMobile = width < 600
+    
     const dpr = window.devicePixelRatio || 1
     canvas.width = width * dpr
     canvas.height = height * dpr
+    canvas.style.width = `${width}px`
+    canvas.style.height = `${height}px`
+    canvas.style.touchAction = 'none' // Prevent page scroll on touch
     ctx.scale(dpr, dpr)
 
-    const simulation = d3
-      .forceSimulation<GraphNode>(data.nodes)
-      .force(
-        'link',
-        d3
-          .forceLink<GraphNode, GraphLink>(data.links)
-          .id((d) => d.id)
-          .distance(60),
-      )
-      .force('charge', d3.forceManyBody().strength(-150))
+    const simulation = d3.forceSimulation<GraphNode>(data.nodes)
+      .force('link', d3.forceLink<GraphNode, GraphLink>(data.links).id(d => d.id).distance(isMobile ? 40 : 60))
+      .force('charge', d3.forceManyBody().strength(isMobile ? -100 : -150))
       .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('x', d3.forceX(width / 2).strength(0.05))
-      .force('y', d3.forceY(height / 2).strength(0.05))
-      .force('collide', d3.forceCollide().radius(15))
+      .force('x', d3.forceX(width / 2).strength(isMobile ? 0.1 : 0.05))
+      .force('y', d3.forceY(height / 2).strength(isMobile ? 0.1 : 0.05))
+      .force('collide', d3.forceCollide().radius(isMobile ? 12 : 15))
 
     simulationRef.current = simulation
+
+    // Initial Zoom for Mobile to fit content
+    if (isMobile) {
+        // Center and zoom out slightly
+        const initialTransform = d3.zoomIdentity
+            .translate(width / 2, height / 2)
+            .scale(0.6)
+            .translate(-width / 2, -height / 2)
+        transformRef.current = initialTransform
+    } else {
+        transformRef.current = d3.zoomIdentity
+    }
 
     const darkPalette = [
       '#a855f7',
@@ -397,9 +407,10 @@ export function GraphView() {
       })
 
     d3.select(canvas).call(zoom)
+    // Apply initial transform
+    d3.select(canvas).call(zoom.transform, transformRef.current)
 
-    const drag = d3
-      .drag<HTMLCanvasElement, unknown>()
+    const drag = d3.drag<HTMLCanvasElement, unknown>()
       .subject((event) => {
         const transform = transformRef.current
         const x = transform.invertX(event.x)
