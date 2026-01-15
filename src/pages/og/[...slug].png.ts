@@ -191,7 +191,7 @@ export const GET = async ({
           },
         ],
       },
-    },
+    } as unknown as React.ReactNode,
     {
       width: 1200,
       height: 630,
