@@ -27,8 +27,8 @@ export function ZoomableImage({
   }, [])
 
   return (
-    <div 
-      className={cn('relative overflow-hidden grid', className)} 
+    <div
+      className={cn('relative grid overflow-hidden', className)}
       style={style}
     >
       {/* Placeholder: Absolute to fill container, renders behind Zoom */}
@@ -38,17 +38,17 @@ export function ZoomableImage({
           alt=""
           aria-hidden="true"
           className={cn(
-            'col-start-1 row-start-1 w-full h-full object-cover transition-opacity duration-700 ease-out',
+            'col-start-1 row-start-1 h-full w-full object-cover transition-opacity duration-700 ease-out',
             // Scale up to hide blur edges
             'scale-110 blur-xl',
-            isLoaded ? 'opacity-0' : 'opacity-100'
+            isLoaded ? 'opacity-0' : 'opacity-100',
           )}
           style={{ pointerEvents: 'none' }}
         />
       )}
-      
+
       {/* Main Image: Defines layout size */}
-      <div className="col-start-1 row-start-1 w-full h-auto z-10">
+      <div className="z-10 col-start-1 row-start-1 h-auto w-full">
         <Zoom>
           <img
             ref={imgRef}
@@ -61,7 +61,7 @@ export function ZoomableImage({
             }}
             className={cn(
               'h-auto w-full transition-opacity duration-500 ease-in',
-              isLoaded ? 'opacity-100' : 'opacity-0'
+              isLoaded ? 'opacity-100' : 'opacity-0',
             )}
           />
         </Zoom>

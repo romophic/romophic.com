@@ -200,30 +200,37 @@ The project features a bi-directional linking system and a visualization graph.
 - **Pattern:** Active Scroll Spy with `requestAnimationFrame` optimization.
 - **Performance:** Throttled scroll handling to prevent layout thrashing.
 
-### 3.7. Global Script Management (AppScript)
+### 3.8. Global Script Management (AppScript)
 
 - **Source:** `src/components/common/AppScript.astro`
 - **Purpose:** Centralizes all global client-side logic (Theme management, Giscus configuration, etc.) to ensure reliable execution across page transitions.
-- **Lifecycle Management:**
-  - Uses `astro:page-load` event listener to re-initialize scripts after View Transitions.
-  - Eliminates the need for scattered `is:inline` scripts, ensuring a predictable execution order.
+- **Pattern:** Uses `astro:page-load` event listener to re-initialize scripts after View Transitions. Replaces scattered `is:inline` scripts.
 
-### 3.8. Icon System
+### 3.9. Type & Constant Centralization
 
-- **Source:** `public/icon.webp`.
-- **Generation:** `scripts/generate-icons.ts` creates all PNG/ICO variants.
+- **Types:** All major domain models (`PostPageData`, `AdjacentPosts`, etc.) are centralized in `src/types.ts`.
+- **Constants:** Site-wide configuration, including Giscus and OpenGraph dimensions, are consolidated in `src/consts.ts` for easier maintenance.
 
 ## 4. Development Standards & Conventions
 
 ### 4.1. The "Vibe Loop"
 
-1.  Plan -> Code (`pnpm dev`) -> Verify (`lint`, `check:links`) -> Test (`vitest`) -> Build (`pnpm build`).
+1.  **Plan:** Check `GEMINI.md` and codebase.
+2.  **Code:** `pnpm dev` (Port 1234).
+3.  **Verify:** `pnpm lint`, `pnpm prettier`, `pnpm check:links`.
+4.  **Test:** `pnpm test` (Vitest) for logic.
+5.  **Finalize:** **Run `pnpm build`**.
 
 ### 4.2. File Naming & Environment
 
-- **Filenames:** Kebab-case for EVERYTHING (no exceptions).
-- **Line Endings:** Force **LF** via `.gitattributes`.
-- **Link Integrity:** Run `pnpm check:links` before commit.
+- **Filenames:** Kebab-case for EVERYTHING without exception (e.g., `binary-search.mdx`, `scc-scs.png`, `graph-view.tsx`). All legacy Japanese filenames have been migrated to English kebab-case.
+- **Line Endings:** Force **LF** (standardized via `.gitattributes` and `.editorconfig`).
+- **Link Integrity:** Internal links must be resolvable. Run `pnpm check:links` before committing.
+
+### 4.3. Markdown Enhancements
+
+- **Anchors:** Automatically generated for H2-H6 via `rehype-autolink-headings`, facilitating direct section linking.
+- **Math:** LaTeX support enabled via `remark-math` and `rehype-katex`.
 
 ## 5. Configuration Reference
 

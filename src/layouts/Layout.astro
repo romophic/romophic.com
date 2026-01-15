@@ -6,6 +6,7 @@ import 'katex/dist/katex.min.css'
 
 import { ClientRouter } from 'astro:transitions'
 
+import AppScript from '@/components/common/AppScript.astro'
 import ScrollProgress from '@/components/common/ScrollProgress.astro'
 import { CommandMenu } from '@/components/features/CommandMenu'
 import { GlobalLinkPreviews } from '@/components/features/GlobalLinkPreviews'
@@ -17,7 +18,6 @@ import Header from '@/components/layout/Header.astro'
 import { SITE } from '@/consts'
 import { cn } from '@/lib/utils'
 import { getCollection } from 'astro:content'
-import AppScript from '@/components/common/AppScript.astro'
 
 const posts = await getCollection('blog')
 const cleanPosts = posts.map((post) => ({

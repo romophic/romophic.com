@@ -148,7 +148,7 @@
 
   /* Anchor Links */
   .anchor-link {
-    @apply ml-2 text-muted-foreground/40 no-underline opacity-0 transition-opacity;
+    @apply text-muted-foreground/40 ml-2 no-underline opacity-0 transition-opacity;
   }
 
   h2:hover .anchor-link,

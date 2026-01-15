@@ -22,7 +22,9 @@ export * from './content/links'
 /**
  * Aggregates all data needed for a single post page.
  */
-export async function getPostPageData(post: CollectionEntry<'blog'>): Promise<PostPageData> {
+export async function getPostPageData(
+  post: CollectionEntry<'blog'>,
+): Promise<PostPageData> {
   const currentPostId = post.id
   const isCurrentSubpost = isSubpost(currentPostId)
 

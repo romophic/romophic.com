@@ -2,7 +2,10 @@
   // --- Theme Management ---
   function initTheme() {
     const getTheme = () => {
-      if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+      if (
+        typeof localStorage !== 'undefined' &&
+        localStorage.getItem('theme')
+      ) {
         return localStorage.getItem('theme') || 'light'
       }
       if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -13,7 +16,7 @@
 
     const theme = getTheme()
     document.documentElement.setAttribute('data-theme', theme)
-    
+
     if (theme === 'dark') {
       document.documentElement.classList.add('dark')
     } else {
@@ -26,25 +29,26 @@
       const element = document.documentElement
       const isDark = element.classList.contains('dark')
       const newTheme = isDark ? 'light' : 'dark'
-      
+
       element.classList.toggle('dark')
       element.setAttribute('data-theme', newTheme)
       localStorage.setItem('theme', newTheme)
-      
+
       // Update Giscus if present
       updateGiscusTheme()
     }
 
     const toggles = document.querySelectorAll('[data-theme-toggle]')
-    toggles.forEach(toggle => {
-        // Remove old listener to avoid duplicates if any
-        toggle.removeEventListener('click', handleToggleClick)
-        toggle.addEventListener('click', handleToggleClick)
+    toggles.forEach((toggle) => {
+      // Remove old listener to avoid duplicates if any
+      toggle.removeEventListener('click', handleToggleClick)
+      toggle.addEventListener('click', handleToggleClick)
     })
   }
 
   // --- Giscus Management ---
   function updateGiscusTheme() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const giscus = document.querySelector('giscus-widget') as any
     if (!giscus) return
 
@@ -73,11 +77,10 @@
   })
 
   // Optional: Listen for system preference changes
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (_e) => {
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     if (!localStorage.getItem('theme')) {
         initTheme()
         updateGiscusTheme()
     }
   })
-
 </script>
