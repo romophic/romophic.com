@@ -1,3 +1,4 @@
+import type { PostPageData } from '@/types'
 import type { CollectionEntry } from 'astro:content'
 import {
   getAdjacentPosts,
@@ -12,12 +13,16 @@ import { parseAuthors } from './content/authors'
 import { getTOCSections } from './content/toc'
 import { getBacklinks } from './content/links'
 
+// Re-export everything from sub-modules to maintain compatibility
 export * from './content/posts'
 export * from './content/authors'
 export * from './content/toc'
 export * from './content/links'
 
-export async function getPostPageData(post: CollectionEntry<'blog'>) {
+/**
+ * Aggregates all data needed for a single post page.
+ */
+export async function getPostPageData(post: CollectionEntry<'blog'>): Promise<PostPageData> {
   const currentPostId = post.id
   const isCurrentSubpost = isSubpost(currentPostId)
 

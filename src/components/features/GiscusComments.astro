@@ -1,21 +1,21 @@
 ---
-
+import { GISCUS_CONFIG } from '@/consts'
 ---
 
 <div id="comments-section" class="mt-10">
   <giscus-widget
     id="comments"
-    repo="romophic/romophic.com"
-    repo-id="R_kgDOQil8lA"
-    category="Announcements"
-    category-id="DIC_kwDOQil8lM4Czpc3"
-    mapping="pathname"
-    strict="0"
-    reactions-enabled="0"
-    emit-metadata="0"
-    input-position="bottom"
-    lang="ja"
-    loading="lazy"
+    repo={GISCUS_CONFIG.repo}
+    repo-id={GISCUS_CONFIG.repoId}
+    category={GISCUS_CONFIG.category}
+    category-id={GISCUS_CONFIG.categoryId}
+    mapping={GISCUS_CONFIG.mapping}
+    strict={GISCUS_CONFIG.strict}
+    reactions-enabled={GISCUS_CONFIG.reactionsEnabled}
+    emit-metadata={GISCUS_CONFIG.emitMetadata}
+    input-position={GISCUS_CONFIG.inputPosition}
+    lang={GISCUS_CONFIG.lang}
+    loading={GISCUS_CONFIG.loading}
     crossorigin="anonymous"
     async></giscus-widget>
 </div>

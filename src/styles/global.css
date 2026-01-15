@@ -145,6 +145,19 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Anchor Links */
+  .anchor-link {
+    @apply ml-2 text-muted-foreground/40 no-underline opacity-0 transition-opacity;
+  }
+
+  h2:hover .anchor-link,
+  h3:hover .anchor-link,
+  h4:hover .anchor-link,
+  h5:hover .anchor-link,
+  h6:hover .anchor-link {
+    @apply opacity-100;
+  }
 }
 
 @layer utilities {

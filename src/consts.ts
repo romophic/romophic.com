@@ -57,6 +57,25 @@ export const ICON_MAP: IconMap = {
 export const READING_SPEED_WPM = 200
 export const SCROLL_TO_TOP_THRESHOLD = 300
 
+export const GISCUS_CONFIG = {
+  repo: 'romophic/romophic.com',
+  repoId: 'R_kgDOQil8lA',
+  category: 'Announcements',
+  categoryId: 'DIC_kwDOQil8lM4Czpc3',
+  mapping: 'pathname',
+  strict: '0',
+  reactionsEnabled: '0',
+  emitMetadata: '0',
+  inputPosition: 'bottom',
+  lang: 'ja',
+  loading: 'lazy',
+}
+
+export const OG_CONFIG = {
+  width: 1200,
+  height: 630,
+}
+
 export const ICONS = {
   arrowUp: 'lucide:arrow-up',
   hash: 'lucide:hash',

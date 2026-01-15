@@ -8,6 +8,7 @@ import AstroPWA from '@vite-pwa/astro'
 import partytown from '@astrojs/partytown'
 
 import { rehypeHeadingIds } from '@astrojs/markdown-remark'
+import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import expressiveCode from 'astro-expressive-code'
 import rehypeExternalLinks from 'rehype-external-links'
 import rehypeKatex from 'rehype-katex'
@@ -136,6 +137,21 @@ export default defineConfig({
         },
       ],
       rehypeHeadingIds,
+      [
+        rehypeAutolinkHeadings,
+        {
+          behavior: 'append',
+          properties: {
+            className: ['anchor-link'],
+            ariaHidden: true,
+            tabIndex: -1,
+          },
+          content: {
+            type: 'text',
+            value: '#',
+          },
+        },
+      ],
       [
         rehypeKatex,
         {

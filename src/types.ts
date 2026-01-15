@@ -1,3 +1,5 @@
+import type { CollectionEntry } from 'astro:content'
+
 export type Site = {
   title: string
   description: string
@@ -36,4 +38,23 @@ export type TOCSection = {
   title: string
   headings: TOCHeading[]
   subpostId?: string
+}
+
+export type AdjacentPosts = {
+  newer: CollectionEntry<'blog'> | null
+  older: CollectionEntry<'blog'> | null
+  parent: CollectionEntry<'blog'> | null
+}
+
+export type PostPageData = {
+  authors: Author[]
+  isCurrentSubpost: boolean
+  navigation: AdjacentPosts
+  parentPost: CollectionEntry<'blog'> | null
+  hasChildPosts: boolean
+  subpostCount: number
+  postReadingTime: string
+  combinedReadingTime: string | null
+  tocSections: TOCSection[]
+  backlinks: CollectionEntry<'blog'>[]
 }
