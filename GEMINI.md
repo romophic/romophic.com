@@ -37,11 +37,11 @@ This document provides a comprehensive and deep technical overview of **romophic
   - **Fonts:** `Geist` (Sans) and `Geist Mono` (Monospace).
 - **Content:** MDX
   - **Remark Plugins:** `remark-math` (Math support), `remark-emoji`.
-  - **Rehype Plugins:** `rehype-katex` (Math rendering), `rehype-pretty-code` (Code highlighting), `rehype-external-links`, `rehype-heading-ids`, `rehype-autolink-headings`.
+  - **Rehype Plugins:** `rehype-katex` (Math rendering), `rehype-pretty-code` (Code highlighting), `rehype-external-links`, `rehype-heading-ids`, `rehype-autolink-headings` (Anchor links).
 - **Search:** [Pagefind](https://pagefind.app/) (Static search index)
 - **Visualization:**
   - **Core Architecture:** `d3-force` + `d3-zoom` + `d3-drag` driving a raw HTML5 Canvas.
-  - **Custom Interaction:** Manual hit-testing and coordinate transformation for 100% reliability.
+  - **Custom Interaction:** Manual hit-testing via coordinate transformation (`screen2GraphCoords`) for 100% reliability.
 - **PWA:** `@vite-pwa/astro` (Offline support, installable).
 
 ### Directory Structure & Codebase Complete Map
@@ -57,12 +57,15 @@ This document provides a comprehensive and deep technical overview of **romophic
     - `TOCHeader.astro`: Table of Contents for mobile.
     - `TOCSidebar.astro`: Table of Contents for desktop.
 - **`common/`**: Reusable blocks.
-    - `AppScript.astro`: **Crucial.** Central manager for theme and scripts across transitions.
+    - `AppScript.astro`: **Crucial.** Central manager for theme and scripts across transitions (astro:page-load).
     - `AuthorCard.astro`: Profile display for authors.
     - `Callout.astro`: Styled notice blocks for MDX.
     - `CopyCodeManager.astro`: Adds copy buttons to code blocks.
+    - `Favicons.astro`: Favicon link tags.
     - `Hero.astro`: The personal introduction section on the homepage.
+    - `Link.astro`: Wrapper for `<a>` tags with prefetching.
     - `MDXImage.astro`: Server-side image optimization wrapper.
+    - `ProjectCard.astro`: Portfolio project card.
     - `ScrollProgress.astro`: Reading progress bar.
     - `ScrollToTop.astro`: Scroll to top button.
     - `SocialIcons.astro`: Social media icons.
@@ -118,9 +121,8 @@ The entire site revolves around the `blog` content collection. The rendering pip
 2.  **Route Generation (`src/pages/blog/[...id].astro`):**
     - `getStaticPaths` calls `getAllPostsAndSubposts` (from `src/lib/data-utils.ts`).
     - It generates routes for _every_ MDX file, preserving the file path as the ID.
-3.  **Data Aggregation (`src/lib/data-utils.ts`):**
-    - **Central Orchestrator:** `getPostPageData` serves as the single entry point for page generation.
-    - **Parallel Execution:** It orchestrates multiple async operations concurrently via `Promise.all`:
+3.  **Data Aggregation (`getPostPageData`):**
+    - When a page is built, `getPostPageData` runs. It orchestrates multiple parallel promises:
       - `parseAuthors`: Resolves author IDs to author data.
       - `getAdjacentPosts`: Determines Next/Prev links based on hierarchy.
       - `hasSubposts` / `getSubpostCount`: Checks for children.
@@ -144,6 +146,8 @@ The project implements a custom "Subpost" pattern to support book-like content (
 - **Navigation (`getAdjacentPosts`):**
   - **Subposts:** Navigation is restricted to siblings sharing the same immediate Parent ID. Sorted by `order` (ascending) first, then `date` (descending).
   - **Top-level:** Navigation is across all top-level posts.
+- **Reading Time:**
+  - For Parent posts, `getCombinedReadingTime` aggregates the reading time of the parent _plus_ all its recursive subposts.
 
 ### 3.3. Knowledge Graph & Backlinks Engine
 
@@ -152,39 +156,41 @@ The project features a bi-directional linking system and a visualization graph.
 - **Backlink Logic (`src/lib/content/links.ts`):**
   - **Method:** Inverted Index Map (`_backlinksMap`).
   - **Pattern:** `/\[.*?\]\((.*?)\)/g` (Standard Markdown links).
-  - **Efficiency:** The engine scans all posts **once** ($O(N)$) to build a global map of `TargetID -> SourcePosts[]`. This map is cached and reused, replacing the inefficient $O(N^2)$ scan.
+  - **Complexity:** $O(N)$ where N is the total number of posts. Cached during build.
   - **Resolution:** Handles absolute (`/blog/foo`) and relative (`../foo`) paths, normalizing IDs (removing `/index`).
 
-- **Graph Visualization (`src/components/features/GraphView.tsx`):**
-  - **Architecture:** `d3-force` simulation driving a raw HTML5 Canvas. No external React graph libraries are used to ensure maximum control and performance.
-  - **Rendering:** Custom `requestAnimationFrame` loop.
+- **Graph Visualization (`GraphView.tsx`):**
+  - **Engine:** Custom D3-force simulation.
+  - **Rendering:** HTML5 Canvas for $O(1)$ draw performance.
   - **Visuals:**
     - **Particle Flow:** Animated particles travel along links to visualize connection flow.
     - **Glow Effects:** Dynamic `shadowBlur` creates a neon/bloom effect, optimized for both Light and Dark modes.
     - **Glassmorphism:** Labels feature a semi-transparent blurred background for readability.
     - **LOD (Level of Detail):** Labels appear based on zoom level and node importance (degree).
-  - **Interaction (Manual Hit-Testing):**
-    - Instead of relying on the library's hit detection (which can be flaky with custom drawing), we implement a manual check using `transformRef.current.invertX/Y`.
-    - On click/hover, the mouse coordinates are transformed into graph space, and the Euclidean distance to every node is calculated to find the nearest target. This ensures 100% reliable interaction.
+  - **Interaction:**
+    - Manual hit-testing using `d3.zoomTransform` inversion and distance calculation ensures 100% reliable clicking and hovering.
+    - Supports Zoom, Pan, and Node Dragging.
+  - **Configuration:** All physics and theme parameters are centralized in `src/consts.ts` under `GRAPH_CONFIG`.
 
 ### 3.4. Search & Link Previews
 
 - **Search Engine:** **Pagefind** (Static Search) indexed post-build.
-- **Link Previews (`src/components/features/GlobalLinkPreviews.tsx`):**
+- **Integration:** `CommandMenu.tsx` with thematic highlighting (`bg-primary/20`).
+- **Link Previews (`GlobalLinkPreviews.tsx`):**
   - Client-side component that intercepts hover events on internal links.
-  - Fetches the target URL in the background, parses the HTML (`DOMParser`), and extracts metadata (`og:image`, title, description) to display a floating preview card.
-  - **Optimization:** Caches fetched metadata to prevent redundant network requests.
+  - Fetches and parses target HTML metadata.
   - **Fix:** Resolves relative `og:image` paths to absolute URLs to prevent 404s.
 
 ### 3.5. Image Optimization Pipeline (LQIP)
 
 1.  **Input:** Local images in `src/content/...` or external URLs.
 2.  **Processing (`MDXImage.astro`):**
-    - Calls `getImage()` (Astro Assets) to generate a **20px wide, 50% quality WebP** version of the image.
+    - Calls `getImage()` (Astro Assets) to generate a **20px wide, 50% quality WebP** version of the image. This serves as the "BlurHash" style placeholder.
 3.  **Client-Side (`ZoomableImage.tsx`):**
-    - **Note:** Placeholder rendering is currently **disabled** via comment to prevent layout issues.
-    - Uses **CSS Grid Stacking** (`grid-area: 1/1`) to overlap images without absolute positioning issues.
-    - Uses `react-medium-image-zoom` for the zoom interaction.
+    - **Modern LQIP**: Implements Low Quality Image Placeholders using **CSS Grid Stacking**.
+    - **Implementation:** Both placeholder and main image occupy `grid-area: 1/1`.
+    - **Visual:** A 20px blurred WebP placeholder is layered behind the main image (`filter: blur(40px)`, `scale(1.2)`).
+    - **Transition:** Smooth 1000ms cross-fade transition upon image load completion to prevent layout shifts.
 
 ### 3.6. Table of Contents (Client-Side Logic)
 
@@ -207,23 +213,19 @@ The project features a bi-directional linking system and a visualization graph.
 
 ### 3.9. Type & Constant Centralization
 
-- **Types:** All major domain models (`PostPageData`, `AdjacentPosts`, etc.) are centralized in `src/types.ts`.
-- **Constants:** Site-wide configuration, including Giscus and OpenGraph dimensions, are consolidated in `src/consts.ts` for easier maintenance.
+- **Types:** All major domain models (`PostPageData`, `AdjacentPosts`, `D3GraphNode`, etc.) are centralized in `src/types.ts`.
+- **Constants:** Site-wide configuration, including Giscus, OpenGraph dimensions, and GraphView physics/themes, are consolidated in `src/consts.ts` for easier maintenance.
 
 ## 4. Development Standards & Conventions
 
 ### 4.1. The "Vibe Loop"
 
-1.  **Plan:** Check `GEMINI.md` and codebase.
-2.  **Code:** `pnpm dev` (Port 1234).
-3.  **Verify:** `pnpm lint`, `pnpm prettier`, `pnpm check:links`.
-4.  **Test:** `pnpm test` (Vitest) for logic.
-5.  **Finalize:** **Run `pnpm build`**.
+1.  Plan -> Code (`pnpm dev`) -> Verify (`lint`, `check:links`) -> Test (`vitest`) -> Build (`pnpm build`).
 
 ### 4.2. File Naming & Environment
 
 - **Filenames:** Kebab-case for EVERYTHING without exception (e.g., `binary-search.mdx`, `scc-scs.png`, `graph-view.tsx`). All legacy Japanese filenames have been migrated to English kebab-case.
-- **Line Endings:** Force **LF** (standardized via `.gitattributes` and `.editorconfig`).
+- **Line Endings:** Force **LF** via `.gitattributes`.
 - **Link Integrity:** Internal links must be resolvable. Run `pnpm check:links` before committing.
 
 ### 4.3. Markdown Enhancements
@@ -245,10 +247,11 @@ The project features a bi-directional linking system and a visualization graph.
 - [x] **GraphView UX:** Implemented a high-performance, stylish Knowledge Graph using `d3-force` + Canvas (Glassmorphism, Particle Flow, Manual Hit-testing).
 - [x] **Architecture:** Refactored component structure (`layout`, `blog`, `features`, `common`) and centralized script management (`AppScript`).
 - [x] **Stability:** Solved View Transitions issues, fixed image double-rendering, and enforced strict file naming conventions.
+- [x] **Type Safety:** Eliminated `any` in core logic and centralized type definitions.
+- [x] **Modern Images:** Restored and perfected LQIP placeholders using CSS Grid.
 
 ### Future Features
 - [ ] Content: Complete algorithms library placeholders (`//TODO`).
-- [ ] UI: Restore Image LQIP (blur placeholders) using CSS Grid.
 - [ ] i18n: Multi-language support.
 
 ## 7. Philosophical Notes & Guiding Principles
@@ -262,7 +265,7 @@ This project started as a template (`astro-erudite`), but templates are cages. T
 
 1.  **God-Tier UX First:**
     - Never compromise on the user experience. If a library limits our ability to deliver a smooth, intuitive, and beautiful interface (like the graph click detection issues), we rewrite it.
-    - Performance is a feature. The site must be fast, responsive, and visually stable.
+    - Performance is a feature. The site must be fast, responsive, and visually stable (LQIP).
 
 2.  **Radical Ownership:**
     - Understand your tools. Don't just paste code; own it. The transition to a custom D3 implementation exemplifies this. We trade easy implementation for limitless potential and maintainability.
@@ -279,4 +282,4 @@ This codebase is now a living organism. It breathes through the D3 simulation an
 
 ---
 
-_Context Updated: 2025-12-31 (Graph UX & Architecture Refactor Complete)_
+_Context Updated: 2025-12-31 (Final Architecture & UX Polish)_

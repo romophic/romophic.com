@@ -46,19 +46,21 @@
     })
   }
 
-  // --- Giscus Management ---
-  function updateGiscusTheme() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const giscus = document.querySelector('giscus-widget') as any
-    if (!giscus) return
-
-    const isDark = document.documentElement.classList.contains('dark')
-    const theme = isDark ? 'transparent_dark' : 'light'
-
-    // Giscus web component API
-    giscus.theme = theme
-  }
-
+    // --- Giscus Management ---
+    interface GiscusWidget extends HTMLElement {
+      theme: string
+    }
+  
+    function updateGiscusTheme() {
+      const giscus = document.querySelector('giscus-widget') as GiscusWidget
+      if (!giscus) return
+  
+      const isDark = document.documentElement.classList.contains('dark')
+      const theme = isDark ? 'transparent_dark' : 'light'
+      
+      // Giscus web component API
+      giscus.theme = theme
+    }
   function initGiscus() {
     // Initial config update
     updateGiscusTheme()
