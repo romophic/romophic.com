@@ -17,23 +17,52 @@ export function ZoomableImage({
   style,
   ...props
 }: ZoomableImageProps) {
+  const [isLoaded, setIsLoaded] = useState(false)
   const imgRef = useRef<HTMLImageElement>(null)
 
+  useEffect(() => {
+    if (imgRef.current?.complete) {
+      setIsLoaded(true)
+    }
+  }, [])
+
   return (
-    <div className={cn('relative overflow-hidden', className)} style={style}>
-      {/* Placeholder removed to fix double image issue
+    <div 
+      className={cn('relative overflow-hidden grid', className)} 
+      style={style}
+    >
+      {/* Placeholder: Absolute to fill container, renders behind Zoom */}
       {placeholderSrc && (
-        <img ... />
-      )} 
-      */}
-      <div className="relative z-10">
+        <img
+          src={placeholderSrc}
+          alt=""
+          aria-hidden="true"
+          className={cn(
+            'col-start-1 row-start-1 w-full h-full object-cover transition-opacity duration-700 ease-out',
+            // Scale up to hide blur edges
+            'scale-110 blur-xl',
+            isLoaded ? 'opacity-0' : 'opacity-100'
+          )}
+          style={{ pointerEvents: 'none' }}
+        />
+      )}
+      
+      {/* Main Image: Defines layout size */}
+      <div className="col-start-1 row-start-1 w-full h-auto z-10">
         <Zoom>
           <img
             ref={imgRef}
             alt={alt}
             src={src}
             {...props}
-            className="h-auto w-full" 
+            onLoad={(e) => {
+              setIsLoaded(true)
+              props.onLoad?.(e)
+            }}
+            className={cn(
+              'h-auto w-full transition-opacity duration-500 ease-in',
+              isLoaded ? 'opacity-100' : 'opacity-0'
+            )}
           />
         </Zoom>
       </div>

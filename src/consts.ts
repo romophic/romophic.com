@@ -40,10 +40,6 @@ export const SOCIAL_LINKS: SocialLink[] = [
     label: 'Twitter',
   },
   {
-    href: 'mailto:jason@enscribe.dev',
-    label: 'Email',
-  },
-  {
     href: '/rss.xml',
     label: 'RSS',
   },

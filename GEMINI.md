@@ -40,7 +40,7 @@ This document provides a comprehensive and deep technical overview of **romophic
   - **Rehype Plugins:** `rehype-katex` (Math rendering), `rehype-pretty-code` (Code highlighting), `rehype-external-links`, `rehype-heading-ids`.
 - **Search:** [Pagefind](https://pagefind.app/) (Static search index)
 - **Visualization:**
-  - `react-force-graph-2d` (Knowledge Graph).
+  - `d3-force`, `d3-drag`, `d3-zoom`, `d3-selection` (Custom Canvas Implementation).
   - `react-medium-image-zoom` (Image interaction).
 - **PWA:** `@vite-pwa/astro` (Offline support, installable).
 
@@ -140,10 +140,11 @@ The project features a bi-directional linking system and a visualization graph.
   - Generates a JSON object `{ nodes: [], links: [] }`.
   - **Nodes:** Type `post` or `tag`.
   - **Links:** `Post -> Tag` and `Post -> Post`.
-  - **Client-Side Optimization:**
-    - `GraphView.tsx` uses `cooldownTicks` to limit simulation time.
-    - **Visuals:** Directional arrows for links, glow effects (`shadowBlur`) for active nodes, and dynamic particle reduction.
-    - **Interaction:** Custom `nodePointerAreaPaint` ensures labels and nodes are easily clickable (`hit-test`).
+  - **Client-Side Rendering:** `GraphView.tsx` implements a custom visualization using **d3-force** and HTML5 **Canvas**.
+    - **Physics:** Custom simulation with optimized charge, centering, and collision forces.
+    - **Rendering:** `requestAnimationFrame` loop drawing nodes, links, particles, and labels directly to Canvas.
+    - **Visuals:** Particle flow on links, glow effects (shadowBlur), glassmorphism labels, and theme-aware styling.
+    - **Interaction:** Custom hit detection (distance-based) to ensure reliable clicking and hovering, bypassing library limitations.
 
 ### 3.4. Search Architecture
 
@@ -158,9 +159,8 @@ The project features a bi-directional linking system and a visualization graph.
 2.  **Processing (`MDXImage.astro`):**
     - Calls `getImage()` (Astro Assets) to generate a **20px wide, 50% quality WebP** version of the image. This serves as the "BlurHash" style placeholder.
 3.  **Client-Side (`ZoomableImage.tsx`):**
-    - Renders the tiny placeholder scaled up with `filter: blur(20px)`.
-    - Renders the full-resolution image on top, initially `opacity-0`.
-    - On `onLoad` of the full image, transitions `opacity` to 1.
+    - **Note:** Placeholder rendering is currently disabled to prevent double-image rendering issues.
+    - Renders the full-resolution image.
     - Uses `react-medium-image-zoom` for the zoom interaction.
 
 ### 3.6. Table of Contents (Client-Side Logic)
@@ -175,6 +175,12 @@ The project features a bi-directional linking system and a visualization graph.
 - **Master Source:** `public/icon.webp`.
 - **Generation:** Run `npx tsx scripts/generate-icons.ts` to regenerate all derived icons (favicons, PWA icons) from the master source.
 - **Constraints:** The project does NOT use SVG favicons to ensure consistency with the generated raster assets.
+
+### 3.8. Global Script Management (AppScript)
+
+- **Source:** `src/components/common/AppScript.astro`
+- **Purpose:** Centralizes all global client-side logic (Theme management, Giscus configuration, etc.) to ensure reliable execution across page transitions.
+- **Pattern:** Uses `astro:page-load` event listener to re-initialize scripts after View Transitions. Replaces scattered `is:inline` scripts.
 
 ## 4. Development Standards & Conventions
 
@@ -227,6 +233,20 @@ The project features a bi-directional linking system and a visualization graph.
 - `check:links`: `node scripts/check-links.cjs` (Integrity check).
 - `build`: `astro check && astro build && pagefind --site dist`.
 
+## 6. Status & Future Roadmap
+
+### Completed Milestones
+- [x] **Brand Identity:** Fully migrated from `astro-erudite` to `romophic.com`.
+- [x] **GraphView UX:** Implemented a high-performance, stylish Knowledge Graph using `d3-force` + Canvas (Glassmorphism, Particle Flow, Manual Hit-testing).
+- [x] **Architecture:** Refactored component structure (`layout`, `blog`, `features`, `common`) and centralized script management (`AppScript`).
+- [x] **Stability:** Solved View Transitions issues, fixed image double-rendering, and enforced strict file naming conventions.
+
+### Known Issues & Future Features
+- **Image Placeholders:** The LQIP (blur placeholder) feature is currently disabled in `ZoomableImage.tsx` to prevent rendering glitches. Needs a proper CSS Grid-based implementation to restore.
+- **Content Completion:** Many algorithm articles in `romophic-library` are still placeholders (`//TODO`).
+- **i18n:** Multi-language support is planned but not yet implemented.
+- **Search Ranking:** Pagefind search results could be fine-tuned for better relevance.
+
 ---
 
-_Context Updated: 2025-12-31 (End of Year Cleanup Completed)_
+_Context Updated: 2025-12-31 (Graph UX & Architecture Refactor Complete)_
