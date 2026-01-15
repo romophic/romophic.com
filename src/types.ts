@@ -1,3 +1,4 @@
+import type * as d3 from 'd3'
 import type { CollectionEntry } from 'astro:content'
 
 export type Site = {
@@ -38,6 +39,23 @@ export type TOCSection = {
   title: string
   headings: TOCHeading[]
   subpostId?: string
+}
+
+export interface D3GraphNode extends d3.SimulationNodeDatum {
+  id: string
+  name: string
+  group: string
+  val: number
+  degree?: number
+  category?: number
+  color?: string
+}
+
+export interface D3GraphLink extends d3.SimulationLinkDatum<D3GraphNode> {
+  source: string | D3GraphNode
+  target: string | D3GraphNode
+  value: number
+  particles?: number[]
 }
 
 export type AdjacentPosts = {

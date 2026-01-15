@@ -54,7 +54,7 @@
 
     const isDark = document.documentElement.classList.contains('dark')
     const theme = isDark ? 'transparent_dark' : 'light'
-    
+
     // Giscus web component API
     giscus.theme = theme
   }
@@ -65,7 +65,7 @@
   }
 
   // --- Main Lifecycle ---
-  
+
   // Run immediately to prevent flash of wrong theme (critical for UX)
   initTheme()
 
@@ -77,10 +77,12 @@
   })
 
   // Optional: Listen for system preference changes
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-    if (!localStorage.getItem('theme')) {
+  window
+    .matchMedia('(prefers-color-scheme: dark)')
+    .addEventListener('change', () => {
+      if (!localStorage.getItem('theme')) {
         initTheme()
         updateGiscusTheme()
-    }
-  })
+      }
+    })
 </script>

@@ -28,27 +28,36 @@ export function ZoomableImage({
 
   return (
     <div
-      className={cn('relative grid overflow-hidden', className)}
-      style={style}
+      className={cn('relative grid h-fit w-full overflow-hidden', className)}
+      style={{ gridTemplateAreas: '"stack"', ...style }}
     >
-      {/* Placeholder: Absolute to fill container, renders behind Zoom */}
+      {/* Placeholder: Renders behind the main image */}
       {placeholderSrc && (
         <img
           src={placeholderSrc}
           alt=""
           aria-hidden="true"
           className={cn(
-            'col-start-1 row-start-1 h-full w-full object-cover transition-opacity duration-700 ease-out',
-            // Scale up to hide blur edges
-            'scale-110 blur-xl',
+            'h-full w-full object-cover transition-opacity duration-1000 ease-out',
             isLoaded ? 'opacity-0' : 'opacity-100',
           )}
-          style={{ pointerEvents: 'none' }}
+          style={{
+            gridArea: 'stack',
+            filter: 'blur(40px)',
+            transform: 'scale(1.2)',
+            pointerEvents: 'none',
+          }}
         />
       )}
 
-      {/* Main Image: Defines layout size */}
-      <div className="z-10 col-start-1 row-start-1 h-auto w-full">
+      {/* Main Image Container */}
+      <div
+        className={cn(
+          'h-auto w-full transition-opacity duration-700 ease-in',
+          isLoaded ? 'opacity-100' : 'opacity-0',
+        )}
+        style={{ gridArea: 'stack' }}
+      >
         <Zoom>
           <img
             ref={imgRef}
@@ -59,10 +68,7 @@ export function ZoomableImage({
               setIsLoaded(true)
               props.onLoad?.(e)
             }}
-            className={cn(
-              'h-auto w-full transition-opacity duration-500 ease-in',
-              isLoaded ? 'opacity-100' : 'opacity-0',
-            )}
+            className="h-auto w-full"
           />
         </Zoom>
       </div>

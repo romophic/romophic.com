@@ -76,6 +76,68 @@ export const OG_CONFIG = {
   height: 630,
 }
 
+export const GRAPH_CONFIG = {
+  physics: {
+    linkDistance: 60,
+    chargeStrength: -150,
+    centerStrength: 0.05,
+    collideRadius: 15,
+    initialRadius: 10,
+    alphaTarget: 0.3,
+    velocityDecay: 0.1,
+  },
+  theme: {
+    dark: {
+      background: '#1a1a1a',
+      nodeDefault: '#e2e8f0',
+      nodeTag: '#a855f7',
+      link: 'rgba(255, 255, 255, 0.08)',
+      linkHighlight: '#fff',
+      particle: 'rgba(255, 255, 255, 0.5)',
+      grid: 'rgba(255, 255, 255, 0.03)',
+      glowIntensity: 20,
+      glowIntensityHover: 35,
+    },
+    light: {
+      background: '#f8fafc',
+      nodeDefault: 'rgba(0, 0, 0, 0.85)',
+      nodeTag: '#7e22ce',
+      link: 'rgba(0, 0, 0, 0.08)',
+      linkHighlight: '#000',
+      particle: 'rgba(0, 0, 0, 0.4)',
+      grid: 'rgba(0, 0, 0, 0.03)',
+      glowIntensity: 6,
+      glowIntensityHover: 15,
+    },
+    palettes: {
+      dark: [
+        '#a855f7',
+        '#3b82f6',
+        '#10b981',
+        '#f59e0b',
+        '#ef4444',
+        '#6366f1',
+        '#ec4899',
+      ],
+      light: [
+        '#7e22ce',
+        '#1d4ed8',
+        '#059669',
+        '#d97706',
+        '#dc2626',
+        '#4f46e5',
+        '#db2777',
+      ],
+    },
+  },
+  interaction: {
+    hitRadius: 12,
+    zoomExtent: [0.1, 8] as [number, number],
+    lodThreshold: 1.2,
+    importantDegree: 4,
+  },
+}
+
 export const ICONS = {
   arrowUp: 'lucide:arrow-up',
   hash: 'lucide:hash',

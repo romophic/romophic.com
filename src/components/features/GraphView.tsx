@@ -1,27 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
-
-interface GraphNode extends d3.SimulationNodeDatum {
-  id: string
-  name: string
-  group: string
-  val: number
-  x?: number
-  y?: number
-  degree?: number
-  category?: number
-}
-
-interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
-  source: string | GraphNode
-  target: string | GraphNode
-  value: number
-  particles?: number[]
-}
+import { GRAPH_CONFIG } from '@/consts'
+import type { D3GraphNode, D3GraphLink } from '@/types'
 
 interface GraphData {
-  nodes: GraphNode[]
-  links: GraphLink[]
+  nodes: D3GraphNode[]
+  links: D3GraphLink[]
 }
 
 export function GraphView() {
@@ -31,33 +15,35 @@ export function GraphView() {
   const [data, setData] = useState<GraphData | null>(null)
   const [isVisible, setIsVisible] = useState(false)
 
-  const hoverNodeRef = useRef<GraphNode | null>(null)
-  const simulationRef = useRef<d3.Simulation<GraphNode, GraphLink> | null>(null)
+  const hoverNodeRef = useRef<D3GraphNode | null>(null)
+  const simulationRef = useRef<d3.Simulation<D3GraphNode, D3GraphLink> | null>(
+    null,
+  )
   const transformRef = useRef<d3.ZoomTransform>(d3.zoomIdentity)
 
-  // 1. Data Fetching
+  // 1. Data Fetching & Processing
   useEffect(() => {
     fetch('/graph.json')
       .then((res) => res.json())
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .then((fetchedData: any) => {
+      .then((fetchedData: { nodes: D3GraphNode[], links: D3GraphLink[] }) => {
         const seenIds = new Set<string>()
-        const nodes: GraphNode[] = []
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        fetchedData.nodes.forEach((n: any) => {
+        const nodes: D3GraphNode[] = []
+
+        fetchedData.nodes.forEach((n) => {
           if (!n.id || seenIds.has(n.id)) return
           seenIds.add(n.id)
           nodes.push({ ...n, val: 5, degree: 0 })
         })
 
-        const nodeMap = new Map(nodes.map((n) => [n.id, n]))
-        const links: GraphLink[] = []
+        const nodeMap = new Map<string, D3GraphNode>(
+          nodes.map((n) => [n.id, n]),
+        )
+        const links: D3GraphLink[] = []
 
         let categoryIdx = 0
         const tagToCategory = new Map<string, number>()
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        fetchedData.links.forEach((l: any) => {
+        fetchedData.links.forEach((l) => {
           const sourceId = typeof l.source === 'object' ? l.source.id : l.source
           const targetId = typeof l.target === 'object' ? l.target.id : l.target
 
@@ -72,8 +58,11 @@ export function GraphView() {
 
         nodes.forEach((n) => {
           if (n.group === 'tag') {
-            tagToCategory.set(n.id, categoryIdx % 7)
-            n.category = categoryIdx % 7
+            tagToCategory.set(
+              n.id,
+              categoryIdx % GRAPH_CONFIG.theme.palettes.dark.length,
+            )
+            n.category = categoryIdx % GRAPH_CONFIG.theme.palettes.dark.length
             categoryIdx++
           }
         })
@@ -81,28 +70,33 @@ export function GraphView() {
         nodes.forEach((n) => {
           if (n.group === 'post') {
             const connectedTag = links.find((l) => {
-              const otherId = l.source === n.id ? l.target : l.source
+              const sId = typeof l.source === 'object' ? l.source.id : l.source
+              const tId = typeof l.target === 'object' ? l.target.id : l.target
+              const otherId = sId === n.id ? tId : sId
               return nodeMap.get(otherId as string)?.group === 'tag'
             })
             if (connectedTag) {
-              const tagId =
-                connectedTag.source === n.id
-                  ? connectedTag.target
+              const sId =
+                typeof connectedTag.source === 'object'
+                  ? connectedTag.source.id
                   : connectedTag.source
-              n.category = tagToCategory.get(tagId as string)
+              const tagId =
+                sId === n.id ? connectedTag.target : connectedTag.source
+              const idStr = typeof tagId === 'object' ? tagId.id : tagId
+              n.category = tagToCategory.get(idStr as string)
             }
           }
         })
 
         const initialX = 400
         const initialY = 300
-        const initialRadius = 10
+        const { initialRadius } = GRAPH_CONFIG.physics
         nodes.forEach((n) => {
           n.x = initialX + (Math.random() - 0.5) * initialRadius
           n.y = initialY + (Math.random() - 0.5) * initialRadius
         })
 
-        setData({ nodes: nodes, links })
+        setData({ nodes, links })
         setTimeout(() => setIsVisible(true), 100)
       })
   }, [])
@@ -134,73 +128,46 @@ export function GraphView() {
 
     const width = containerRef.current.clientWidth
     const height = containerRef.current.clientHeight
-    const isMobile = width < 600
-
     const dpr = window.devicePixelRatio || 1
     canvas.width = width * dpr
     canvas.height = height * dpr
     canvas.style.width = `${width}px`
     canvas.style.height = `${height}px`
-    canvas.style.touchAction = 'none' // Prevent page scroll on touch
     ctx.scale(dpr, dpr)
 
+    const { physics, theme } = GRAPH_CONFIG
+
     const simulation = d3
-      .forceSimulation<GraphNode>(data.nodes)
+      .forceSimulation<D3GraphNode>(data.nodes)
       .force(
         'link',
         d3
-          .forceLink<GraphNode, GraphLink>(data.links)
+          .forceLink<D3GraphNode, D3GraphLink>(data.links)
           .id((d) => d.id)
-          .distance(isMobile ? 40 : 60),
+          .distance(physics.linkDistance),
       )
-      .force('charge', d3.forceManyBody().strength(isMobile ? -100 : -150))
+      .force('charge', d3.forceManyBody().strength(physics.chargeStrength))
       .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('x', d3.forceX(width / 2).strength(isMobile ? 0.1 : 0.05))
-      .force('y', d3.forceY(height / 2).strength(isMobile ? 0.1 : 0.05))
-      .force('collide', d3.forceCollide().radius(isMobile ? 12 : 15))
+      .force('x', d3.forceX(width / 2).strength(physics.centerStrength))
+      .force('y', d3.forceY(height / 2).strength(physics.centerStrength))
+      .force('collide', d3.forceCollide().radius(physics.collideRadius))
 
     simulationRef.current = simulation
 
-    // Initial Zoom for Mobile to fit content
-    if (isMobile) {
-      // Center and zoom out slightly
-      const initialTransform = d3.zoomIdentity
-        .translate(width / 2, height / 2)
-        .scale(0.6)
-        .translate(-width / 2, -height / 2)
-      transformRef.current = initialTransform
-    } else {
-      transformRef.current = d3.zoomIdentity
-    }
+    const activeTheme = isDark ? theme.dark : theme.light
+    const palettes = theme.palettes
 
-    const darkPalette = [
-      '#a855f7',
-      '#3b82f6',
-      '#10b981',
-      '#f59e0b',
-      '#ef4444',
-      '#6366f1',
-      '#ec4899',
-    ]
-    const lightPalette = [
-      '#7e22ce',
-      '#1d4ed8',
-      '#059669',
-      '#d97706',
-      '#dc2626',
-      '#4f46e5',
-      '#db2777',
-    ]
-
-    const getNodeColor = (node: GraphNode, dark: boolean) => {
+    const getNodeColor = (node: D3GraphNode) => {
       if (node.category !== undefined) {
-        return dark ? darkPalette[node.category] : lightPalette[node.category]
+        return isDark
+          ? palettes.dark[node.category]
+          : palettes.light[node.category]
       }
-      return dark ? '#e2e8f0' : 'rgba(0, 0, 0, 0.85)'
+      return activeTheme.nodeDefault
     }
 
     const drawArrow = (
-      ctx: CanvasRenderingContext2D,
+      context: CanvasRenderingContext2D,
       x1: number,
       y1: number,
       x2: number,
@@ -211,18 +178,18 @@ export function GraphView() {
       const arrowLength = 5
       const tx = x2 - radius * Math.cos(angle)
       const ty = y2 - radius * Math.sin(angle)
-      ctx.beginPath()
-      ctx.moveTo(tx, ty)
-      ctx.lineTo(
+      context.beginPath()
+      context.moveTo(tx, ty)
+      context.lineTo(
         tx - arrowLength * Math.cos(angle - Math.PI / 7),
         ty - arrowLength * Math.sin(angle - Math.PI / 7),
       )
-      ctx.lineTo(
+      context.lineTo(
         tx - arrowLength * Math.cos(angle + Math.PI / 7),
         ty - arrowLength * Math.sin(angle + Math.PI / 7),
       )
-      ctx.closePath()
-      ctx.fill()
+      context.closePath()
+      context.fill()
     }
 
     let animationFrameId: number
@@ -239,7 +206,7 @@ export function GraphView() {
 
       // Grid
       if (isDark) {
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)'
+        ctx.strokeStyle = activeTheme.grid
         ctx.lineWidth = 1 / transform.k
         const gridSize = 50
         const xStart = -width * 2,
@@ -260,8 +227,8 @@ export function GraphView() {
 
       // Links
       data.links.forEach((link) => {
-        const source = link.source as GraphNode,
-          target = link.target as GraphNode
+        const source = link.source as D3GraphNode,
+          target = link.target as D3GraphNode
         const isRelated =
           currentHover &&
           (source.id === currentHover.id || target.id === currentHover.id)
@@ -270,24 +237,20 @@ export function GraphView() {
         ctx.moveTo(source.x!, source.y!)
         ctx.lineTo(target.x!, target.y!)
         ctx.strokeStyle = isRelated
-          ? isDark
-            ? '#fff'
-            : '#000'
-          : isDark
-            ? 'rgba(255,255,255,0.08)'
-            : 'rgba(0,0,0,0.08)'
+          ? activeTheme.linkHighlight
+          : activeTheme.link
         ctx.lineWidth = isRelated ? 1.5 : 0.6
         ctx.stroke()
 
         if (isRelated) {
-          ctx.fillStyle = isDark ? '#fff' : '#000'
+          ctx.fillStyle = activeTheme.linkHighlight
           drawArrow(ctx, source.x!, source.y!, target.x!, target.y!, 8)
         }
 
         // Particles
         if (!link.particles) link.particles = []
         if (Math.random() < 0.005) link.particles.push(0)
-        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'
+        ctx.fillStyle = activeTheme.particle
         for (let i = link.particles.length - 1; i >= 0; i--) {
           link.particles[i] += 0.008
           if (link.particles[i] >= 1) {
@@ -307,17 +270,18 @@ export function GraphView() {
         const isHover = currentHover?.id === node.id
         const isNeighbor =
           currentHover &&
-          data.links.some(
-            (l) =>
-              ((l.source as GraphNode).id === currentHover.id &&
-                (l.target as GraphNode).id === node.id) ||
-              ((l.target as GraphNode).id === currentHover.id &&
-                (l.source as GraphNode).id === node.id),
-          )
+          data.links.some((l) => {
+            const sId = typeof l.source === 'object' ? l.source.id : l.source
+            const tId = typeof l.target === 'object' ? l.target.id : l.target
+            return (
+              (sId === currentHover.id && tId === node.id) ||
+              (tId === currentHover.id && sId === node.id)
+            )
+          })
 
         const baseRadius = node.group === 'tag' ? 4 : 6
         const radius = isHover ? baseRadius * 1.5 : baseRadius
-        const nodeColor = getNodeColor(node, isDark)
+        const nodeColor = getNodeColor(node)
 
         // Halo
         if (isHover || isNeighbor) {
@@ -336,14 +300,10 @@ export function GraphView() {
         ctx.beginPath()
         ctx.arc(node.x!, node.y!, radius, 0, 2 * Math.PI)
 
-        // Glow effect
-        if (isDark) {
-          ctx.shadowColor = nodeColor
-          ctx.shadowBlur = isHover ? 20 : 6
-        } else {
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)'
-          ctx.shadowBlur = isHover ? 15 : 8
-        }
+        ctx.shadowColor = isDark ? nodeColor : 'rgba(0, 0, 0, 0.3)'
+        ctx.shadowBlur = isHover
+          ? activeTheme.glowIntensityHover
+          : activeTheme.glowIntensity
 
         ctx.fillStyle = nodeColor
         ctx.fill()
@@ -351,29 +311,27 @@ export function GraphView() {
 
         // Label
         const degree = node.degree || 0
-        const isImportant = degree > 4
-        const shouldShowLabel =
-          isHover || transform.k > 1.2 || (transform.k > 0.6 && isImportant)
-
-        if (shouldShowLabel) {
+        const isImportant = degree > GRAPH_CONFIG.interaction.importantDegree
+        if (
+          isHover ||
+          transform.k > GRAPH_CONFIG.interaction.lodThreshold ||
+          (transform.k > 0.6 && isImportant)
+        ) {
           const label = node.name
           ctx.save()
           ctx.translate(node.x!, node.y!)
           ctx.scale(1 / transform.k, 1 / transform.k)
-
           ctx.font = `${isHover || isImportant ? '600' : 'normal'} 12px Sans-Serif`
           const textWidth = ctx.measureText(label).width
 
           ctx.fillStyle = isDark
-            ? 'rgba(0, 0, 0, 0.6)'
-            : 'rgba(255, 255, 255, 0.65)'
-
-          const px = -textWidth / 2 - 4
-          const py = radius * transform.k + 6
-          const pw = textWidth + 8
-          const ph = 18
-          const pr = 4
-
+            ? 'rgba(0, 0, 0, 0.75)'
+            : 'rgba(255, 255, 255, 0.85)'
+          const px = -textWidth / 2 - 4,
+            py = radius * transform.k + 6,
+            pw = textWidth + 8,
+            ph = 18,
+            pr = 4
           ctx.beginPath()
           ctx.moveTo(px + pr, py)
           ctx.lineTo(px + pw - pr, py)
@@ -385,7 +343,6 @@ export function GraphView() {
           ctx.lineTo(px, py + pr)
           ctx.quadraticCurveTo(px, py, px + pr, py)
           ctx.fill()
-
           if (!isDark) {
             ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)'
             ctx.lineWidth = 0.5
@@ -408,25 +365,23 @@ export function GraphView() {
 
     const zoom = d3
       .zoom<HTMLCanvasElement, unknown>()
-      .scaleExtent([0.1, 8])
+      .scaleExtent(GRAPH_CONFIG.interaction.zoomExtent)
       .on('zoom', (event) => {
         transformRef.current = event.transform
       })
 
     d3.select(canvas).call(zoom)
-    // Apply initial transform
-    d3.select(canvas).call(zoom.transform, transformRef.current)
 
     const drag = d3
       .drag<HTMLCanvasElement, unknown>()
       .subject((event) => {
         const transform = transformRef.current
-        const x = transform.invertX(event.x)
-        const y = transform.invertY(event.y)
+        const x = transform.invertX(event.x),
+          y = transform.invertY(event.y)
         return data.nodes.find((n) => Math.hypot(n.x! - x, n.y! - y) < 20)
       })
       .on('start', (event) => {
-        if (!event.active) simulation.alphaTarget(0.3).restart()
+        if (!event.active) simulation.alphaTarget(physics.alphaTarget).restart()
         event.subject.fx = event.subject.x
         event.subject.fy = event.subject.y
       })
@@ -452,18 +407,17 @@ export function GraphView() {
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!data) return
     const transform = transformRef.current
-    const x = transform.invertX(e.nativeEvent.offsetX)
-    const y = transform.invertY(e.nativeEvent.offsetY)
-
+    const x = transform.invertX(e.nativeEvent.offsetX),
+      y = transform.invertY(e.nativeEvent.offsetY)
     const hovered = data.nodes.find((node) => {
       if (node.x === undefined || node.y === undefined) return false
-      return Math.hypot(node.x - x, node.y - y) < 12
+      return (
+        Math.hypot(node.x - x, node.y - y) < GRAPH_CONFIG.interaction.hitRadius
+      )
     })
-
     if (hovered?.id !== hoverNodeRef.current?.id) {
       hoverNodeRef.current = hovered || null
     }
-
     document.body.style.cursor = hovered ? 'pointer' : 'default'
   }
 
