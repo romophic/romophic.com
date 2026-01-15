@@ -32,11 +32,17 @@ This document provides a comprehensive and deep technical overview of **romophic
 
 - **Framework:** [Astro v5](https://astro.build/) (SSG, Islands Architecture)
 - **UI Library:** [React v19](https://react.dev/) (For interactive islands)
-- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
+- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/) (configured via `@tailwindcss/vite`)
+  - **Theme Strategy:** CSS Variables in `src/styles/global.css` (`--background`, `--foreground`, etc.) combined with `oklch` colors.
+  - **Fonts:** `Geist` (Sans) and `Geist Mono` (Monospace).
 - **Content:** MDX
+  - **Remark Plugins:** `remark-math` (Math support), `remark-emoji`.
+  - **Rehype Plugins:** `rehype-katex` (Math rendering), `rehype-pretty-code` (Code highlighting), `rehype-external-links`, `rehype-heading-ids`, `rehype-autolink-headings`.
 - **Search:** [Pagefind](https://pagefind.app/) (Static search index)
-- **Visualization:** `d3-force` + HTML5 Canvas (Custom implementation).
-- **PWA:** `@vite-pwa/astro` (Offline support).
+- **Visualization:**
+  - **Core Architecture:** `d3-force` + `d3-zoom` + `d3-drag` driving a raw HTML5 Canvas.
+  - **Custom Interaction:** Manual hit-testing and coordinate transformation for 100% reliability.
+- **PWA:** `@vite-pwa/astro` (Offline support, installable).
 
 ### Directory Structure & Codebase Complete Map
 
@@ -56,14 +62,18 @@ This document provides a comprehensive and deep technical overview of **romophic
     - `Callout.astro`: Styled notice blocks for MDX.
     - `CopyCodeManager.astro`: Adds copy buttons to code blocks.
     - `Hero.astro`: The personal introduction section on the homepage.
-    - `MDXImage.astro`: Optimized image component for MDX content.
+    - `MDXImage.astro`: Server-side image optimization wrapper.
     - `ScrollProgress.astro`: Reading progress bar.
+    - `ScrollToTop.astro`: Scroll to top button.
+    - `SocialIcons.astro`: Social media icons.
 - **`features/`**: Complex interactive islands.
     - `GraphView.tsx`: The Knowledge Graph implementation (D3 + Canvas).
     - `CommandMenu.tsx`: Global search and navigation menu (React).
     - `GlobalLinkPreviews.tsx`: Hover preview for internal links (React).
     - `ActivityGraph.astro`: GitHub-style contribution heatmap.
     - `GiscusComments.astro`: Comment system integration.
+    - `PageLoader.astro`: Page transition loader.
+    - `ReloadPrompt.astro`: PWA update prompt.
 - **`layout/`**: Structural components.
     - `Header.astro`: Navigation bar.
     - `Footer.astro`: Site footer with social links.
@@ -80,11 +90,11 @@ This document provides a comprehensive and deep technical overview of **romophic
 
 #### `src/lib/` (Core Logic)
 - **`content/`**: Atomic fetchers and parsers.
-    - `posts.ts`: Post loading, sorting, and sibling resolution (Subposts).
-    - `links.ts`: Backlink indexing and resolution (O(N) inverted index).
+    - `posts.ts`: Post loading, sorting, and sibling resolution (Subposts). **Memoized** to optimize build performance.
+    - `links.ts`: Backlink indexing and resolution using an O(N) inverted index map.
     - `authors.ts`: Author data resolution.
     - `toc.ts`: Server-side TOC data generation.
-- `data-utils.ts`: **Central Orchestrator.** Aggregates all data for a page (`getPostPageData`).
+- `data-utils.ts`: **Central Orchestrator.** Aggregates all data for a page (`getPostPageData`). Runs parallel fetches for performance.
 - `toc.ts`: Client-side Scroll Spy controller (rAF optimized).
 - `utils.ts`: General helpers (formatting, word counts).
 
@@ -92,48 +102,181 @@ This document provides a comprehensive and deep technical overview of **romophic
 - `blog/[...id].astro`: Dynamic catch-all for every blog post.
 - `blog/[...page].astro`: Paginated list of blog posts.
 - `graph.astro`: The Knowledge Graph page.
-- `graph.json.ts`: API serving nodes and links for the graph.
+- `graph.json.ts`: API endpoint serving nodes and links for the graph visualization.
 - `og/[...slug].png.ts`: Dynamic OG Image generator (Satori + Resvg).
 - `rss.xml.ts`, `robots.txt.ts`, `llms.txt.ts`: Meta-feeds.
 
-## 3. Deep Dive: Implementation Details
+## 3. Deep Dive: Architecture & Implementation Details
 
-### 3.1. Content Orchestration (`src/lib/data-utils.ts`)
-The `getPostPageData` function is the single entry point for all post metadata. It runs several async tasks in parallel to minimize build time:
-- Resolves author information.
-- Finds adjacent posts (Next/Prev) within the correct hierarchy (Top-level or Subpost).
-- Calculates reading time (combined reading time for parent posts).
-- Retrieves backlinks and generates TOC sections.
+### 3.1. Content Data Flow & Rendering Pipeline
 
-### 3.2. Knowledge Graph (`src/components/features/GraphView.tsx`)
-- **Engine**: Custom D3-force simulation.
-- **Rendering**: HTML5 Canvas for $O(1)$ draw performance regardless of node count.
-- **Interaction**: Manual hit-testing via coordinate inversion. This ensures precise clicks/hovers even after zoom and pan.
-- **Visuals**: Features animated particle flow, dynamic glow effects, and responsive LOD (Level of Detail) for labels.
+The entire site revolves around the `blog` content collection. The rendering pipeline is designed for concurrency and performance:
 
-### 3.3. Script Lifecycle (`src/components/common/AppScript.astro`)
-Manages all client-side logic that must survive or re-initialize during `ClientRouter` transitions:
-- Persistent Theme (stored in `localStorage`).
-- Giscus theme synchronization.
-- Event listener attachment for theme toggles and custom components.
+1.  **Loading (`src/content.config.ts`):**
+    - Uses `glob` loader to ingest files from `src/content/blog`.
+    - **Schema:** `title`, `description`, `date`, `order` (optional), `image` (optional), `tags`, `authors`, `draft`.
+2.  **Route Generation (`src/pages/blog/[...id].astro`):**
+    - `getStaticPaths` calls `getAllPostsAndSubposts` (from `src/lib/data-utils.ts`).
+    - It generates routes for _every_ MDX file, preserving the file path as the ID.
+3.  **Data Aggregation (`src/lib/data-utils.ts`):**
+    - **Central Orchestrator:** `getPostPageData` serves as the single entry point for page generation.
+    - **Parallel Execution:** It orchestrates multiple async operations concurrently via `Promise.all`:
+      - `parseAuthors`: Resolves author IDs to author data.
+      - `getAdjacentPosts`: Determines Next/Prev links based on hierarchy.
+      - `hasSubposts` / `getSubpostCount`: Checks for children.
+      - `getPostReadingTime`: Calculates reading time.
+      - `getBacklinks`: Scans for incoming links.
+      - `getTOCSections`: Generates the Table of Contents.
+4.  **Rendering:**
+    - `Astro.render()` compiles the MDX to HTML.
+    - **Islands:** Interactive components (`CommandMenu`, `GraphView`, `GiscusComments`) are hydrated on the client.
+
+### 3.2. Subpost (Book/Series) Logic Specification
+
+The project implements a custom "Subpost" pattern to support book-like content (e.g., `romophic-library`).
+
+- **Logic Location:** `src/lib/content/posts.ts`
+- **Definition:** A post is considered a "Subpost" if its ID contains a forward slash (`/`).
+  - `isSubpost(id)`: `id.includes('/')`
+- **Parent Resolution:**
+  - `getParentId(id)`: Returns the immediate parent path (e.g., `a/b/c` -> `a/b`).
+  - **Support:** Fully supports multi-level nested hierarchies.
+- **Navigation (`getAdjacentPosts`):**
+  - **Subposts:** Navigation is restricted to siblings sharing the same immediate Parent ID. Sorted by `order` (ascending) first, then `date` (descending).
+  - **Top-level:** Navigation is across all top-level posts.
+
+### 3.3. Knowledge Graph & Backlinks Engine
+
+The project features a bi-directional linking system and a visualization graph.
+
+- **Backlink Logic (`src/lib/content/links.ts`):**
+  - **Method:** Inverted Index Map (`_backlinksMap`).
+  - **Pattern:** `/\[.*?\]\((.*?)\)/g` (Standard Markdown links).
+  - **Efficiency:** The engine scans all posts **once** ($O(N)$) to build a global map of `TargetID -> SourcePosts[]`. This map is cached and reused, replacing the inefficient $O(N^2)$ scan.
+  - **Resolution:** Handles absolute (`/blog/foo`) and relative (`../foo`) paths, normalizing IDs (removing `/index`).
+
+- **Graph Visualization (`src/components/features/GraphView.tsx`):**
+  - **Architecture:** `d3-force` simulation driving a raw HTML5 Canvas. No external React graph libraries are used to ensure maximum control and performance.
+  - **Rendering:** Custom `requestAnimationFrame` loop.
+  - **Visuals:**
+    - **Particle Flow:** Animated particles travel along links to visualize connection flow.
+    - **Glow Effects:** Dynamic `shadowBlur` creates a neon/bloom effect, optimized for both Light and Dark modes.
+    - **Glassmorphism:** Labels feature a semi-transparent blurred background for readability.
+    - **LOD (Level of Detail):** Labels appear based on zoom level and node importance (degree).
+  - **Interaction (Manual Hit-Testing):**
+    - Instead of relying on the library's hit detection (which can be flaky with custom drawing), we implement a manual check using `transformRef.current.invertX/Y`.
+    - On click/hover, the mouse coordinates are transformed into graph space, and the Euclidean distance to every node is calculated to find the nearest target. This ensures 100% reliable interaction.
+
+### 3.4. Search & Link Previews
+
+- **Search Engine:** **Pagefind** (Static Search) indexed post-build.
+- **Link Previews (`src/components/features/GlobalLinkPreviews.tsx`):**
+  - Client-side component that intercepts hover events on internal links.
+  - Fetches the target URL in the background, parses the HTML (`DOMParser`), and extracts metadata (`og:image`, title, description) to display a floating preview card.
+  - **Optimization:** Caches fetched metadata to prevent redundant network requests.
+  - **Fix:** Resolves relative `og:image` paths to absolute URLs to prevent 404s.
+
+### 3.5. Image Optimization Pipeline (LQIP)
+
+1.  **Input:** Local images in `src/content/...` or external URLs.
+2.  **Processing (`MDXImage.astro`):**
+    - Calls `getImage()` (Astro Assets) to generate a **20px wide, 50% quality WebP** version of the image.
+3.  **Client-Side (`ZoomableImage.tsx`):**
+    - **Note:** Placeholder rendering is currently **disabled** via comment to prevent layout issues.
+    - Uses **CSS Grid Stacking** (`grid-area: 1/1`) to overlap images without absolute positioning issues.
+    - Uses `react-medium-image-zoom` for the zoom interaction.
+
+### 3.6. Table of Contents (Client-Side Logic)
+
+- **Source:** `src/lib/toc.ts`
+- **Pattern:** Active Scroll Spy with `requestAnimationFrame` optimization.
+- **Performance:** Throttled scroll handling to prevent layout thrashing.
+
+### 3.7. Global Script Management (AppScript)
+
+- **Source:** `src/components/common/AppScript.astro`
+- **Purpose:** Centralizes all global client-side logic (Theme management, Giscus configuration, etc.) to ensure reliable execution across page transitions.
+- **Lifecycle Management:**
+  - Uses `astro:page-load` event listener to re-initialize scripts after View Transitions.
+  - Eliminates the need for scattered `is:inline` scripts, ensuring a predictable execution order.
+
+### 3.8. Icon System
+
+- **Source:** `public/icon.webp`.
+- **Generation:** `scripts/generate-icons.ts` creates all PNG/ICO variants.
+
+### 3.9. Type & Constant Centralization
+
+- **Types:** All major domain models (`PostPageData`, `AdjacentPosts`, etc.) are centralized in `src/types.ts`.
+- **Constants:** Site-wide configuration, including Giscus and OpenGraph dimensions, are consolidated in `src/consts.ts` for easier maintenance.
 
 ## 4. Development Standards & Conventions
 
 ### 4.1. The "Vibe Loop"
-Plan -> Code (`pnpm dev`) -> Verify (`lint`, `check:links`) -> Test (`vitest`) -> Build (`pnpm build`).
 
-### 4.2. Strict Naming & Environment
-- **Filenames**: Kebab-case for EVERYTHING.
-- **Line Endings**: LF forced via `.gitattributes`.
-- **Imports**: Prefer `@/` alias for all internal modules.
+1.  **Plan:** Check `GEMINI.md` and codebase.
+2.  **Code:** `pnpm dev` (Port 1234).
+3.  **Verify:** `pnpm lint`, `pnpm prettier`, `pnpm check:links`.
+4.  **Test:** `pnpm test` (Vitest) for logic.
+5.  **Finalize:** **Run `pnpm build`**.
 
-## 5. Status & Future Roadmap
+### 4.2. File Naming & Environment
 
-- [x] **Stable Architecture**: Centralized scripts, structured components, O(N) backlinks.
-- [x] **High UX Graph**: Custom D3+Canvas implementation with arrow links and glow effects.
-- [ ] **Content**: Fill algorithm placeholders in `romophic-library` (`//TODO`).
-- [ ] **i18n**: Multi-language support planned.
+- **Filenames:** Kebab-case for EVERYTHING without exception (e.g., `binary-search.mdx`, `scc-scs.png`, `graph-view.tsx`). All legacy Japanese filenames have been migrated to English kebab-case.
+- **Line Endings:** Force **LF** (standardized via `.gitattributes` and `.editorconfig`).
+- **Link Integrity:** Internal links must be resolvable. Run `pnpm check:links` before committing.
+
+### 4.3. Markdown Enhancements
+
+- **Anchors:** Automatically generated for H2-H6 via `rehype-autolink-headings`, facilitating direct section linking.
+- **Math:** LaTeX support enabled via `remark-math` and `rehype-katex`.
+
+## 5. Configuration Reference
+
+### `astro.config.ts` Highlights
+- **Integration**: React, MDX, PWA, Tailwind, Expressive Code.
+- **PWA**: Configured for `romophic.com`.
+- **Markdown**: Uses `rehype-pretty-code` for syntax highlighting and `remark-math` for LaTeX.
+
+## 6. Status & Future Roadmap
+
+### Completed Milestones
+- [x] **Brand Identity:** Fully migrated from `astro-erudite` to `romophic.com`.
+- [x] **GraphView UX:** Implemented a high-performance, stylish Knowledge Graph using `d3-force` + Canvas (Glassmorphism, Particle Flow, Manual Hit-testing).
+- [x] **Architecture:** Refactored component structure (`layout`, `blog`, `features`, `common`) and centralized script management (`AppScript`).
+- [x] **Stability:** Solved View Transitions issues, fixed image double-rendering, and enforced strict file naming conventions.
+
+### Future Features
+- [ ] Content: Complete algorithms library placeholders (`//TODO`).
+- [ ] UI: Restore Image LQIP (blur placeholders) using CSS Grid.
+- [ ] i18n: Multi-language support.
+
+## 7. Philosophical Notes & Guiding Principles
+
+### Why we refactored everything
+This project started as a template (`astro-erudite`), but templates are cages. To achieve a truly unique and "God-Tier" user experience, we had to break free.
+- **Identity over Convenience:** We stripped away the generic branding to forge `romophic.com`.
+- **Control over Abstraction:** We abandoned `react-force-graph` not because it was bad, but because it was a black box. By rewriting the GraphView with `d3-force` and raw Canvas, we regained total control over physics, rendering, and interaction. The result is a graph that feels alive, not just a static chart.
+
+### Core Principles
+
+1.  **God-Tier UX First:**
+    - Never compromise on the user experience. If a library limits our ability to deliver a smooth, intuitive, and beautiful interface (like the graph click detection issues), we rewrite it.
+    - Performance is a feature. The site must be fast, responsive, and visually stable.
+
+2.  **Radical Ownership:**
+    - Understand your tools. Don't just paste code; own it. The transition to a custom D3 implementation exemplifies this. We trade easy implementation for limitless potential and maintainability.
+
+3.  **Minimalism & Robustness:**
+    - Complexity is the enemy. We centralized scripts into `AppScript`, unified types in `types.ts`, and enforced strict naming conventions.
+    - A clean codebase is a maintainable codebase. We prefer standard web APIs (Canvas, ResizeObserver) and robust logic over fragile hacks.
+
+### A Note to Future Developers
+This codebase is now a living organism. It breathes through the D3 simulation and speaks through the content. Treat it with care.
+- **Respect the Vibe:** Keep the aesthetics sharp and the interactions snappy.
+- **Keep it Clean:** Don't let technical debt accumulate. Refactor fearlessly when the architecture no longer serves the goal.
+- **Push the Boundaries:** This is a digital garden. Let it grow wild, but keep the fences strong.
 
 ---
 
-_Context Updated: 2025-12-31 (Full Codebase Map Completed)_
+_Context Updated: 2025-12-31 (Graph UX & Architecture Refactor Complete)_
