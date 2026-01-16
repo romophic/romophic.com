@@ -75,7 +75,6 @@ This document provides a comprehensive and deep technical overview of **romophic
 - **`features/`**: Complex interactive islands.
     - `GraphView.tsx`: The Knowledge Graph implementation (D3 + Canvas).
     - `CommandMenu.tsx`: Global search and navigation menu (React).
-    - `GlobalLinkPreviews.tsx`: Hover preview for internal links (React).
     - `ActivityGraph.astro`: GitHub-style contribution heatmap.
     - `GiscusComments.astro`: Comment system integration.
     - `PageLoader.astro`: Page transition loader.
@@ -176,14 +175,10 @@ The project features a bi-directional linking system and a visualization graph.
     - Supports Zoom, Pan, and Node Dragging.
   - **Configuration:** All physics and theme parameters are centralized in `src/consts.ts` under `GRAPH_CONFIG`.
 
-### 3.4. Search & Link Previews
+### 3.4. Search
 
 - **Search Engine:** **Pagefind** (Static Search) indexed post-build.
 - **Integration:** `CommandMenu.tsx` with thematic highlighting (`bg-primary/20`).
-- **Link Previews (`GlobalLinkPreviews.tsx`):**
-  - Client-side component that intercepts hover events on internal links.
-  - Fetches and parses target HTML metadata.
-  - **Fix:** Resolves relative `og:image` paths to absolute URLs to prevent 404s.
 
 ### 3.5. Image Optimization Pipeline (LQIP)
 
