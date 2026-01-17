@@ -1,63 +1,58 @@
-![Showcase Card](/public/static/twitter-card.png)
+# romophic.com
 
-<div align="center">
+A high-performance technical digital garden designed for deep interconnectedness and "God-Tier" UX.
 
-## romophic.com
+[![Netlify Status](https://api.netlify.com/api/v1/badges/your-site-id/deploy-status)](https://app.netlify.com/sites/your-site-name/deploys)
+![Astro](https://img.shields.io/badge/Astro-v5-orange?style=flat-square&logo=astro)
+![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue?style=flat-square&logo=typescript)
 
-![License]
+## ✨ Features
 
-</div>
+- **🕸 Interactive Knowledge Graph**
+  - A fully custom visualization engine built with **D3-force** and **HTML5 Canvas**.
+  - Features particle flow animations, manual hit-testing for reliable interaction, and dynamic LOD (Level of Detail).
+  
+- **⚡️ "God-Tier" Performance**
+  - Built on **Astro v5** (Static Site Generation).
+  - **Zero-runtime CSS** via Tailwind v4.
+  - Smart image optimization with **LQIP** (Low Quality Image Placeholders) using CSS Grid stacking.
 
-**romophic.com** is a high-performance, technical digital garden designed for deep interconnectedness and "God-Tier" UX. It is built with [Astro](https://astro.build/), [Tailwind CSS](https://tailwindcss.com/), and [React](https://react.dev/).
+- **📖 Rich Content Experience**
+  - **Math**: Full LaTeX support via KaTeX.
+  - **Code**: Beautiful syntax highlighting with Expressive Code.
+  - **Navigation**: Auto-generated TOC, bi-directional backlinks, and keyboard-driven command menu.
 
-Based on the [astro-erudite](https://github.com/jktrn/astro-erudite) template.
+- **🛠 Robust Engineering**
+  - **Strict Typing**: Zero `any` policy across the codebase.
+  - **Centralized Logic**: `AppScript` architecture to manage state across View Transitions.
+  - **Graph Theory**: O(N) backlink indexing engine.
 
----
+## 🛠 Tech Stack
 
-## Features
+- **Framework**: [Astro](https://astro.build/)
+- **UI Library**: [React](https://react.dev/) (Used sparingly for interactive islands)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Visualization**: [D3.js](https://d3js.org/)
+- **Search**: [Pagefind](https://pagefind.app/)
+- **Content**: MDX, Remark, Rehype
 
-- **Performance:** Static Generation (SSG) first. Minimal client-side JS.
-- **Interconnectivity:** Bi-directional linking, graph visualizations, and nested content structures.
-- **Ergonomics:** "Vibe Coding" workflow — fast, intuitive, and type-safe.
-- **Aesthetics:** Minimalist, typography-focused, dark/light mode adaptive (system sync).
+## 🚀 Getting Started
 
-### Technology stack
+```bash
+# Install dependencies
+pnpm install
 
-| Category   | Technology Name                                                                            |
-| ---------- | ------------------------------------------------------------------------------------------ |
-| Framework  | [Astro](https://astro.build/)                                                              |
-| UI Library | [React](https://react.dev/)                                                                |
-| Styling    | [Tailwind CSS](https://tailwindcss.com)                                                    |
-| Content    | [MDX](https://mdxjs.com/)                                                                  |
-| Search     | [Pagefind](https://pagefind.app/)                                                          |
-| Visualization | [react-force-graph-2d](https://github.com/vasturiano/react-force-graph)                 |
+# Start development server
+pnpm dev
 
-## Getting started
+# Build for production
+pnpm build
+```
 
-1. Install dependencies:
+## 📂 Project Structure
 
-   ```bash
-   pnpm install
-   ```
+Please refer to [GEMINI.md](./GEMINI.md) for a comprehensive deep dive into the architecture, file structure, and design philosophy.
 
-2. Start the development server:
+## 📄 License
 
-   ```bash
-   pnpm dev
-   ```
-
-3. Build for production:
-
-   ```bash
-   pnpm build
-   ```
-
-## Project Structure
-
-Please refer to `GEMINI.md` for a comprehensive deep dive into the project architecture and implementation details.
-
-## License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-[License]: https://img.shields.io/github/license/romophic/romophic.com?color=0a0a0a&logo=github&logoColor=fff&style=for-the-badge
+MIT
