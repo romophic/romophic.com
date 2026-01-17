@@ -5,5 +5,5 @@ bio: ''
 website: 'https://romophic.com'
 twitter: 'https://twitter.com/romophic'
 github: 'https://github.com/romophic'
-mail: 'jason@enscribe.dev'
+mail: 'nariyu.pub@gmail.com'
 ---
