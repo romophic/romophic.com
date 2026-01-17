@@ -4,6 +4,7 @@ import Breadcrumbs from '@/components/layout/Breadcrumbs.astro'
 import PageHead from '@/components/layout/PageHead.astro'
 import Layout from '@/layouts/Layout.astro'
 import { getAllProjects } from '@/lib/data-utils'
+import { Icon } from 'astro-icon/components'
 
 const projects = await getAllProjects()
 ---
@@ -12,15 +13,126 @@ const projects = await getAllProjects()
   <PageHead slot="head" title="About" />
   <Breadcrumbs items={[{ label: 'About', icon: 'lucide:info' }]} />
 
-  <section>
-    <div class="min-w-full">
-      <div class="prose mb-8">
-        <p>
-          romophic.com is a technical digital garden and personal portfolio.
-        </p>
-      </div>
+  <section class="space-y-12">
+    {/* Intro */}
+    <div class="prose dark:prose-invert">
+      <p>
+        romophic.com is a technical digital garden and personal portfolio. It
+        serves as a space for sharing knowledge, documenting projects, and
+        exploring interconnected ideas.
+      </p>
+    </div>
 
-      <h2 class="mb-4 text-2xl font-medium">Example Projects Listing</h2>
+    {/* Experience */}
+    <div>
+      <h2 class="mb-6 text-2xl font-semibold tracking-tight">Experience</h2>
+      <div class="space-y-6">
+        {
+          [
+            {
+              title: 'Institute of Science Tokyo EE',
+              organization: '',
+              period: '2024/04 - Present',
+              description: 'Bachelor',
+            },
+            {
+              title: 'ICPC 予選',
+              organization: '',
+              period: '2024/04 - Present',
+              description: 'Bachelor',
+            },
+            {
+              title: 'UTokyoGSC',
+              organization: '',
+              period: '2021 - 2024',
+              description: '',
+            },
+            {
+              title: 'JOI 本選出場',
+              organization: '',
+              period: '2020, 2022',
+              description: '',
+            },
+            {
+              title: 'Goldman Sachs Engineering Workshop',
+              organization: '',
+              period: '2020, 2022',
+              description: '',
+            },
+          ].map((item) => (
+            <div class="group border-muted hover:border-primary relative flex flex-col border-l-2 pl-4 transition-colors">
+              <span class="text-muted-foreground text-sm font-medium">
+                {item.period}
+              </span>
+              <h3 class="text-lg font-bold">{item.title}</h3>
+              <p class="text-primary font-medium">{item.organization}</p>
+              <p class="text-muted-foreground mt-2 text-sm">
+                {item.description}
+              </p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    {/* Tech Stack */}
+    <div>
+      <h2 class="mb-6 text-2xl font-semibold tracking-tight">Tech Stack</h2>
+      <div class="flex flex-wrap gap-2">
+        {
+          [
+            'C++',
+            'Python',
+            'React',
+            'Vue',
+            'Rust',
+            'Astro',
+            'TypeScript',
+            'Next.js',
+          ].map((skill) => (
+            <span class="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 rounded-full border px-3 py-1 text-sm font-medium transition-colors">
+              {skill}
+            </span>
+          ))
+        }
+      </div>
+    </div>
+
+    {/* Connect */}
+    <div>
+      <h2 class="mb-6 text-2xl font-semibold tracking-tight">Connect</h2>
+      <div class="flex flex-wrap gap-4">
+        {
+          [
+            {
+              name: 'GitHub',
+              href: 'https://github.com/romophic',
+              icon: 'lucide:github',
+            },
+            {
+              name: 'Twitter',
+              href: 'https://twitter.com/romophic',
+              icon: 'lucide:twitter',
+            },
+            { name: 'RSS', href: '/rss.xml', icon: 'lucide:rss' },
+          ].map((social) => (
+            <a
+              href={social.href}
+              class="text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2 rounded-md p-2 transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Icon name={social.icon} class="size-5" />
+              <span class="font-medium">{social.name}</span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+
+    {/* Projects */}
+    <div>
+      <h2 class="mb-6 text-2xl font-semibold tracking-tight">Projects</h2>
       <div class="flex flex-col gap-4">
         {projects.map((project) => <ProjectCard project={project} />)}
       </div>
