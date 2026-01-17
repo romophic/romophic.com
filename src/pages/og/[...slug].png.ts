@@ -33,25 +33,25 @@ export async function getStaticPaths() {
 }
 
 // In-memory cache for the font data.
-let fontsCache: { inter: ArrayBuffer; notoSansJP: ArrayBuffer } | null = null
+let fontData: ArrayBuffer | null = null
 
-async function getFonts() {
-  if (fontsCache) return fontsCache
+async function getFont() {
+  if (fontData) return fontData
   try {
-    const [inter, notoSansJP] = await Promise.all([
-      fetch(
-        'https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-700-normal.woff',
-      ).then((res) => res.arrayBuffer()),
-      // Use Google Fonts GitHub raw content for full Japanese support
-      fetch(
-        'https://github.com/google/fonts/raw/main/ofl/notosansjp/NotoSansJP-Bold.ttf',
-      ).then((res) => res.arrayBuffer()),
-    ])
-
-    fontsCache = { inter, notoSansJP }
-    return fontsCache
+    // Load local font from node_modules
+    const fontPath = path.join(
+      process.cwd(),
+      'node_modules',
+      '@fontsource',
+      'inter',
+      'files',
+      'inter-latin-700-normal.woff',
+    )
+    const buffer = await readFile(fontPath)
+    fontData = new Uint8Array(buffer).buffer as ArrayBuffer
+    return fontData
   } catch (e) {
-    console.error('Font fetch error:', e)
+    console.error('Font load error:', e)
     throw e
   }
 }
@@ -115,7 +115,7 @@ export const GET = async ({
     title: post.data.title,
     date: post.data.date.toISOString(),
     siteTitle: SITE.title,
-    version: 'v2', // Increment version to bust cache
+    version: 'v5', // Increment version
   })
 
   // Try cache
@@ -128,7 +128,8 @@ export const GET = async ({
     })
   }
 
-  const fonts = await getFonts()
+  const fontData = await getFont()
+  if (!fontData) throw new Error('Failed to load font')
 
   const svg = await satori(
     {
@@ -138,7 +139,7 @@ export const GET = async ({
           display: 'flex',
           height: '100%',
           width: '100%',
-          backgroundColor: '#121212', // Dark theme background
+          backgroundColor: '#121212',
           color: '#ffffff',
           flexDirection: 'column',
           justifyContent: 'center',
@@ -168,7 +169,7 @@ export const GET = async ({
                 fontSize: '64px',
                 fontWeight: 'bold',
                 lineHeight: 1.2,
-                fontFamily: 'Noto Sans JP, Inter', // Prioritize JP for mixed content if needed, or rely on array order
+                fontFamily: 'Inter',
               },
               children: post.data.title,
             },
@@ -207,13 +208,7 @@ export const GET = async ({
       fonts: [
         {
           name: 'Inter',
-          data: fonts.inter,
-          weight: 700,
-          style: 'normal',
-        },
-        {
-          name: 'Noto Sans JP',
-          data: fonts.notoSansJP,
+          data: fontData,
           weight: 700,
           style: 'normal',
         },
