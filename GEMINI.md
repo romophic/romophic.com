@@ -208,10 +208,22 @@ The project features a bi-directional linking system and a visualization graph.
 - **Source:** `public/icon.webp`.
 - **Generation:** `scripts/generate-icons.ts` creates all PNG/ICO variants.
 
-### 3.9. Type & Constant Centralization
+### 3.9. Verification & Well-known Path
 
-- **Types:** All major domain models (`PostPageData`, `AdjacentPosts`, `D3GraphNode`, etc.) are centralized in `src/types.ts`.
-- **Constants:** Site-wide configuration, including Giscus, OpenGraph dimensions, and GraphView physics/themes, are consolidated in `src/consts.ts` for easier maintenance.
+- **Discord Verification:** Stored at `public/.well-known/discord`. Used for ownership verification.
+
+### 3.10. OG Image Generation & Font Strategy
+
+- **Finalized Strategy:** Uses `satori` and `resvg-js`.
+- **Fonts:** 
+  - Dynamically fetches **Inter** and **Noto Sans JP** (Bold) directly from **Google Fonts GitHub repository** (`raw.githubusercontent.com`) during build time.
+  - This ensures direct access to stable TTF files, bypassing complex local font configurations or unstable CDN redirects.
+- **Cache:** Images are cached in `node_modules/.cache/og-images` to speed up subsequent builds.
+
+### 3.11. About Page Architecture
+
+- **Structure:** Divided into Experience (Timeline), Tech Stack (Badges), Connect (Social Icons), and Projects.
+- **Data Source:** Projects are loaded from the `projects` content collection.
 
 ## 4. Development Standards & Conventions
 
@@ -246,6 +258,8 @@ The project features a bi-directional linking system and a visualization graph.
 - [x] **Stability:** Solved View Transitions issues, fixed image double-rendering, and enforced strict file naming conventions.
 - [x] **Type Safety:** Eliminated `any` in core logic and centralized type definitions.
 - [x] **Modern Images:** Restored and perfected LQIP placeholders using CSS Grid.
+- [x] **Robust OG Images:** Implemented a stable font loading strategy for build-time OG image generation.
+- [x] **Personal Identity:** Revamped the About page with structured Experience, Skills, and Connect sections.
 
 ### Future Features
 - [ ] Content: Complete algorithms library placeholders (`//TODO`).

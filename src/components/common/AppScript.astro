@@ -30,7 +30,7 @@
       const isDark = element.classList.contains('dark')
       const newTheme = isDark ? 'light' : 'dark'
 
-      // @ts-expect-error View Transitions API is not fully typed yet
+      // View Transitions API is now typed
       if (!document.startViewTransition) {
         element.classList.toggle('dark')
         element.setAttribute('data-theme', newTheme)
@@ -46,7 +46,6 @@
         Math.max(y, window.innerHeight - y)
       )
 
-      // @ts-expect-error View Transitions API is not fully typed yet
       const transition = document.startViewTransition(() => {
         element.classList.toggle('dark')
         element.setAttribute('data-theme', newTheme)
@@ -77,10 +76,8 @@
     const toggles = document.querySelectorAll('[data-theme-toggle]')
     toggles.forEach((toggle) => {
       // Remove old listener to avoid duplicates if any
-      // @ts-expect-error EventListener type mismatch
-      toggle.removeEventListener('click', handleToggleClick)
-      // @ts-expect-error EventListener type mismatch
-      toggle.addEventListener('click', handleToggleClick)
+      toggle.removeEventListener('click', handleToggleClick as unknown as EventListener)
+      toggle.addEventListener('click', handleToggleClick as unknown as EventListener)
     })
   }
 
