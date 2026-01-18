@@ -2,10 +2,13 @@
 
 ## 0. Meta-Instruction: Maintaining This Document
 
-**This file is a living document.** It serves as the primary context anchor for this project.
+**This file is a living document and MUST NOT be summarized or truncated.**
 
 - **Read First:** Before starting any task, read this file to understand the current architecture and conventions.
 - **Update Always:** Whenever you change the project structure, add new features, modify core logic, or establish new patterns, **you MUST update this file**.
+- **No Omissions:** When editing this file, **DO NOT delete or summarize existing information**. Every detail, especially implementation notes and philosophical contexts, must be preserved.
+- **Prefer `replace`:** Use the `replace` tool for targeted, incremental updates. Avoid overwriting the entire file with `write_file` unless absolutely necessary, to prevent accidental information loss.
+- **Verification:** Always perform a `read_file` immediately before an update to ensure you are working with the most recent version.
 - **Truth:** Ensure this file remains the "Single Source of Truth" for the codebase.
 
 This document provides a comprehensive and deep technical overview of **romophic.com**. It is designed to be the single source of truth for AI agents and developers working on the codebase, synthesizing information from the file structure, configuration, and implementation details.
@@ -61,7 +64,7 @@ This document provides a comprehensive and deep technical overview of **romophic
     - `AuthorCard.astro`: Profile display for authors.
     - `Callout.astro`: Styled notice blocks for MDX.
     - `CopyCodeManager.astro`: Adds copy buttons to code blocks.
-    - `Favicons.astro`: Favicon link tags.
+    - `Favicons.astro`: Favicon link tags. **PWA manifest path corrected here.**
     - `Hero.astro`: The personal introduction section on the homepage.
     - `Link.astro`: Wrapper for `<a>` tags with prefetching.
     - `MDXImage.astro`: Server-side image optimization wrapper.
@@ -107,7 +110,7 @@ This document provides a comprehensive and deep technical overview of **romophic
 - `graph.astro`: The Knowledge Graph page.
 - `graph.json.ts`: API endpoint serving nodes and links for the graph visualization.
 - `og/[...slug].png.ts`: Dynamic OG Image generator (Satori + Resvg).
-- `rss.xml.ts`, `robots.txt.ts`, `llms.txt.ts`: Meta-feeds.
+- `rss.xml.ts`, `robots.txt.ts`, `llms.txt.ts`: Meta-feeds. **Robots.txt is now strictly standardized.**
 
 ## 3. Deep Dive: Architecture & Implementation Details
 
@@ -229,6 +232,7 @@ The project features a bi-directional linking system and a visualization graph.
 
 - **Structure:** Divided into Experience (Timeline), Tech Stack (Badges), Connect (Social Icons), and Projects.
 - **Data Source:** Projects are loaded from the `projects` content collection.
+- **SEO Fix:** Ensured proper heading hierarchy (`h1 -> h2 -> h3`) for better accessibility and ranking.
 
 ## 4. Development Standards & Conventions
 
@@ -251,7 +255,7 @@ The project features a bi-directional linking system and a visualization graph.
 
 ### `astro.config.ts` Highlights
 - **Integration**: React, MDX, PWA, Tailwind, Expressive Code.
-- **PWA**: Configured for `romophic.com`.
+- **PWA**: Configured for `romophic.com`. **Manifest filename: `manifest.webmanifest`.**
 - **Markdown**: Uses `rehype-pretty-code` for syntax highlighting and `remark-math` for LaTeX.
 
 ## 6. Status & Future Roadmap
@@ -266,6 +270,7 @@ The project features a bi-directional linking system and a visualization graph.
 - [x] **Robust OG Images:** Implemented a stable font loading strategy for build-time OG image generation.
 - [x] **Personal Identity:** Revamped the About page with structured Experience, Skills, and Connect sections.
 - [x] **Refined UX:** Improved search interaction (no flicker) and theme transitions (smooth cross-fade).
+- [x] **Lighthouse Polish:** Fixed PWA manifest paths, standardized robots.txt, and optimized heading hierarchy.
 
 ### Future Features
 - [ ] Content: Complete algorithms library placeholders (`//TODO`).
