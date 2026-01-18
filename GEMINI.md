@@ -2,13 +2,10 @@
 
 ## 0. Meta-Instruction: Maintaining This Document
 
-**This file is a living document and MUST NOT be summarized or truncated.**
+**This file is a living document.** It serves as the primary context anchor for this project.
 
 - **Read First:** Before starting any task, read this file to understand the current architecture and conventions.
 - **Update Always:** Whenever you change the project structure, add new features, modify core logic, or establish new patterns, **you MUST update this file**.
-- **No Omissions:** When editing this file, **DO NOT delete or summarize existing information**. Every detail, especially implementation notes and philosophical contexts, must be preserved.
-- **Prefer `replace`:** Use the `replace` tool for targeted, incremental updates. Avoid overwriting the entire file with `write_file` unless absolutely necessary, to prevent accidental information loss.
-- **Verification:** Always perform a `read_file` immediately before an update to ensure you are working with the most recent version.
 - **Truth:** Ensure this file remains the "Single Source of Truth" for the codebase.
 
 This document provides a comprehensive and deep technical overview of **romophic.com**. It is designed to be the single source of truth for AI agents and developers working on the codebase, synthesizing information from the file structure, configuration, and implementation details.
@@ -75,6 +72,7 @@ This document provides a comprehensive and deep technical overview of **romophic
 - **`features/`**: Complex interactive islands.
     - `GraphView.tsx`: The Knowledge Graph implementation (D3 + Canvas).
     - `CommandMenu.tsx`: Global search and navigation menu (React).
+    - `GlobalLinkPreviews.tsx`: Hover preview for internal links (React).
     - `ActivityGraph.astro`: GitHub-style contribution heatmap.
     - `GiscusComments.astro`: Comment system integration.
     - `PageLoader.astro`: Page transition loader.
@@ -86,7 +84,7 @@ This document provides a comprehensive and deep technical overview of **romophic
     - `PageHead.astro`: SEO and meta tags per page.
     - `ThemeToggle.astro`: Switch button for dark/light mode.
 - **`ui/`**: Atomic, unstyled components (Shadcn-like).
-    - `button.tsx`, `dialog.tsx`, `badge.tsx`, `ZoomableImage.tsx`, etc.
+    - `button.tsx`, `dialog.tsx`, `badge.tsx`, `zoomable-image.tsx`, etc.
 
 #### `src/content/` (Data Source)
 - **`authors/`**: Author metadata in `.md`.
@@ -159,7 +157,7 @@ The project features a bi-directional linking system and a visualization graph.
 - **Backlink Logic (`src/lib/content/links.ts`):**
   - **Method:** Inverted Index Map (`_backlinksMap`).
   - **Pattern:** `/\[.*?\]\((.*?)\)/g` (Standard Markdown links).
-  - **Efficiency:** The engine scans all posts **once** ($O(N)$) to build a global map of `TargetID -> SourcePosts[]`. This map is cached and reused, replacing the inefficient $O(N^2)$ scan.
+  - **Complexity:** $O(N)$ where N is the total number of posts. Cached during build.
   - **Resolution:** Handles absolute (`/blog/foo`) and relative (`../foo`) paths, normalizing IDs (removing `/index`).
 
 - **Graph Visualization (`GraphView.tsx`):**
@@ -175,17 +173,22 @@ The project features a bi-directional linking system and a visualization graph.
     - Supports Zoom, Pan, and Node Dragging.
   - **Configuration:** All physics and theme parameters are centralized in `src/consts.ts` under `GRAPH_CONFIG`.
 
-### 3.4. Search
+### 3.4. Search & Link Previews
 
 - **Search Engine:** **Pagefind** (Static Search) indexed post-build.
 - **Integration:** `CommandMenu.tsx` with thematic highlighting (`bg-primary/20`).
+- **UX Optimization:** Implements a `searching` state to prevent the "No results found" flicker while Pagefind is fetching results asynchronously.
+- **Link Previews (`GlobalLinkPreviews.tsx`):**
+  - Client-side component that intercepts hover events on internal links.
+  - Fetches and parses target HTML metadata.
+  - **Fix:** Resolves relative `og:image` paths to absolute URLs to prevent 404s.
 
 ### 3.5. Image Optimization Pipeline (LQIP)
 
 1.  **Input:** Local images in `src/content/...` or external URLs.
 2.  **Processing (`MDXImage.astro`):**
     - Calls `getImage()` (Astro Assets) to generate a **20px wide, 50% quality WebP** version of the image. This serves as the "BlurHash" style placeholder.
-3.  **Client-Side (`ZoomableImage.tsx`):**
+3.  **Client-Side (`zoomable-image.tsx`):**
     - **Modern LQIP**: Implements Low Quality Image Placeholders using **CSS Grid Stacking**.
     - **Implementation:** Both placeholder and main image occupy `grid-area: 1/1`.
     - **Visual:** A 20px blurred WebP placeholder is layered behind the main image (`filter: blur(40px)`, `scale(1.2)`).
@@ -202,6 +205,8 @@ The project features a bi-directional linking system and a visualization graph.
 - **Source:** `src/components/common/AppScript.astro`
 - **Purpose:** Centralizes all **global** client-side logic (Theme management, Giscus configuration, etc.) to ensure reliable execution across page transitions.
 - **Component Scripts:** Component-specific UI logic (e.g., scroll-to-top, copy buttons) remains within the component but **MUST** use `astro:page-load` or Web Components to support View Transitions.
+- **Theme Transitions:**
+  - `global.css` enforces `transition-colors` (300ms) on all major elements to ensure a smooth, fluid experience when toggling between Light and Dark modes, even outside of View Transitions.
 
 ### 3.8. Icon System
 
@@ -260,6 +265,7 @@ The project features a bi-directional linking system and a visualization graph.
 - [x] **Modern Images:** Restored and perfected LQIP placeholders using CSS Grid.
 - [x] **Robust OG Images:** Implemented a stable font loading strategy for build-time OG image generation.
 - [x] **Personal Identity:** Revamped the About page with structured Experience, Skills, and Connect sections.
+- [x] **Refined UX:** Improved search interaction (no flicker) and theme transitions (smooth cross-fade).
 
 ### Future Features
 - [ ] Content: Complete algorithms library placeholders (`//TODO`).
@@ -293,4 +299,4 @@ This codebase is now a living organism. It breathes through the D3 simulation an
 
 ---
 
-_Context Updated: 2025-12-31 (Strict Typing & Final UX Polish Completed)_
+_Context Updated: 2025-12-31 (Strict Typing, UX Polish & Document Consistency Complete)_
