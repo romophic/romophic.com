@@ -137,12 +137,18 @@
 }
 
 @layer base {
+  html {
+    transition: background-color 0.3s ease;
+  }
   *,
   ::after,
   ::before,
   ::backdrop,
   ::file-selector-button {
     border-color: var(--border, currentColor);
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
   }
 }
 

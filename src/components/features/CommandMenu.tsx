@@ -41,6 +41,7 @@ export function CommandMenu({ posts: initialPosts = [] }: Partial<Props>) {
   const [open, setOpen] = useState(false)
   const [posts] = useState<Props['posts']>(initialPosts)
   const [query, setQuery] = useState('')
+  const [searching, setSearching] = useState(false)
   const [pagefindResults, setPagefindResults] = useState<PagefindResult[]>([])
 
   useEffect(() => {
@@ -67,8 +68,10 @@ export function CommandMenu({ posts: initialPosts = [] }: Partial<Props>) {
     async function search() {
       if (!query) {
         setPagefindResults([])
+        setSearching(false)
         return
       }
+      setSearching(true)
       try {
         const pagefindUrl = '/pagefind/pagefind.js'
         const pagefind = await import(/* @vite-ignore */ pagefindUrl)
@@ -82,6 +85,8 @@ export function CommandMenu({ posts: initialPosts = [] }: Partial<Props>) {
         setPagefindResults(results)
       } catch {
         // Pagefind not available (dev mode)
+      } finally {
+        setSearching(false)
       }
     }
     const timeout = setTimeout(search, 300)
@@ -104,7 +109,9 @@ export function CommandMenu({ posts: initialPosts = [] }: Partial<Props>) {
             onValueChange={setQuery}
           />
           <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
+            {query && !searching && pagefindResults.length === 0 && (
+              <CommandEmpty>No results found.</CommandEmpty>
+            )}
             {!query && (
               <CommandGroup heading="Suggestions">
                 <CommandItem
