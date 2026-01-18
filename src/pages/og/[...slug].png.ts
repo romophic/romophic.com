@@ -33,13 +33,13 @@ export async function getStaticPaths() {
 }
 
 // In-memory cache for the font data.
-let fontData: ArrayBuffer | null = null
+let fontsCache: { inter: ArrayBuffer; notoSansJP: ArrayBuffer | null } | null = null
 
-async function getFont() {
-  if (fontData) return fontData
+async function getFonts() {
+  if (fontsCache) return fontsCache
   try {
-    // Load local font from node_modules
-    const fontPath = path.join(
+    // Load Inter from node_modules (Reliable)
+    const interPath = path.join(
       process.cwd(),
       'node_modules',
       '@fontsource',
@@ -47,9 +47,26 @@ async function getFont() {
       'files',
       'inter-latin-700-normal.woff',
     )
-    const buffer = await readFile(fontPath)
-    fontData = new Uint8Array(buffer).buffer as ArrayBuffer
-    return fontData
+    const interBuffer = await readFile(interPath)
+    const inter = new Uint8Array(interBuffer).buffer as ArrayBuffer
+
+    // Fetch Noto Sans JP (Optional / Fallback)
+    let notoSansJP: ArrayBuffer | null = null
+    try {
+      const res = await fetch(
+        'https://raw.githubusercontent.com/google/fonts/main/ofl/notosansjp/NotoSansJP-Bold.ttf',
+      )
+      if (res.ok) {
+        notoSansJP = await res.arrayBuffer()
+      } else {
+        console.warn(`Failed to fetch Noto Sans JP: ${res.statusText}`)
+      }
+    } catch (e) {
+      console.warn('Failed to fetch Noto Sans JP:', e)
+    }
+
+    fontsCache = { inter, notoSansJP }
+    return fontsCache
   } catch (e) {
     console.error('Font load error:', e)
     throw e
@@ -115,7 +132,7 @@ export const GET = async ({
     title: post.data.title,
     date: post.data.date.toISOString(),
     siteTitle: SITE.title,
-    version: 'v5', // Increment version
+    version: 'v7', // Increment version
   })
 
   // Try cache
@@ -128,8 +145,26 @@ export const GET = async ({
     })
   }
 
-  const fontData = await getFont()
-  if (!fontData) throw new Error('Failed to load font')
+  const fonts = await getFonts()
+  if (!fonts) throw new Error('Failed to load fonts')
+
+  const fontConfig: any[] = [
+    {
+      name: 'Inter',
+      data: fonts.inter,
+      weight: 700,
+      style: 'normal',
+    },
+  ]
+
+  if (fonts.notoSansJP) {
+    fontConfig.push({
+      name: 'Noto Sans JP',
+      data: fonts.notoSansJP,
+      weight: 700,
+      style: 'normal',
+    })
+  }
 
   const svg = await satori(
     {
@@ -169,7 +204,7 @@ export const GET = async ({
                 fontSize: '64px',
                 fontWeight: 'bold',
                 lineHeight: 1.2,
-                fontFamily: 'Inter',
+                fontFamily: 'Noto Sans JP, Inter',
               },
               children: post.data.title,
             },
@@ -205,14 +240,7 @@ export const GET = async ({
     {
       width: 1200,
       height: 630,
-      fonts: [
-        {
-          name: 'Inter',
-          data: fontData,
-          weight: 700,
-          style: 'normal',
-        },
-      ],
+      fonts: fontConfig,
     },
   )
 
