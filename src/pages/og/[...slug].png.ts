@@ -148,7 +148,12 @@ export const GET = async ({
   const fonts = await getFonts()
   if (!fonts) throw new Error('Failed to load fonts')
 
-  const fontConfig: any[] = [
+  const fontConfig: {
+    name: string
+    data: ArrayBuffer
+    weight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
+    style: 'normal' | 'italic'
+  }[] = [
     {
       name: 'Inter',
       data: fonts.inter,
