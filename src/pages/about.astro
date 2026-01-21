@@ -31,7 +31,7 @@ const projects = await getAllProjects()
     {/* Experience */}
     <div>
       <h2 class="mb-6 text-2xl font-semibold tracking-tight">Experience</h2>
-      <div class="space-y-6">
+      <div class="relative ml-2 space-y-8 border-l-2 border-muted pl-6">
         {
           [
             {
@@ -65,15 +65,26 @@ const projects = await getAllProjects()
               description: '',
             },
           ].map((item) => (
-            <div class="group border-muted hover:border-primary relative flex flex-col border-l-2 pl-4 transition-colors">
-              <span class="text-muted-foreground text-sm font-medium">
-                {item.period}
-              </span>
-              <h3 class="text-lg font-bold">{item.title}</h3>
-              <p class="text-primary font-medium">{item.organization}</p>
-              <p class="text-muted-foreground mt-2 text-sm">
-                {item.description}
-              </p>
+            <div class="group relative">
+              {/* Timeline Dot */}
+              <div class="absolute -left-[31px] top-1.5 size-4 rounded-full border-2 border-background bg-muted shadow-sm transition-colors duration-300 group-hover:bg-primary" />
+              
+              <div class="flex flex-col gap-1">
+                <span class="text-xs font-mono text-muted-foreground">
+                  {item.period}
+                </span>
+                <h3 class="text-lg font-bold leading-none">{item.title}</h3>
+                {item.organization && (
+                  <p class="text-sm font-medium text-primary">
+                    {item.organization}
+                  </p>
+                )}
+                {item.description && (
+                  <p class="mt-1 text-sm leading-relaxed text-muted-foreground">
+                    {item.description}
+                  </p>
+                )}
+              </div>
             </div>
           ))
         }
