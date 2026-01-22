@@ -101,18 +101,18 @@
     updateGiscusTheme()
   }
 
-  // --- Main Lifecycle ---
-
-  // Run immediately to prevent flash of wrong theme (critical for UX)
-  initTheme()
-
-  // Run on every page navigation
-  document.addEventListener('astro:page-load', () => {
-    initTheme() // Re-apply theme just in case
-    setupThemeToggle()
-    initGiscus()
-  })
-
+    // Run immediately to prevent flash of wrong theme (critical for UX)
+    initTheme()
+  
+    // Run immediately after the page is swapped but before it's rendered
+    document.addEventListener('astro:after-swap', initTheme)
+  
+    // Run on every page navigation
+    document.addEventListener('astro:page-load', () => {
+      initTheme() // Re-apply theme just in case
+      setupThemeToggle()
+      initGiscus()
+    })
   // Optional: Listen for system preference changes
   window
     .matchMedia('(prefers-color-scheme: dark)')
