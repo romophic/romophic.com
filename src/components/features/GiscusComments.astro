@@ -19,3 +19,23 @@ import { GISCUS_CONFIG } from '@/consts'
     crossorigin="anonymous"
     async></giscus-widget>
 </div>
+
+<script>
+  interface GiscusWidget extends HTMLElement {
+    theme: string
+  }
+
+  function updateGiscusTheme() {
+    const giscus = document.querySelector('giscus-widget') as GiscusWidget
+    if (!giscus) return
+
+    const isDark = document.documentElement.classList.contains('dark')
+    const theme = isDark ? 'transparent_dark' : 'light'
+    giscus.theme = theme
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    updateGiscusTheme()
+    window.addEventListener('theme-change', updateGiscusTheme)
+  })
+</script>

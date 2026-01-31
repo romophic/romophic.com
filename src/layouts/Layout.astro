@@ -6,7 +6,6 @@ import 'katex/dist/katex.min.css'
 
 import { ClientRouter } from 'astro:transitions'
 
-import AppScript from '@/components/common/AppScript.astro'
 import ScrollProgress from '@/components/common/ScrollProgress.astro'
 import { CommandMenu } from '@/components/features/CommandMenu'
 import PageLoader from '@/components/features/PageLoader.astro'
@@ -60,6 +59,5 @@ const { class: className } = Astro.props
     <PageLoader />
     <ReloadPrompt />
     <CommandMenu client:idle posts={cleanPosts} />
-    <AppScript />
   </body>
 </html>
