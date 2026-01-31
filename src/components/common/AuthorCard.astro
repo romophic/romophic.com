@@ -1,5 +1,5 @@
 ---
-import Link from '@/components/common/Link.astro'
+
 import SocialIcons from '@/components/common/SocialIcons.astro'
 import AvatarComponent from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
@@ -28,7 +28,7 @@ const socialLinks: SocialLink[] = [
   class="has-[a:hover]:bg-muted/50 overflow-hidden rounded-xl border p-4 transition-colors duration-300 ease-in-out"
 >
   <div class="flex flex-wrap gap-4">
-    <Link
+    <a
       href={`/authors/${author.id}`}
       class={cn('block', isAuthorPage && 'pointer-events-none')}
     >
@@ -43,7 +43,7 @@ const socialLinks: SocialLink[] = [
             'hover:ring-primary transition-shadow duration-300 hover:cursor-pointer hover:ring-2',
         )}
       />
-    </Link>
+    </a>
     <div class="flex grow flex-col justify-between gap-y-4">
       <div>
         <div class="flex flex-wrap items-center gap-x-2">

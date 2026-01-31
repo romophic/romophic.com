@@ -1,5 +1,5 @@
 ---
-import Link from '@/components/common/Link.astro'
+
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Icon } from 'astro-icon/components'
@@ -14,7 +14,7 @@ const isSubpost = !!parentPost
     isSubpost ? 'sm:grid-cols-3' : 'sm:grid-cols-2',
   )}
 >
-  <Link
+  <a
     href={olderPost ? `/blog/${olderPost.id}#post-title` : '#'}
     class={cn(
       buttonVariants({ variant: 'outline' }),
@@ -38,11 +38,11 @@ const isSubpost = !!parentPost
         }
       </span>
     </div>
-  </Link>
+  </a>
 
   {
     isSubpost && (
-      <Link
+      <a
         href={parentPost ? `/blog/${parentPost.id}#post-title` : '#'}
         class={cn(
           buttonVariants({ variant: 'outline' }),
@@ -62,11 +62,11 @@ const isSubpost = !!parentPost
             {parentPost?.data.title || 'No parent post'}
           </span>
         </div>
-      </Link>
+      </a>
     )
   }
 
-  <Link
+  <a
     href={newerPost ? `/blog/${newerPost.id}#post-title` : '#'}
     class={cn(
       buttonVariants({ variant: 'outline' }),
@@ -90,5 +90,5 @@ const isSubpost = !!parentPost
       name="lucide:arrow-right"
       class="ml-2 size-4 transition-transform group-hover:translate-x-1"
     />
-  </Link>
+  </a>
 </nav>

@@ -1,8 +1,8 @@
 ---
-import Link from '@/components/common/Link.astro'
+
 import AvatarComponent from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
+import Badge from '@/components/ui/badge.astro'
+import Separator from '@/components/ui/separator.astro'
 import {
   getCombinedReadingTime,
   getSubpostCount,
@@ -32,7 +32,7 @@ const subpostCount = !isSubpost(entry.id) ? await getSubpostCount(entry.id) : 0
     class="from-primary/0 via-primary/0 to-primary/0 group-hover:from-primary/5 absolute inset-0 -z-10 bg-gradient-to-br opacity-0 transition-opacity duration-500 group-hover:to-purple-500/5 group-hover:opacity-100"
   >
   </div>
-  <Link
+  <a
     href={`/${entry.collection}/${entry.id}`}
     class="flex flex-col gap-4 sm:flex-row"
   >
@@ -106,5 +106,5 @@ const subpostCount = !isSubpost(entry.id) ? await getSubpostCount(entry.id) : 0
         )
       }
     </div>
-  </Link>
+  </a>
 </div>

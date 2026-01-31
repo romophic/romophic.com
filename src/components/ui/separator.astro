@@ -1,0 +1,28 @@
+---
+import { cn } from '@/lib/utils'
+
+interface Props {
+  class?: string
+  orientation?: 'horizontal' | 'vertical'
+  decorative?: boolean
+}
+
+const {
+  orientation = 'horizontal',
+  decorative = true,
+  class: className,
+  ...props
+} = Astro.props
+---
+
+<div
+  role={decorative ? 'none' : 'separator'}
+  aria-orientation={orientation === 'vertical' ? 'vertical' : undefined}
+  data-slot="separator-root"
+  class={cn(
+    'bg-border shrink-0',
+    orientation === 'horizontal' ? 'h-px w-full' : 'h-full w-px',
+    className
+  )}
+  {...props}
+/>

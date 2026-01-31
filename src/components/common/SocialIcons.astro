@@ -1,5 +1,5 @@
 ---
-import Link from '@/components/common/Link.astro'
+
 import { buttonVariants } from '@/components/ui/button'
 import { ICON_MAP } from '@/consts'
 import type { SocialLink } from '@/types'
@@ -16,7 +16,7 @@ const { links } = Astro.props
   {
     links.map(({ href, label }) => (
       <li>
-        <Link
+        <a
           href={href}
           aria-label={label}
           title={label}
@@ -30,7 +30,7 @@ const { links } = Astro.props
             }
             class="size-4"
           />
-        </Link>
+        </a>
       </li>
     ))
   }

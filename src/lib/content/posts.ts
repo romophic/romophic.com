@@ -1,5 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content'
-import { readingTime, calculateWordCountFromHtml } from '@/lib/utils'
+import readingTime from 'reading-time'
 
 let _postsCache: CollectionEntry<'blog'>[] | null = null
 
@@ -182,24 +182,23 @@ export async function getSubpostCount(parentId: string): Promise<number> {
 
 export async function getPostReadingTime(postId: string): Promise<string> {
   const post = await getPostById(postId)
-  if (!post) return readingTime(0)
+  if (!post) return '0 min read'
 
-  const wordCount = calculateWordCountFromHtml(post.body)
-  return readingTime(wordCount)
+  return readingTime(post.body || '').text
 }
 
 export async function getCombinedReadingTime(postId: string): Promise<string> {
   const post = await getPostById(postId)
-  if (!post) return readingTime(0)
+  if (!post) return '0 min read'
 
-  let totalWords = calculateWordCountFromHtml(post.body)
+  let totalMinutes = readingTime(post.body || '').minutes
 
   if (!isSubpost(postId)) {
     const subposts = await getSubpostsForParent(postId)
     for (const subpost of subposts) {
-      totalWords += calculateWordCountFromHtml(subpost.body)
+      totalMinutes += readingTime(subpost.body || '').minutes
     }
   }
 
-  return readingTime(totalWords)
+  return `${Math.ceil(totalMinutes)} min read`
 }

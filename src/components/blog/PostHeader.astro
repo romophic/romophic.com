@@ -1,6 +1,6 @@
 ---
-import Link from '@/components/common/Link.astro'
-import { badgeVariants } from '@/components/ui/badge'
+
+import { badgeVariants } from '@/lib/ui-utils'
 import { ICONS } from '@/consts'
 import { formatDate } from '@/lib/utils'
 import type { Author } from '@/types'
@@ -45,13 +45,12 @@ const { post, authors, postReadingTime, combinedReadingTime, subpostCount } =
                   class="rounded-full"
                 />
                 {author.isRegistered ? (
-                  <Link
+                  <a
                     href={`/authors/${author.id}`}
-                    underline
-                    class="text-foreground"
+                    class="text-foreground underline decoration-muted-foreground underline-offset-[3px] hover:decoration-foreground"
                   >
                     <span>{author.name}</span>
-                  </Link>
+                  </a>
                 ) : (
                   <span>{author.name}</span>
                 )}
