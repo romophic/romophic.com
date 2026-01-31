@@ -431,7 +431,7 @@ export function GraphView() {
   return (
     <div
       ref={containerRef}
-      className={`bg-background relative h-[600px] w-full overflow-hidden rounded-lg border transition-opacity duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+      className={`bg-background relative h-[600px] w-full overflow-hidden rounded-lg border transition-opacity duration-100 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
     >
       <canvas
         ref={canvasRef}
