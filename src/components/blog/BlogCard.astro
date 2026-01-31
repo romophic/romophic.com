@@ -3,6 +3,7 @@
 import AvatarComponent from '@/components/ui/avatar'
 import Badge from '@/components/ui/badge.astro'
 import Separator from '@/components/ui/separator.astro'
+import { ICONS } from '@/consts'
 import {
   getCombinedReadingTime,
   getSubpostCount,
@@ -73,17 +74,17 @@ const subpostCount = !isSubpost(entry.id) ? await getSubpostCount(entry.id) : 0
                   <span>{author.name}</span>
                 </div>
               ))}
-              <Separator orientation="vertical" className="h-4!" />
+              <Separator orientation="vertical" class="h-4!" />
             </>
           )
         }
         <span>{formattedDate}</span>
-        <Separator orientation="vertical" className="h-4!" />
+        <Separator orientation="vertical" class="h-4!" />
         <span>{readTime}</span>
         {
           subpostCount > 0 && (
             <>
-              <Separator orientation="vertical" className="h-4!" />
+              <Separator orientation="vertical" class="h-4!" />
               <span class="flex items-center gap-1">
                 <Icon name="lucide:file-text" class="size-3" />
                 {subpostCount} subpost{subpostCount === 1 ? '' : 's'}
@@ -97,8 +98,8 @@ const subpostCount = !isSubpost(entry.id) ? await getSubpostCount(entry.id) : 0
         entry.data.tags && (
           <div class="flex flex-wrap gap-2">
             {entry.data.tags.map((tag) => (
-              <Badge variant="muted" className="flex items-center gap-x-1">
-                <Icon name="lucide:hash" class="size-3" />
+              <Badge variant="muted" class="flex items-center gap-x-1">
+                <Icon name={ICONS.hash} class="size-3" />
                 {tag}
               </Badge>
             ))}

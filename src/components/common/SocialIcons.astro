@@ -21,7 +21,8 @@ const { links } = Astro.props
           aria-label={label}
           title={label}
           class={buttonVariants({ variant: 'outline', size: 'icon' })}
-          external
+          target="_blank"
+          rel="noopener noreferrer"
         >
           <Icon
             name={

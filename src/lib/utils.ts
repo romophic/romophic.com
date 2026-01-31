@@ -1,8 +1,6 @@
-import { READING_SPEED_WPM, SITE } from '@/consts'
+import { SITE } from '@/consts'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-
-import { SITE } from '@/consts'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))

@@ -170,6 +170,7 @@ export default defineConfig({
         },
       ],
     ],
+    // @ts-expect-error remark-reading-time types are not fully compatible with astro
     remarkPlugins: [remarkMath, remarkEmoji, remarkReadingTime],
   },
 })
