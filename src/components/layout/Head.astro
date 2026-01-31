@@ -63,7 +63,14 @@ import { ClientRouter } from 'astro:transitions'
     }
 
     applyTheme()
-    document.addEventListener('astro:after-swap', applyTheme)
+    
+    // Ensure the theme class is preserved during View Transitions
+    document.addEventListener('astro:before-swap', (ev) => {
+      const currentTheme = getTheme()
+      if (currentTheme === 'dark') {
+        ev.newDocument.documentElement.classList.add('dark')
+      }
+    })
   </script>
   <ClientRouter />
 
