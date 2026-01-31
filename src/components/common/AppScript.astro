@@ -63,7 +63,7 @@
             clipPath: isDark ? [...clipPath].reverse() : clipPath,
           },
           {
-            duration: 400,
+            duration: 250,
             easing: 'ease-in',
             pseudoElement: isDark
               ? '::view-transition-old(root)'
@@ -101,19 +101,29 @@
     updateGiscusTheme()
   }
 
-    // Run immediately to prevent flash of wrong theme (critical for UX)
-    initTheme()
-  
-    // Run immediately after the page is swapped but before it's rendered
-    document.addEventListener('astro:after-swap', initTheme)
-  
-    // Run on every page navigation
-    document.addEventListener('astro:page-load', () => {
-      initTheme() // Re-apply theme just in case
-      setupThemeToggle()
-      initGiscus()
-    })
-  // Optional: Listen for system preference changes
+        // Run immediately to prevent flash of wrong theme (critical for UX)
+
+        initTheme()
+
+      
+
+        // Re-apply theme after swap
+
+        document.addEventListener('astro:after-swap', initTheme)
+
+      
+
+        // Run on every page navigation
+
+        document.addEventListener('astro:page-load', () => {
+
+          initTheme()
+
+          setupThemeToggle()
+
+          initGiscus()
+
+        })  // Optional: Listen for system preference changes
   window
     .matchMedia('(prefers-color-scheme: dark)')
     .addEventListener('change', () => {

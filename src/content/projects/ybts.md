@@ -1,7 +1,7 @@
 ---
 name: 'YBTS'
 description: '文化祭用POSシステム'
-tags: ['Vue', 'Nuxt.js', 'JavaScript', 'HTML']
+tags: ['Nuxt.js', 'Vue', 'Buefy', 'PWA' ]
 image: 'ybts.png'
 link: 'https://ysflc.github.io/YBTS/'
 startDate: '2024-01-01'

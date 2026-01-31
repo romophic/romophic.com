@@ -140,7 +140,7 @@ export default defineConfig({
       [
         rehypeAutolinkHeadings,
         {
-          behavior: 'append',
+          behavior: 'prepend',
           properties: {
             className: ['anchor-link'],
             ariaHidden: true,

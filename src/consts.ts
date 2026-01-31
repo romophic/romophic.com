@@ -40,6 +40,10 @@ export const SOCIAL_LINKS: SocialLink[] = [
     label: 'Twitter',
   },
   {
+    href: 'mailto:nariyu.pub@gmail.com',
+    label: 'Email',
+  },
+  {
     href: '/rss.xml',
     label: 'RSS',
   },

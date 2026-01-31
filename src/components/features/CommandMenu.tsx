@@ -89,7 +89,7 @@ export function CommandMenu({ posts: initialPosts = [] }: Partial<Props>) {
         setSearching(false)
       }
     }
-    const timeout = setTimeout(search, 300)
+    const timeout = setTimeout(search, 150)
     return () => clearTimeout(timeout)
   }, [query])
 

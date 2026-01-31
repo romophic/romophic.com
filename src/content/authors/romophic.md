@@ -1,7 +1,7 @@
 ---
 name: 'romophic'
-avatar: 'https://avatars.githubusercontent.com/u/45321757?v=4'
-bio: ''
+avatar: '/icon.webp'
+bio: 'romophic.com/about'
 website: 'https://romophic.com'
 twitter: 'https://twitter.com/romophic'
 github: 'https://github.com/romophic'

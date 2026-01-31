@@ -151,27 +151,59 @@
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 300ms;
   }
+
+  /* Anchor Links */
+  .anchor-link {
+    @apply text-muted-foreground/40 absolute no-underline opacity-0 transition-opacity;
+    margin-left: -1.2em;
+  }
+
+  h2:hover .anchor-link,
+  h3:hover .anchor-link,
+  h4:hover .anchor-link,
+  h5:hover .anchor-link,
+  h6:hover .anchor-link {
+    @apply opacity-100;
+  }
 }
 
-/* View Transitions for Theme Toggle */
+@layer utilities {
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 hover:bg-muted-foreground/50 border-background rounded-full border-2;
+  }
+
+  /* Custom Selection */
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+}
+
+/* Force disable transitions during theme switch/page swap */
+.transition-none,
+.transition-none *,
+.transition-none ::before,
+.transition-none ::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Disable default View Transition animations */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
+  animation: none !important;
+  mix-blend-mode: normal !important;
 }
 
-::view-transition-old(root) {
-  z-index: 1;
-}
-
-::view-transition-new(root) {
-  z-index: 9999;
-}
-
-.dark::view-transition-old(root) {
-  z-index: 9999;
-}
-
-.dark::view-transition-new(root) {
-  z-index: 1;
+::view-transition-group(root) {
+  animation: none !important;
 }

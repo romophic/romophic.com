@@ -31,35 +31,37 @@ const projects = await getAllProjects()
     {/* Experience */}
     <div>
       <h2 class="mb-6 text-2xl font-semibold tracking-tight">Experience</h2>
-      <div class="relative ml-2 space-y-8 border-l-2 border-muted pl-6">
+      <div class="border-muted relative ml-2 space-y-8 border-l-2 pl-6">
         {
           [
             {
-              title: 'Institute of Science Tokyo EE',
+              title: 'Goldman Sachs Engineering Workshop',
               organization: '',
-              period: '2024/04 - Present',
-              description: 'Bachelor',
+              period: '2025/09',
+              description: '',
             },
             {
-              title: 'ICPC 予選',
+              title: 'ICPC',
               organization: '',
-              period: '2024/04 - Present',
-              description: 'Bachelor',
+              period: '2024/07',
+              description: '',
             },
             {
-              title: 'UTokyoGSC',
+              title:
+                'Institute of Science Tokyo (Tokyo Institute of Technology) EE',
+              organization: '',
+              period: '2024/04 - Present',
+              description: '',
+            },
+            {
+              title: 'UTokyoGSC 4期',
               organization: '',
               period: '2021 - 2024',
-              description: '',
+              description:
+                '制約付き筋肉トレーニングにおける負荷効果最大化に関する数理モデル研究',
             },
             {
-              title: 'JOI 本選出場',
-              organization: '',
-              period: '2020, 2022',
-              description: '',
-            },
-            {
-              title: 'Goldman Sachs Engineering Workshop',
+              title: 'JOI本選',
               organization: '',
               period: '2020, 2022',
               description: '',
@@ -67,20 +69,20 @@ const projects = await getAllProjects()
           ].map((item) => (
             <div class="group relative">
               {/* Timeline Dot */}
-              <div class="absolute -left-[31px] top-1.5 size-4 rounded-full border-2 border-background bg-muted shadow-sm transition-colors duration-300 group-hover:bg-primary" />
-              
+              <div class="border-background bg-muted group-hover:bg-primary absolute top-1.5 -left-[31px] size-4 rounded-full border-2 shadow-sm transition-colors duration-300" />
+
               <div class="flex flex-col gap-1">
-                <span class="text-xs font-mono text-muted-foreground">
+                <span class="text-muted-foreground font-mono text-xs">
                   {item.period}
                 </span>
-                <h3 class="text-lg font-bold leading-none">{item.title}</h3>
+                <h3 class="text-lg leading-none font-bold">{item.title}</h3>
                 {item.organization && (
-                  <p class="text-sm font-medium text-primary">
+                  <p class="text-primary text-sm font-medium">
                     {item.organization}
                   </p>
                 )}
                 {item.description && (
-                  <p class="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  <p class="text-muted-foreground mt-1 text-sm leading-relaxed">
                     {item.description}
                   </p>
                 )}
@@ -96,20 +98,13 @@ const projects = await getAllProjects()
       <h2 class="mb-6 text-2xl font-semibold tracking-tight">Tech Stack</h2>
       <div class="flex flex-wrap gap-2">
         {
-          [
-            'C++',
-            'Python',
-            'React',
-            'Vue',
-            'Rust',
-            'Astro',
-            'TypeScript',
-            'Next.js',
-          ].map((skill) => (
-            <span class="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 rounded-full border px-3 py-1 text-sm font-medium transition-colors">
-              {skill}
-            </span>
-          ))
+          ['C++', 'Python', 'React', 'Vue', 'Nuxt.js', 'Rust', 'Astro'].map(
+            (skill) => (
+              <span class="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 rounded-full border px-3 py-1 text-sm font-medium transition-colors">
+                {skill}
+              </span>
+            ),
+          )
         }
       </div>
     </div>
@@ -129,6 +124,11 @@ const projects = await getAllProjects()
               name: 'Twitter',
               href: 'https://twitter.com/romophic',
               icon: 'lucide:twitter',
+            },
+            {
+              name: 'Email',
+              href: 'mailto:nariyu.pub@gmail.com',
+              icon: 'lucide:mail',
             },
             { name: 'RSS', href: '/rss.xml', icon: 'lucide:rss' },
           ].map((social) => (
