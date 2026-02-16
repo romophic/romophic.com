@@ -3,10 +3,33 @@ import { getAllPostsAndSubposts } from './posts'
 import type { CollectionEntry } from 'astro:content'
 
 // Global regex for capturing markdown link URLs: [label](url)
-const MARKDOWN_LINK_REGEX = /\[.*?\]\((.*?)\)/g
+export const MARKDOWN_LINK_REGEX = /\[.*?\]\((.*?)\)/g
+
+/**
+ * Extract all resolved internal link target IDs from a post's body.
+ */
+export function extractInternalLinks(body: string, sourceId: string): string[] {
+  MARKDOWN_LINK_REGEX.lastIndex = 0
+  const targets: string[] = []
+  let match
+  while ((match = MARKDOWN_LINK_REGEX.exec(body)) !== null) {
+    const targetId = resolveLinkToId(match[1], sourceId)
+    if (targetId) {
+      targets.push(normalizeId(targetId))
+    }
+  }
+  return targets
+}
 
 // Cache for the O(N) backlinks map
 let _backlinksMap: Map<string, CollectionEntry<'blog'>[]> | null = null
+
+/**
+ * Reset the backlinks cache. Useful for testing.
+ */
+export function resetBacklinksCache() {
+  _backlinksMap = null
+}
 
 export function resolveLinkToId(url: string, sourceId: string): string | null {
   const cleanUrl = url.split('#')[0].split('?')[0]
@@ -35,7 +58,7 @@ export function resolveLinkToId(url: string, sourceId: string): string | null {
   return null
 }
 
-function normalizeId(id: string): string {
+export function normalizeId(id: string): string {
   return id.endsWith('/index') ? id.replace(/\/index$/, '') : id
 }
 
@@ -52,25 +75,17 @@ async function getBacklinksMap(): Promise<
   const allPosts = await getAllPostsAndSubposts()
 
   for (const sourcePost of allPosts) {
-    // Scan body for links
-    MARKDOWN_LINK_REGEX.lastIndex = 0
-    let match
-    while ((match = MARKDOWN_LINK_REGEX.exec(sourcePost.body || '')) !== null) {
-      const url = match[1]
-      const targetIdRaw = resolveLinkToId(url, sourcePost.id)
+    const targetIds = extractInternalLinks(sourcePost.body || '', sourcePost.id)
 
-      if (targetIdRaw) {
-        const targetId = normalizeId(targetIdRaw)
+    for (const targetId of targetIds) {
+      if (!_backlinksMap.has(targetId)) {
+        _backlinksMap.set(targetId, [])
+      }
+      const list = _backlinksMap.get(targetId)!
 
-        if (!_backlinksMap.has(targetId)) {
-          _backlinksMap.set(targetId, [])
-        }
-        const list = _backlinksMap.get(targetId)!
-
-        // Avoid adding the same source post multiple times for the same target
-        if (!list.some((p) => p.id === sourcePost.id)) {
-          list.push(sourcePost)
-        }
+      // Avoid adding the same source post multiple times for the same target
+      if (!list.some((p) => p.id === sourcePost.id)) {
+        list.push(sourcePost)
       }
     }
   }

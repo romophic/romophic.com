@@ -14,8 +14,6 @@ export function formatDate(date: Date) {
   }).format(date)
 }
 
-
-
 export function getHeadingMargin(depth: number): string {
   const margins: Record<number, string> = {
     3: 'ml-4',

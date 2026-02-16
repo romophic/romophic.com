@@ -13,11 +13,40 @@ import { parseAuthors } from './content/authors'
 import { getTOCSections } from './content/toc'
 import { getBacklinks } from './content/links'
 
-// Re-export everything from sub-modules to maintain compatibility
-export * from './content/posts'
-export * from './content/authors'
-export * from './content/toc'
-export * from './content/links'
+export {
+  getAllPosts,
+  getAllPostsAndSubposts,
+  getAllProjects,
+  getAllTags,
+  getAdjacentPosts,
+  getParentPost,
+  getPostById,
+  getPostsByTag,
+  getRecentPosts,
+  getSortedTags,
+  getSubpostsForParent,
+  hasSubposts,
+  isSubpost,
+  getParentId,
+  getSubpostCount,
+  getPostReadingTime,
+  getCombinedReadingTime,
+  groupPostsByYear,
+  getPostsForCommandMenu,
+  resetPostsCache,
+} from './content/posts'
+
+export { parseAuthors, getAllAuthors, getPostsByAuthor } from './content/authors'
+export { getTOCSections } from './content/toc'
+export {
+  resolveLinkToId,
+  normalizeId,
+  getBacklinks,
+  extractInternalLinks,
+  MARKDOWN_LINK_REGEX,
+  resetBacklinksCache,
+} from './content/links'
+export { getSubpostsData } from './content/subposts-data'
 
 /**
  * Aggregates all data needed for a single post page.

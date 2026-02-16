@@ -1,18 +1,32 @@
-import { getAllPostsAndSubposts, resolveLinkToId } from '@/lib/data-utils'
+import { getAllPostsAndSubposts, extractInternalLinks, normalizeId } from '@/lib/data-utils'
+
+type GraphApiNode = {
+  id: string
+  name: string
+  val: number
+  group: 'post' | 'tag'
+  color?: string
+}
+
+type GraphApiLink = {
+  source: string
+  target: string
+  value: number
+}
 
 export async function GET() {
   const posts = await getAllPostsAndSubposts()
 
-  const nodes: {
-    id: string
-    name: string
-    val: number
-    group: string
-    color?: string
-  }[] = []
-  const links: { source: string; target: string; value: number }[] = []
+  const nodes: GraphApiNode[] = []
+  const links: GraphApiLink[] = []
   const tagSet = new Set<string>()
   const postIds = new Set(posts.map((p) => p.id))
+
+  // Build a normalized ID -> actual ID map for O(1) lookup
+  const normalizedIdMap = new Map<string, string>()
+  for (const pid of postIds) {
+    normalizedIdMap.set(normalizeId(pid), pid)
+  }
 
   // 1. Add Post Nodes and Tag Links
   for (const post of posts) {
@@ -48,31 +62,18 @@ export async function GET() {
   }
 
   // 3. Add Internal Links (Post to Post)
-  const normalize = (id: string) =>
-    id.endsWith('/index') ? id.replace(/\/index$/, '') : id
-
   for (const post of posts) {
-    const localRegex = /\[.*?\]\((.*?)\)/g
-    let match
+    const targetIds = extractInternalLinks(post.body || '', post.id)
 
-    while ((match = localRegex.exec(post.body || '')) !== null) {
-      const url = match[1]
-      const targetId = resolveLinkToId(url, post.id)
+    for (const normTarget of targetIds) {
+      const foundId = normalizedIdMap.get(normTarget)
 
-      if (targetId) {
-        const normTarget = normalize(targetId)
-        // Find matching actual post ID
-        const foundId = Array.from(postIds).find(
-          (pid) => normalize(pid) === normTarget,
-        )
-
-        if (foundId && foundId !== post.id) {
-          links.push({
-            source: post.id,
-            target: foundId,
-            value: 2, // Stronger connection between posts
-          })
-        }
+      if (foundId && foundId !== post.id) {
+        links.push({
+          source: post.id,
+          target: foundId,
+          value: 2, // Stronger connection between posts
+        })
       }
     }
   }

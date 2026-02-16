@@ -35,6 +35,13 @@ export async function getStaticPaths() {
 // In-memory cache for the font data.
 let fontsCache: { inter: ArrayBuffer; notoSansJP: ArrayBuffer | null } | null = null
 
+const FONT_CACHE_DIR = path.join(
+  process.cwd(),
+  'node_modules',
+  '.cache',
+  'og-fonts',
+)
+
 async function getFonts() {
   if (fontsCache) return fontsCache
   try {
@@ -50,19 +57,30 @@ async function getFonts() {
     const interBuffer = await readFile(interPath)
     const inter = new Uint8Array(interBuffer).buffer as ArrayBuffer
 
-    // Fetch Noto Sans JP (Optional / Fallback)
+    // Fetch Noto Sans JP with disk cache
     let notoSansJP: ArrayBuffer | null = null
+    const notoSansCachePath = path.join(FONT_CACHE_DIR, 'NotoSansJP-Bold.ttf')
+
     try {
-      const res = await fetch(
-        'https://raw.githubusercontent.com/google/fonts/main/ofl/notosansjp/NotoSansJP-Bold.ttf',
-      )
-      if (res.ok) {
-        notoSansJP = await res.arrayBuffer()
+      if (existsSync(notoSansCachePath)) {
+        // Load from disk cache
+        const cached = await readFile(notoSansCachePath)
+        notoSansJP = new Uint8Array(cached).buffer as ArrayBuffer
       } else {
-        console.warn(`Failed to fetch Noto Sans JP: ${res.statusText}`)
+        // Fetch from network and save to disk
+        const res = await fetch(
+          'https://raw.githubusercontent.com/google/fonts/main/ofl/notosansjp/NotoSansJP-Bold.ttf',
+        )
+        if (res.ok) {
+          notoSansJP = await res.arrayBuffer()
+          await mkdir(FONT_CACHE_DIR, { recursive: true })
+          await writeFile(notoSansCachePath, new Uint8Array(notoSansJP))
+        } else {
+          console.warn(`Failed to fetch Noto Sans JP: ${res.statusText}`)
+        }
       }
     } catch (e) {
-      console.warn('Failed to fetch Noto Sans JP:', e)
+      console.warn('Failed to load Noto Sans JP:', e)
     }
 
     fontsCache = { inter, notoSansJP }
@@ -154,13 +172,13 @@ export const GET = async ({
     weight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
     style: 'normal' | 'italic'
   }[] = [
-    {
-      name: 'Inter',
-      data: fonts.inter,
-      weight: 700,
-      style: 'normal',
-    },
-  ]
+      {
+        name: 'Inter',
+        data: fonts.inter,
+        weight: 700,
+        style: 'normal',
+      },
+    ]
 
   if (fonts.notoSansJP) {
     fontConfig.push({

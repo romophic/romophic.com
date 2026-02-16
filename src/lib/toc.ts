@@ -1,10 +1,19 @@
+import {
+  buildHeadingRegions,
+  getVisibleHeadingIds,
+  headingIdsChanged,
+  scrollToCenter,
+  updateScrollMaskClasses,
+  type HeadingRegion,
+} from './toc-core'
+
 const HEADER_OFFSET = 150
 
 class TOCState {
   links: NodeListOf<Element> = document.querySelectorAll('[data-heading-link]')
   activeIds: string[] = []
   headings: HTMLElement[] = []
-  regions: { id: string; start: number; end: number }[] = []
+  regions: HeadingRegion[] = []
   scrollArea: HTMLElement | null = null
   tocScrollArea: HTMLElement | null = null
   ticking: boolean = false
@@ -22,82 +31,24 @@ class TOCState {
     this.tocScrollArea =
       tocContainer?.querySelector('[data-toc-scroll-area]') || null
   }
+
+  buildRegions() {
+    const result = buildHeadingRegions()
+    this.headings = result.headings
+    this.regions = result.regions
+  }
+
+  getVisibleIds(): string[] {
+    return getVisibleHeadingIds(this.headings, this.regions, HEADER_OFFSET)
+  }
 }
 
 const state = new TOCState()
 
-class HeadingRegions {
-  static build() {
-    state.headings = Array.from(
-      document.querySelectorAll<HTMLElement>(
-        '.prose h2, .prose h3, .prose h4, .prose h5, .prose h6',
-      ),
-    )
-
-    if (state.headings.length === 0) {
-      state.regions = []
-      return
-    }
-
-    state.regions = state.headings.map((heading, index) => {
-      const nextHeading = state.headings[index + 1]
-      return {
-        id: heading.id,
-        start: heading.offsetTop,
-        end: nextHeading ? nextHeading.offsetTop : document.body.scrollHeight,
-      }
-    })
-  }
-
-  static getVisibleIds(): string[] {
-    if (state.headings.length === 0) return []
-
-    const viewportTop = window.scrollY + HEADER_OFFSET
-    const viewportBottom = window.scrollY + window.innerHeight
-    const visibleIds = new Set<string>()
-
-    const isInViewport = (top: number, bottom: number) =>
-      (top >= viewportTop && top <= viewportBottom) ||
-      (bottom >= viewportTop && bottom <= viewportBottom) ||
-      (top <= viewportTop && bottom >= viewportBottom)
-
-    state.headings.forEach((heading) => {
-      const headingBottom = heading.offsetTop + heading.offsetHeight
-      if (isInViewport(heading.offsetTop, headingBottom)) {
-        visibleIds.add(heading.id)
-      }
-    })
-
-    state.regions.forEach((region) => {
-      if (region.start <= viewportBottom && region.end >= viewportTop) {
-        const heading = document.getElementById(region.id)
-        if (heading) {
-          const headingBottom = heading.offsetTop + heading.offsetHeight
-          if (
-            region.end > headingBottom &&
-            (headingBottom < viewportBottom || viewportTop < region.end)
-          ) {
-            visibleIds.add(region.id)
-          }
-        }
-      }
-    })
-
-    return Array.from(visibleIds)
-  }
-}
-
 class TOCScrollMask {
   static update() {
     if (!state.scrollArea || !state.tocScrollArea) return
-
-    const { scrollTop, scrollHeight, clientHeight } = state.scrollArea
-    const threshold = 5
-    const isAtTop = scrollTop <= threshold
-    const isAtBottom = scrollTop >= scrollHeight - clientHeight - threshold
-
-    state.tocScrollArea.classList.toggle('mask-t-from-90%', !isAtTop)
-    state.tocScrollArea.classList.toggle('mask-b-from-90%', !isAtBottom)
+    updateScrollMaskClasses(state.scrollArea, state.tocScrollArea)
   }
 }
 
@@ -129,23 +80,7 @@ class TOCLinks {
     )
     if (!activeLink) return
 
-    const { top: areaTop, height: areaHeight } =
-      state.scrollArea.getBoundingClientRect()
-    const { top: linkTop, height: linkHeight } =
-      activeLink.getBoundingClientRect()
-
-    const currentLinkTop = linkTop - areaTop + state.scrollArea.scrollTop
-    const targetScroll = Math.max(
-      0,
-      Math.min(
-        currentLinkTop - (areaHeight - linkHeight) / 2,
-        state.scrollArea.scrollHeight - state.scrollArea.clientHeight,
-      ),
-    )
-
-    if (Math.abs(targetScroll - state.scrollArea.scrollTop) > 5) {
-      state.scrollArea.scrollTop = targetScroll
-    }
+    scrollToCenter(state.scrollArea, activeLink)
   }
 }
 
@@ -155,9 +90,9 @@ export class TOCController {
     state.ticking = true
 
     requestAnimationFrame(() => {
-      const newActiveIds = HeadingRegions.getVisibleIds()
+      const newActiveIds = state.getVisibleIds()
 
-      if (JSON.stringify(newActiveIds) !== JSON.stringify(state.activeIds)) {
+      if (headingIdsChanged(state.activeIds, newActiveIds)) {
         state.activeIds = newActiveIds
         TOCLinks.update(state.activeIds)
       }
@@ -168,10 +103,10 @@ export class TOCController {
   static handleTOCScroll = () => TOCScrollMask.update()
 
   static handleResize = () => {
-    HeadingRegions.build()
-    const newActiveIds = HeadingRegions.getVisibleIds()
+    state.buildRegions()
+    const newActiveIds = state.getVisibleIds()
 
-    if (JSON.stringify(newActiveIds) !== JSON.stringify(state.activeIds)) {
+    if (headingIdsChanged(state.activeIds, newActiveIds)) {
       state.activeIds = newActiveIds
       TOCLinks.update(state.activeIds)
     }
@@ -181,7 +116,7 @@ export class TOCController {
 
   static init() {
     state.reset()
-    HeadingRegions.build()
+    state.buildRegions()
 
     if (state.headings.length === 0) {
       TOCLinks.update([])

@@ -1,4 +1,4 @@
-import type { IconMap, SocialLink, Site } from '@/types'
+import type { SocialLink, Site } from '@/types'
 
 export const SITE: Site = {
   title: 'romophic',
@@ -49,14 +49,14 @@ export const SOCIAL_LINKS: SocialLink[] = [
   },
 ]
 
-export const ICON_MAP: IconMap = {
+export const ICON_MAP = {
   Website: 'lucide:globe',
   GitHub: 'lucide:github',
   LinkedIn: 'lucide:linkedin',
   Twitter: 'lucide:twitter',
   Email: 'lucide:mail',
   RSS: 'lucide:rss',
-}
+} as const satisfies Record<string, string>
 
 export const READING_SPEED_WPM = 200
 export const SCROLL_TO_TOP_THRESHOLD = 300
@@ -97,7 +97,6 @@ export const GRAPH_CONFIG = {
       nodeTag: '#a855f7',
       link: 'rgba(255, 255, 255, 0.08)',
       linkHighlight: '#fff',
-      particle: 'rgba(255, 255, 255, 0.5)',
       grid: 'rgba(255, 255, 255, 0.03)',
       glowIntensity: 20,
       glowIntensityHover: 35,
@@ -108,7 +107,6 @@ export const GRAPH_CONFIG = {
       nodeTag: '#7e22ce',
       link: 'rgba(0, 0, 0, 0.08)',
       linkHighlight: '#000',
-      particle: 'rgba(0, 0, 0, 0.4)',
       grid: 'rgba(0, 0, 0, 0.03)',
       glowIntensity: 6,
       glowIntensityHover: 15,
@@ -144,13 +142,33 @@ export const GRAPH_CONFIG = {
 
 export const ICONS = {
   arrowUp: 'lucide:arrow-up',
-  hash: 'lucide:hash',
-  fileText: 'lucide:file-text',
+  arrowRight: 'lucide:arrow-right',
+  arrowLeft: 'lucide:arrow-left',
+  bookCopy: 'lucide:book-copy',
   bookOpen: 'lucide:book-open',
   bookOpenText: 'lucide:book-open-text',
+  calendar: 'lucide:calendar',
+  chevronDown: 'lucide:chevron-down',
+  circleHelp: 'lucide:circle-help',
+  cornerLeftUp: 'lucide:corner-left-up',
+  file: 'lucide:file',
+  fileText: 'lucide:file-text',
+  github: 'lucide:github',
+  hash: 'lucide:hash',
+  home: 'lucide:home',
+  info: 'lucide:info',
   libraryBig: 'lucide:library-big',
   link: 'lucide:link',
+  mail: 'lucide:mail',
+  messageCircleQuestion: 'lucide:message-circle-question',
+  moon: 'lucide:moon',
   network: 'lucide:share-2',
+  rss: 'lucide:rss',
+  search: 'lucide:search',
+  sun: 'lucide:sun',
+  tag: 'lucide:tag',
+  tags: 'lucide:tags',
+  twitter: 'lucide:twitter',
   user: 'lucide:user',
   users: 'lucide:users',
-}
+} as const satisfies Record<string, string>

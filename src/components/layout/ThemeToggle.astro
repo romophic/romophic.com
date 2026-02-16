@@ -1,5 +1,6 @@
 ---
 import { Button } from '@/components/ui/button'
+import { ICONS } from '@/consts'
 import { Icon } from 'astro-icon/components'
 ---
 
@@ -8,14 +9,15 @@ import { Icon } from 'astro-icon/components'
   size="icon"
   title="Toggle theme"
   className="-my-2 -me-2 size-8"
+  data-theme-toggle
 >
   <div class="relative flex items-center justify-center">
     <Icon
-      name="lucide:sun"
+      name={ICONS.sun}
       class="size-4 scale-100 rotate-0 transition-all duration-300 dark:scale-0 dark:-rotate-90"
     />
     <Icon
-      name="lucide:moon"
+      name={ICONS.moon}
       class="absolute size-4 scale-0 rotate-90 transition-all duration-300 dark:scale-100 dark:rotate-0"
     />
   </div>
@@ -24,7 +26,7 @@ import { Icon } from 'astro-icon/components'
 
 <script>
   function setupThemeToggle() {
-    const button = document.querySelector('button[title="Toggle theme"]')
+    const button = document.querySelector('[data-theme-toggle]')
     if (!button) return
 
     const handleToggle = () => {

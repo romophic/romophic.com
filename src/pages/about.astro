@@ -2,6 +2,7 @@
 import ProjectCard from '@/components/common/ProjectCard.astro'
 import Breadcrumbs from '@/components/layout/Breadcrumbs.astro'
 import PageHead from '@/components/layout/PageHead.astro'
+import { ICONS } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import { getAllProjects } from '@/lib/data-utils'
 import { Icon } from 'astro-icon/components'
@@ -11,7 +12,7 @@ const projects = await getAllProjects()
 
 <Layout class="max-w-3xl">
   <PageHead slot="head" title="About" />
-  <Breadcrumbs items={[{ label: 'About', icon: 'lucide:info' }]} />
+  <Breadcrumbs items={[{ label: 'About', icon: ICONS.info }]} />
 
   <section class="space-y-12">
     {/* Page Title */}
@@ -118,19 +119,19 @@ const projects = await getAllProjects()
             {
               name: 'GitHub',
               href: 'https://github.com/romophic',
-              icon: 'lucide:github',
+              icon: ICONS.github,
             },
             {
               name: 'Twitter',
               href: 'https://twitter.com/romophic',
-              icon: 'lucide:twitter',
+              icon: ICONS.twitter,
             },
             {
               name: 'Email',
               href: 'mailto:nariyu.pub@gmail.com',
-              icon: 'lucide:mail',
+              icon: ICONS.mail,
             },
-            { name: 'RSS', href: '/rss.xml', icon: 'lucide:rss' },
+            { name: 'RSS', href: '/rss.xml', icon: ICONS.rss },
           ].map((social) => (
             <a
               href={social.href}

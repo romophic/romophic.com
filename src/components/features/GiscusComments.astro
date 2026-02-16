@@ -36,6 +36,7 @@ import { GISCUS_CONFIG } from '@/consts'
 
   document.addEventListener('astro:page-load', () => {
     updateGiscusTheme()
+    window.removeEventListener('theme-change', updateGiscusTheme)
     window.addEventListener('theme-change', updateGiscusTheme)
   })
 </script>

@@ -1,7 +1,8 @@
 ---
 
 import ThemeToggle from '@/components/layout/ThemeToggle.astro'
-import { NAV_LINKS, SITE } from '@/consts'
+import { ICONS, NAV_LINKS, SITE } from '@/consts'
+import { Icon } from 'astro-icon/components'
 ---
 
 <div>
@@ -32,20 +33,7 @@ import { NAV_LINKS, SITE } from '@/consts'
         onclick="window.toggleCommandMenu()"
         aria-label="Open Command Menu"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="lucide lucide-search size-5"
-          ><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"
-          ></path></svg
-        >
+        <Icon name={ICONS.search} class="size-5" />
         <span class="sr-only">Search</span>
       </button>
       <ThemeToggle transition:persist />

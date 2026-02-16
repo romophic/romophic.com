@@ -19,24 +19,26 @@ import { Icon } from 'astro-icon/components'
 </Button>
 
 <script is:inline define:vars={{ SCROLL_TO_TOP_THRESHOLD }}>
-  document.addEventListener('astro:page-load', () => {
-    const scrollToTopButton = document.getElementById('scroll-to-top')
-    const footer = document.querySelector('footer')
+  ;(function () {
+    let handleScroll = null
+    let handleClick = null
 
-    if (scrollToTopButton && footer) {
-      scrollToTopButton.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-      })
+    document.addEventListener('astro:page-load', () => {
+      const btn = document.getElementById('scroll-to-top')
+      const footer = document.querySelector('footer')
+      if (!btn || !footer) return
 
-      window.addEventListener('scroll', () => {
-        const footerRect = footer.getBoundingClientRect()
-        const isFooterVisible = footerRect.top <= window.innerHeight
+      if (handleScroll) window.removeEventListener('scroll', handleScroll)
+      if (handleClick) btn.removeEventListener('click', handleClick)
 
-        scrollToTopButton.classList.toggle(
-          'hidden',
-          window.scrollY <= SCROLL_TO_TOP_THRESHOLD || isFooterVisible,
-        )
-      })
-    }
-  })
+      handleClick = () => window.scrollTo({ top: 0, behavior: 'smooth' })
+      handleScroll = () => {
+        const isFooterVisible = footer.getBoundingClientRect().top <= window.innerHeight
+        btn.classList.toggle('hidden', window.scrollY <= SCROLL_TO_TOP_THRESHOLD || isFooterVisible)
+      }
+
+      btn.addEventListener('click', handleClick)
+      window.addEventListener('scroll', handleScroll, { passive: true })
+    })
+  })()
 </script>

@@ -1,49 +1,25 @@
 ---
 import { ScrollArea } from '@/components/ui/scroll-area'
-import {
-  getCombinedReadingTime,
-  getParentId,
-  getParentPost,
-  getPostById,
-  getPostReadingTime,
-  getSubpostsForParent,
-  isSubpost,
-} from '@/lib/data-utils'
+import { ICONS } from '@/consts'
+import { getSubpostsData } from '@/lib/data-utils'
 import { Icon } from 'astro-icon/components'
+import SubpostItem from './SubpostItem.astro'
 
 const { parentId } = Astro.props
 const currentPostId = Astro.params.id as string
-const isCurrentSubpost = isSubpost(currentPostId)
-const rootParentId = isCurrentSubpost ? getParentId(currentPostId) : parentId
 
-const currentPost = !isCurrentSubpost ? await getPostById(currentPostId) : null
-const subposts = await getSubpostsForParent(rootParentId)
-const parentPost = isCurrentSubpost ? await getParentPost(currentPostId) : null
-
-const activePost = parentPost || currentPost
-const isActivePost = activePost?.id === currentPostId
-
-const activePostReadingTime = activePost
-  ? await getPostReadingTime(activePost.id)
-  : null
-const activePostCombinedReadingTime =
-  activePost && subposts.length > 0
-    ? await getCombinedReadingTime(activePost.id)
-    : null
-const subpostsWithReadingTime = await Promise.all(
-  subposts.map(async (subpost) => ({
-    ...subpost,
-    readingTime: await getPostReadingTime(subpost.id),
-  })),
-)
-
-const currentSubpostDetails = isCurrentSubpost
-  ? subpostsWithReadingTime.find((subpost) => subpost.id === currentPostId)
-  : null
+const {
+  activePost,
+  isActivePost,
+  activePostReadingTime,
+  activePostCombinedReadingTime,
+  subpostsWithReadingTime,
+  currentSubpostDetails,
+} = await getSubpostsData(parentId, currentPostId)
 ---
 
 {
-  activePost && subposts.length > 0 && (
+  activePost && subpostsWithReadingTime.length > 0 && (
     <mobile-subposts
       id="mobile-subposts-container"
       class="block w-full xl:hidden"
@@ -55,10 +31,10 @@ const currentSubpostDetails = isCurrentSubpost
               <Icon
                 name={
                   currentSubpostDetails
-                    ? 'lucide:file-text'
+                    ? ICONS.fileText
                     : isActivePost
-                      ? 'lucide:book-open-text'
-                      : 'lucide:book-open'
+                      ? ICONS.bookOpenText
+                      : ICONS.bookOpen
                 }
                 class="size-4 flex-shrink-0"
                 aria-hidden="true"
@@ -73,7 +49,7 @@ const currentSubpostDetails = isCurrentSubpost
             </div>
             <span class="text-muted-foreground ml-2">
               <Icon
-                name="lucide:chevron-down"
+                name={ICONS.chevronDown}
                 class="h-4 w-4 transition-transform duration-200 group-open:rotate-180"
               />
             </span>
@@ -89,101 +65,34 @@ const currentSubpostDetails = isCurrentSubpost
             <ul class="flex list-none flex-col gap-y-1 px-4 pb-4">
               {activePost && (
                 <li>
-                  {isActivePost ? (
-                    <div class="text-foreground bg-muted mobile-subposts-active-item flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium">
-                      <Icon
-                        name="lucide:book-open-text"
-                        class="size-4 flex-shrink-0"
-                        aria-hidden="true"
-                      />
-                      <div class="flex flex-col">
-                        <span class="line-clamp-2">
-                          {activePost.data.title}
-                        </span>
-                        {activePostReadingTime && (
-                          <span class="text-muted-foreground/80 text-xs">
-                            {activePostReadingTime}
-                            {activePostCombinedReadingTime &&
-                              activePostCombinedReadingTime !==
-                                activePostReadingTime && (
-                                <span>
-                                  {' '}
-                                  ({activePostCombinedReadingTime} total)
-                                </span>
-                              )}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <a
-                      href={`/blog/${activePost.id}`}
-                      class="mobile-subposts-link hover:text-foreground text-muted-foreground hover:bg-muted/50 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors"
-                    >
-                      <Icon
-                        name="lucide:book-open"
-                        class="size-4 flex-shrink-0"
-                        aria-hidden="true"
-                      />
-                      <div class="flex flex-col">
-                        <span class="line-clamp-2">
-                          {activePost.data.title}
-                        </span>
-                        {activePostReadingTime && (
-                          <span class="text-muted-foreground/80 hover:text-foreground/80 text-xs">
-                            {activePostReadingTime}
-                            {activePostCombinedReadingTime &&
-                              activePostCombinedReadingTime !==
-                                activePostReadingTime && (
-                                <span>
-                                  {' '}
-                                  ({activePostCombinedReadingTime} total)
-                                </span>
-                              )}
-                          </span>
-                        )}
-                      </div>
-                    </a>
-                  )}
+                  <SubpostItem
+                    title={activePost.data.title}
+                    href={`/blog/${activePost.id}`}
+                    readingTime={activePostReadingTime}
+                    combinedReadingTime={activePostCombinedReadingTime}
+                    isActive={isActivePost}
+                    icon={ICONS.bookOpen}
+                    activeIcon={ICONS.bookOpenText}
+                    activeClassName="mobile-subposts-active-item"
+                    linkClassName="mobile-subposts-link"
+                  />
                 </li>
               )}
 
               {subpostsWithReadingTime.length > 0 && (
                 <div class="ml-4 space-y-1">
-                  {subpostsWithReadingTime.map((subpost) =>
-                    currentPostId === subpost.id ? (
-                      <div class="text-foreground bg-muted mobile-subposts-active-item flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium">
-                        <Icon
-                          name="lucide:file-text"
-                          class="size-4 flex-shrink-0"
-                          aria-hidden="true"
-                        />
-                        <div class="flex flex-col">
-                          <span class="line-clamp-2">{subpost.data.title}</span>
-                          <span class="text-muted-foreground/80 text-xs">
-                            {subpost.readingTime}
-                          </span>
-                        </div>
-                      </div>
-                    ) : (
-                      <a
-                        href={`/blog/${subpost.id}`}
-                        class="mobile-subposts-link hover:text-foreground text-muted-foreground hover:bg-muted/50 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors"
-                      >
-                        <Icon
-                          name="lucide:file"
-                          class="size-4 flex-shrink-0"
-                          aria-hidden="true"
-                        />
-                        <div class="flex flex-col">
-                          <span class="line-clamp-2">{subpost.data.title}</span>
-                          <span class="text-muted-foreground/80 hover:text-foreground/80 text-xs">
-                            {subpost.readingTime}
-                          </span>
-                        </div>
-                      </a>
-                    ),
-                  )}
+                  {subpostsWithReadingTime.map((subpost) => (
+                    <SubpostItem
+                      title={subpost.data.title}
+                      href={`/blog/${subpost.id}`}
+                      readingTime={subpost.readingTime}
+                      isActive={currentPostId === subpost.id}
+                      icon={ICONS.file}
+                      activeIcon={ICONS.fileText}
+                      activeClassName="mobile-subposts-active-item"
+                      linkClassName="mobile-subposts-link"
+                    />
+                  ))}
                 </div>
               )}
             </ul>
@@ -195,6 +104,8 @@ const currentSubpostDetails = isCurrentSubpost
 }
 
 <script>
+  import { scrollToCenter, updateScrollMaskClasses } from '@/lib/toc-core'
+
   class MobileSubposts extends HTMLElement {
     private scrollArea: HTMLElement | null = null
     private detailsElement: HTMLDetailsElement | null = null
@@ -227,39 +138,19 @@ const currentSubpostDetails = isCurrentSubpost
 
     updateScrollMask() {
       if (!this.scrollArea || !this.headerScrollArea) return
-
-      const { scrollTop, scrollHeight, clientHeight } = this.scrollArea
-      const threshold = 5
-      const isAtTop = scrollTop <= threshold
-      const isAtBottom = scrollTop >= scrollHeight - clientHeight - threshold
-
-      this.headerScrollArea.classList.toggle('mask-t-from-80%', !isAtTop)
-      this.headerScrollArea.classList.toggle('mask-b-from-80%', !isAtBottom)
+      updateScrollMaskClasses(this.scrollArea, this.headerScrollArea, {
+        topClass: 'mask-t-from-80%',
+        bottomClass: 'mask-b-from-80%',
+      })
     }
 
     scrollToActive() {
       if (!this.scrollArea) return
-
       const activeItem = this.scrollArea.querySelector(
         '.mobile-subposts-active-item',
       )
       if (!activeItem) return
-
-      const { top: areaTop, height: areaHeight } =
-        this.scrollArea.getBoundingClientRect()
-      const { top: itemTop, height: itemHeight } =
-        activeItem.getBoundingClientRect()
-
-      const currentItemTop = itemTop - areaTop + this.scrollArea.scrollTop
-      const targetScroll = Math.max(
-        0,
-        Math.min(
-          currentItemTop - (areaHeight - itemHeight) / 2,
-          this.scrollArea.scrollHeight - this.scrollArea.clientHeight,
-        ),
-      )
-
-      this.scrollArea.scrollTop = targetScroll
+      scrollToCenter(this.scrollArea, activeItem, 0)
     }
 
     setupInteraction() {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { resolveLinkToId } from './links'
+import { resolveLinkToId, normalizeId } from './links'
 
 describe('links utils', () => {
   describe('resolveLinkToId', () => {
@@ -38,5 +38,93 @@ describe('links utils', () => {
       expect(resolveLinkToId('https://example.com', 'source')).toBeNull()
       expect(resolveLinkToId('mailto:user@example.com', 'source')).toBeNull()
     })
+
+    it('strips anchor fragments before resolving', () => {
+      expect(resolveLinkToId('/blog/my-post#section-1', 'source')).toBe(
+        'my-post',
+      )
+    })
+
+    it('strips query parameters before resolving', () => {
+      expect(resolveLinkToId('/blog/my-post?foo=bar', 'source')).toBe(
+        'my-post',
+      )
+    })
+
+    it('ignores protocol-relative URLs', () => {
+      expect(resolveLinkToId('//example.com/blog', 'source')).toBeNull()
+    })
+
+    it('resolves bare relative paths (without ./ prefix)', () => {
+      const sourceId = 'parent/child'
+      expect(resolveLinkToId('sibling', sourceId)).toBe('parent/sibling')
+    })
+
+    it('returns null for non-blog absolute paths', () => {
+      expect(resolveLinkToId('/about', 'source')).toBeNull()
+      expect(resolveLinkToId('/graph', 'source')).toBeNull()
+    })
+
+    it('strips trailing slashes from blog links', () => {
+      expect(resolveLinkToId('/blog/my-post/', 'source')).toBe('my-post')
+    })
+  })
+
+  describe('normalizeId', () => {
+    it('strips /index suffix', () => {
+      expect(normalizeId('romophic-library/index')).toBe('romophic-library')
+    })
+
+    it('leaves non-index ids unchanged', () => {
+      expect(normalizeId('my-post')).toBe('my-post')
+      expect(normalizeId('romophic-library/lib/directed-graph')).toBe(
+        'romophic-library/lib/directed-graph',
+      )
+    })
+
+    it('only strips trailing /index', () => {
+      expect(normalizeId('index')).toBe('index')
+      expect(normalizeId('my-index')).toBe('my-index')
+    })
+
+    it('handles deeply nested index', () => {
+      expect(normalizeId('a/b/c/index')).toBe('a/b/c')
+    })
+  })
+})
+
+describe('extractInternalLinks', () => {
+  it('extracts absolute blog links from markdown body', async () => {
+    const { extractInternalLinks } = await import('./links')
+    const body = 'See [my post](/blog/hello-world) and [another](/blog/parent/child) for details.'
+    const result = extractInternalLinks(body, 'source-post')
+    expect(result).toEqual(['hello-world', 'parent/child'])
+  })
+
+  it('extracts relative links resolved from source', async () => {
+    const { extractInternalLinks } = await import('./links')
+    const body = 'Check [sibling](./sibling-post) here.'
+    const result = extractInternalLinks(body, 'parent/current')
+    expect(result).toEqual(['parent/sibling-post'])
+  })
+
+  it('ignores external links', async () => {
+    const { extractInternalLinks } = await import('./links')
+    const body = '[Google](https://google.com) and [email](mailto:a@b.com)'
+    const result = extractInternalLinks(body, 'source')
+    expect(result).toEqual([])
+  })
+
+  it('returns empty array for body with no links', async () => {
+    const { extractInternalLinks } = await import('./links')
+    const result = extractInternalLinks('No links here.', 'source')
+    expect(result).toEqual([])
+  })
+
+  it('normalizes /index suffix in resolved links', async () => {
+    const { extractInternalLinks } = await import('./links')
+    const body = '[parent](/blog/romophic-library/index)'
+    const result = extractInternalLinks(body, 'source')
+    expect(result).toEqual(['romophic-library'])
   })
 })

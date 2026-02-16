@@ -1,5 +1,6 @@
 ---
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { ICONS } from '@/consts'
 import { cn, getHeadingMargin } from '@/lib/utils'
 import type { MarkdownHeading } from 'astro'
 import { Icon } from 'astro-icon/components'
@@ -51,7 +52,7 @@ const { headings } = Astro.props
             </span>
             <span class="text-muted-foreground ml-2">
               <Icon
-                name="lucide:chevron-down"
+                name={ICONS.chevronDown}
                 class="h-4 w-4 transition-transform duration-200 group-open:rotate-180"
               />
             </span>
@@ -94,6 +95,15 @@ const { headings } = Astro.props
 }
 
 <script>
+  import {
+    buildHeadingRegions,
+    getVisibleHeadingIds,
+    headingIdsChanged,
+    scrollToCenter,
+    updateScrollMaskClasses,
+    type HeadingRegion,
+  } from '@/lib/toc-core'
+
   const INITIAL_OVERVIEW_TEXT = 'Overview'
   const HEADER_OFFSET = 102 + 36
   const PROGRESS_CIRCLE_RADIUS = 10
@@ -106,7 +116,7 @@ const { headings } = Astro.props
     private listElement: HTMLElement | null = null
     private scrollArea: HTMLElement | null = null
     private headings: HTMLElement[] = []
-    private regions: { id: string; start: number; end: number }[] = []
+    private regions: HeadingRegion[] = []
     private activeIds: string[] = []
 
     constructor() {
@@ -143,7 +153,9 @@ const { headings } = Astro.props
           PROGRESS_CIRCLE_CIRCUMFERENCE.toString()
       }
 
-      this.buildRegions()
+      const result = buildHeadingRegions()
+      this.headings = result.headings
+      this.regions = result.regions
 
       if (!this.currentSectionText) return
 
@@ -156,7 +168,11 @@ const { headings } = Astro.props
         return
       }
 
-      this.activeIds = this.getVisibleIds()
+      this.activeIds = getVisibleHeadingIds(
+        this.headings,
+        this.regions,
+        HEADER_OFFSET,
+      )
       this.updateLinks(this.activeIds)
       this.updateProgressCircle()
 
@@ -165,69 +181,14 @@ const { headings } = Astro.props
       window.addEventListener('resize', this.handleResize, { passive: true })
     }
 
-    buildRegions() {
-      this.headings = Array.from(
-        document.querySelectorAll<HTMLElement>(
-          '.prose h2, .prose h3, .prose h4, .prose h5, .prose h6',
-        ),
+    handleScroll() {
+      const newActiveIds = getVisibleHeadingIds(
+        this.headings,
+        this.regions,
+        HEADER_OFFSET,
       )
 
-      if (this.headings.length === 0) {
-        this.regions = []
-        return
-      }
-
-      this.regions = this.headings.map((heading, index) => {
-        const nextHeading = this.headings[index + 1]
-        return {
-          id: heading.id,
-          start: heading.offsetTop,
-          end: nextHeading ? nextHeading.offsetTop : document.body.scrollHeight,
-        }
-      })
-    }
-
-    getVisibleIds(): string[] {
-      if (this.headings.length === 0) return []
-
-      const viewportTop = window.scrollY + HEADER_OFFSET
-      const viewportBottom = window.scrollY + window.innerHeight
-      const visibleIds = new Set<string>()
-
-      const isInViewport = (top: number, bottom: number) =>
-        (top >= viewportTop && top <= viewportBottom) ||
-        (bottom >= viewportTop && bottom <= viewportBottom) ||
-        (top <= viewportTop && bottom >= viewportBottom)
-
-      this.headings.forEach((heading) => {
-        const headingBottom = heading.offsetTop + heading.offsetHeight
-        if (isInViewport(heading.offsetTop, headingBottom)) {
-          visibleIds.add(heading.id)
-        }
-      })
-
-      this.regions.forEach((region) => {
-        if (region.start <= viewportBottom && region.end >= viewportTop) {
-          const heading = document.getElementById(region.id)
-          if (heading) {
-            const headingBottom = heading.offsetTop + heading.offsetHeight
-            if (
-              region.end > headingBottom &&
-              (headingBottom < viewportBottom || viewportTop < region.end)
-            ) {
-              visibleIds.add(region.id)
-            }
-          }
-        }
-      })
-
-      return Array.from(visibleIds)
-    }
-
-    handleScroll() {
-      const newActiveIds = this.getVisibleIds()
-
-      if (JSON.stringify(newActiveIds) !== JSON.stringify(this.activeIds)) {
+      if (headingIdsChanged(this.activeIds, newActiveIds)) {
         this.activeIds = newActiveIds
         this.updateLinks(this.activeIds)
       }
@@ -236,9 +197,16 @@ const { headings } = Astro.props
     }
 
     handleResize() {
-      this.buildRegions()
-      const newActiveIds = this.getVisibleIds()
-      if (JSON.stringify(newActiveIds) !== JSON.stringify(this.activeIds)) {
+      const result = buildHeadingRegions()
+      this.headings = result.headings
+      this.regions = result.regions
+
+      const newActiveIds = getVisibleHeadingIds(
+        this.headings,
+        this.regions,
+        HEADER_OFFSET,
+      )
+      if (headingIdsChanged(this.activeIds, newActiveIds)) {
         this.activeIds = newActiveIds
         this.updateLinks(this.activeIds)
       }
@@ -286,33 +254,14 @@ const { headings } = Astro.props
     }
 
     scrollToActive(activeHeadingId: string) {
-      if (!this.listElement) return
+      if (!this.listElement || !this.scrollArea) return
 
       const activeItem = this.listElement.querySelector(
         `[data-heading-id="${activeHeadingId}"]`,
       )
       if (!activeItem) return
 
-      const scrollContainer = this.scrollArea
-      if (!scrollContainer) return
-
-      const { top: containerTop, height: containerHeight } =
-        scrollContainer.getBoundingClientRect()
-      const { top: itemTop, height: itemHeight } =
-        activeItem.getBoundingClientRect()
-
-      const currentItemTop = itemTop - containerTop + scrollContainer.scrollTop
-      const targetScroll = Math.max(
-        0,
-        Math.min(
-          currentItemTop - (containerHeight - itemHeight) / 2,
-          scrollContainer.scrollHeight - scrollContainer.clientHeight,
-        ),
-      )
-
-      if (Math.abs(targetScroll - scrollContainer.scrollTop) > 5) {
-        scrollContainer.scrollTop = targetScroll
-      }
+      scrollToCenter(this.scrollArea, activeItem)
     }
 
     setupInteraction() {
@@ -359,14 +308,10 @@ const { headings } = Astro.props
 
     updateScrollMask() {
       if (!this.scrollArea) return
-
-      const { scrollTop, scrollHeight, clientHeight } = this.scrollArea
-      const threshold = 5
-      const isAtTop = scrollTop <= threshold
-      const isAtBottom = scrollTop >= scrollHeight - clientHeight - threshold
-
-      this.scrollArea.classList.toggle('mask-t-from-80%', !isAtTop)
-      this.scrollArea.classList.toggle('mask-b-from-80%', !isAtBottom)
+      updateScrollMaskClasses(this.scrollArea, this.scrollArea, {
+        topClass: 'mask-t-from-80%',
+        bottomClass: 'mask-b-from-80%',
+      })
     }
   }
 

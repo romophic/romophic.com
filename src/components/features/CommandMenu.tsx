@@ -44,6 +44,10 @@ export function CommandMenu({ posts: initialPosts = [] }: Partial<Props>) {
   const [searching, setSearching] = useState(false)
   const [pagefindResults, setPagefindResults] = useState<PagefindResult[]>([])
 
+  const navigate = (path: string) => {
+    setOpen(false)
+    window.location.href = path
+  }
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
@@ -115,26 +119,17 @@ export function CommandMenu({ posts: initialPosts = [] }: Partial<Props>) {
             {!query && (
               <CommandGroup heading="Suggestions">
                 <CommandItem
-                  onSelect={() => {
-                    setOpen(false)
-                    window.location.href = '/'
-                  }}
+                  onSelect={() => navigate('/')}
                 >
                   Home
                 </CommandItem>
                 <CommandItem
-                  onSelect={() => {
-                    setOpen(false)
-                    window.location.href = '/blog'
-                  }}
+                  onSelect={() => navigate('/blog')}
                 >
                   Blog
                 </CommandItem>
                 <CommandItem
-                  onSelect={() => {
-                    setOpen(false)
-                    window.location.href = '/projects'
-                  }}
+                  onSelect={() => navigate('/projects')}
                 >
                   Projects
                 </CommandItem>
@@ -148,10 +143,7 @@ export function CommandMenu({ posts: initialPosts = [] }: Partial<Props>) {
                   {pagefindResults.map((result) => (
                     <CommandItem
                       key={result.url}
-                      onSelect={() => {
-                        setOpen(false)
-                        window.location.href = result.url
-                      }}
+                      onSelect={() => navigate(result.url)}
                       className="items-start"
                     >
                       <div className="flex flex-col gap-1">
@@ -195,10 +187,7 @@ export function CommandMenu({ posts: initialPosts = [] }: Partial<Props>) {
                   {posts.map((post) => (
                     <CommandItem
                       key={post.id}
-                      onSelect={() => {
-                        setOpen(false)
-                        window.location.href = `/blog/${post.slug}`
-                      }}
+                      onSelect={() => navigate(`/blog/${post.slug}`)}
                     >
                       <span className="truncate">{post.title}</span>
                     </CommandItem>

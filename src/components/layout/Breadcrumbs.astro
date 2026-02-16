@@ -7,6 +7,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
+import { ICONS } from '@/consts'
 import { Icon } from 'astro-icon/components'
 
 export interface BreadcrumbItemType {
@@ -26,7 +27,7 @@ const { items } = Astro.props
   <BreadcrumbList>
     <BreadcrumbItem>
       <BreadcrumbLink href="/">
-        <Icon name="lucide:home" class="size-4 shrink-0" />
+        <Icon name={ICONS.home} class="size-4 shrink-0" />
       </BreadcrumbLink>
     </BreadcrumbItem>
     {

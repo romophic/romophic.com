@@ -16,10 +16,6 @@ export type SocialLink = {
   label: string
 }
 
-export type IconMap = {
-  [key: string]: string
-}
-
 export type Author = {
   id: string
   name: string
@@ -44,7 +40,7 @@ export type TOCSection = {
 export interface D3GraphNode extends d3.SimulationNodeDatum {
   id: string
   name: string
-  group: string
+  group: 'post' | 'tag'
   val: number
   degree?: number
   category?: number
@@ -55,7 +51,6 @@ export interface D3GraphLink extends d3.SimulationLinkDatum<D3GraphNode> {
   source: string | D3GraphNode
   target: string | D3GraphNode
   value: number
-  particles?: number[]
 }
 
 export type AdjacentPosts = {
