@@ -271,8 +271,16 @@ The project features a bi-directional linking system and a visualization graph.
 - [x] **Personal Identity:** Revamped the About page with structured Experience, Skills, and Connect sections.
 - [x] **Refined UX:** Improved search interaction (no flicker) and theme transitions (smooth cross-fade).
 - [x] **Lighthouse Polish:** Fixed PWA manifest paths, standardized robots.txt, and optimized heading hierarchy.
+- [x] **Refactoring (Round 2):** Icon unification (`ICONS` constant), Graph performance optimization (O(1) neighbor check), and strict type improvements.
+- [x] **Transition UX:** Implemented "Snappy" page transitions (immediate fade-out using `before-preparation`).
+- [x] **Graph View:** Added tag node navigation and addressed resize/skeleton issues.
+- [x] **Config:** Standardized Expressive Code style (removed terminal frame for shell).
+- [x] **Content:** Added "Neural Network from Scratch" article.
 
 ### Future Features
+- [ ] **Performance (Graph):** Remove D3.js dependency by implementing a custom lightweight physics engine (Verlet integration) and zoom/drag handlers.
+- [ ] **Performance (Loading):** Switch GraphView to `client:visible` to defer JS execution until scroll.
+- [ ] **Performance (Fonts):** Implement font subsetting for Japanese characters to reduce font file size.
 - [ ] Content: Complete algorithms library placeholders (`//TODO`).
 - [ ] i18n: Multi-language support.
 
@@ -304,4 +312,4 @@ This codebase is now a living organism. It breathes through the D3 simulation an
 
 ---
 
-_Context Updated: 2025-12-31 (Strict Typing, UX Polish & Document Consistency Complete)_
+_Context Updated: 2026-02-16 (Refactoring Round 2 & Snappy UX Implementation)_
