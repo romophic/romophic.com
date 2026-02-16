@@ -4,10 +4,11 @@ import '@/styles/typography.css'
 import '@fontsource-variable/noto-sans-jp'
 import 'katex/dist/katex.min.css'
 
-import { ClientRouter } from 'astro:transitions'
+
 
 import ScrollProgress from '@/components/common/ScrollProgress.astro'
 import { CommandMenu } from '@/components/features/CommandMenu'
+
 import PageLoader from '@/components/features/PageLoader.astro'
 import ReloadPrompt from '@/components/features/ReloadPrompt.astro'
 import Footer from '@/components/layout/Footer.astro'
@@ -15,15 +16,9 @@ import Head from '@/components/layout/Head.astro'
 import Header from '@/components/layout/Header.astro'
 import { SITE } from '@/consts'
 import { cn } from '@/lib/utils'
-import { getCollection } from 'astro:content'
+import { getPostsForCommandMenu } from '@/lib/content/posts'
 
-const posts = await getCollection('blog')
-const cleanPosts = posts.map((post) => ({
-  id: post.id,
-  title: post.data.title,
-  description: post.data.description,
-  slug: post.id, // Assuming id is slug for now or close enough. id includes content/blog/ path? No, simple slug usually
-}))
+const cleanPosts = await getPostsForCommandMenu()
 
 interface Props {
   class?: string
@@ -38,7 +33,6 @@ const { class: className } = Astro.props
   lang={SITE.locale}
 >
   <Head>
-    <ClientRouter />
     <slot name="head" />
   </Head>
   <body class="flex h-fit min-h-screen flex-col gap-y-6 font-sans">
