@@ -1,6 +1,5 @@
 ---
-
-import { ICON_MAP, ICONS, NAV_LINKS, SITE, SOCIAL_LINKS } from '@/consts'
+import { ICON_MAP, ICONS, SITE, SOCIAL_LINKS } from '@/consts'
 import { Icon } from 'astro-icon/components'
 ---
 
@@ -18,33 +17,10 @@ import { Icon } from 'astro-icon/components'
         </p>
       </div>
 
-      <!-- Navigation -->
-      <div class="flex flex-col gap-4">
-        <h3 class="font-medium">Navigation</h3>
-        <nav class="text-muted-foreground flex flex-col gap-2 text-sm">
-          {
-            NAV_LINKS.map((item) => (
-              <a
-                href={item.href}
-                class="hover:text-foreground w-fit transition-colors"
-              >
-                {item.label}
-              </a>
-            ))
-          }
-          <a
-            href="/rss.xml"
-            class="hover:text-foreground w-fit transition-colors"
-          >
-            RSS Feed
-          </a>
-        </nav>
-      </div>
-
-      <!-- Socials -->
+      <!-- Socials & RSS -->
       <div class="flex flex-col gap-4">
         <h3 class="font-medium">Connect</h3>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           {
             SOCIAL_LINKS.map((link) => (
               <a
@@ -55,12 +31,22 @@ import { Icon } from 'astro-icon/components'
                 aria-label={link.label}
               >
                 <Icon
-                  name={(ICON_MAP as Record<string, string>)[link.label] || ICONS.link}
+                  name={
+                    (ICON_MAP as Record<string, string>)[link.label] ||
+                    ICONS.link
+                  }
                   class="size-4"
                 />
               </a>
             ))
           }
+          <a
+            href="/rss.xml"
+            class="bg-background text-muted-foreground hover:bg-muted hover:text-foreground inline-flex size-9 items-center justify-center rounded-md border transition-colors"
+            aria-label="RSS Feed"
+          >
+            <Icon name={ICONS.rss} class="size-4" />
+          </a>
         </div>
       </div>
     </div>

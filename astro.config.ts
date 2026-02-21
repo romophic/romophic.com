@@ -5,6 +5,7 @@ import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
 import icon from 'astro-icon'
 import partytown from '@astrojs/partytown'
+import pagefind from 'astro-pagefind'
 
 import { rehypeHeadingIds } from '@astrojs/markdown-remark'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
@@ -73,7 +74,7 @@ export default defineConfig({
     react(),
     sitemap(),
     icon(),
-    icon(),
+    pagefind(),
     partytown({
       config: {
         forward: ['dataLayer.push'],

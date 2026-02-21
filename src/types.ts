@@ -1,4 +1,4 @@
-import type * as d3 from 'd3'
+import type { SimulationNodeDatum, SimulationLinkDatum } from 'd3-force'
 import type { CollectionEntry } from 'astro:content'
 
 export type Site = {
@@ -37,7 +37,7 @@ export type TOCSection = {
   subpostId?: string
 }
 
-export interface D3GraphNode extends d3.SimulationNodeDatum {
+export interface D3GraphNode extends SimulationNodeDatum {
   id: string
   name: string
   group: 'post' | 'tag'
@@ -47,7 +47,7 @@ export interface D3GraphNode extends d3.SimulationNodeDatum {
   color?: string
 }
 
-export interface D3GraphLink extends d3.SimulationLinkDatum<D3GraphNode> {
+export interface D3GraphLink extends SimulationLinkDatum<D3GraphNode> {
   source: string | D3GraphNode
   target: string | D3GraphNode
   value: number

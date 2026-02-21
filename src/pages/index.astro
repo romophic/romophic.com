@@ -3,6 +3,7 @@ import BlogCard from '@/components/blog/BlogCard.astro'
 import Hero from '@/components/common/Hero.astro'
 
 import ActivityGraph from '@/components/features/ActivityGraph.astro'
+import { GraphView } from '@/components/features/GraphView'
 import PageHead from '@/components/layout/PageHead.astro'
 import { buttonVariants } from '@/components/ui/button'
 import { SITE } from '@/consts'
@@ -16,6 +17,10 @@ const blog = await getRecentPosts(SITE.featuredPostCount)
   <PageHead slot="head" title="Home" />
   <Hero />
   <section class="flex flex-col gap-y-8">
+    <div class="flex flex-col gap-y-4">
+      <h2 class="text-2xl font-medium">Knowledge Graph</h2>
+      <GraphView client:only="react" />
+    </div>
     <ActivityGraph />
     <div class="flex flex-col gap-y-4">
       <h2 class="text-2xl font-medium">Latest posts</h2>
@@ -30,10 +35,7 @@ const blog = await getRecentPosts(SITE.featuredPostCount)
       </ul>
     </div>
     <div class="flex justify-center">
-      <a
-        href="/blog"
-        class={buttonVariants({ variant: 'ghost' }) + ' group'}
-      >
+      <a href="/blog" class={buttonVariants({ variant: 'ghost' }) + ' group'}>
         See all posts <span
           class="ml-1.5 transition-transform group-hover:translate-x-1"
           >&rarr;</span

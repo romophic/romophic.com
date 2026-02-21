@@ -1,5 +1,8 @@
 import React, { useCallback, useEffect, useRef } from 'react'
-import * as d3 from 'd3'
+import { forceSimulation, forceLink, forceManyBody, forceCenter, forceX, forceY, forceCollide, type Simulation } from 'd3-force'
+import { zoom, zoomIdentity, type ZoomTransform } from 'd3-zoom'
+import { drag } from 'd3-drag'
+import { select } from 'd3-selection'
 import { GRAPH_CONFIG } from '@/consts'
 import type { D3GraphNode, D3GraphLink } from '@/types'
 import { renderGraph } from './graph/graph-renderer'
@@ -31,10 +34,10 @@ export function GraphView() {
 
   const hoverNodeRef = useRef<D3GraphNode | null>(null)
   const neighborIdsRef = useRef<ReadonlySet<string>>(EMPTY_SET)
-  const simulationRef = useRef<d3.Simulation<D3GraphNode, D3GraphLink> | null>(
+  const simulationRef = useRef<Simulation<D3GraphNode, D3GraphLink> | null>(
     null,
   )
-  const transformRef = useRef<d3.ZoomTransform>(d3.zoomIdentity)
+  const transformRef = useRef<ZoomTransform>(zoomIdentity)
   const scheduleRenderRef = useRef<(() => void) | null>(null)
   const sizeRef = useRef<{ width: number; height: number }>({
     width: 0,
@@ -68,20 +71,18 @@ export function GraphView() {
 
     const { physics, theme } = GRAPH_CONFIG
 
-    const simulation = d3
-      .forceSimulation<D3GraphNode>(data.nodes)
+    const simulation = forceSimulation<D3GraphNode>(data.nodes)
       .force(
         'link',
-        d3
-          .forceLink<D3GraphNode, D3GraphLink>(data.links)
+        forceLink<D3GraphNode, D3GraphLink>(data.links)
           .id((d) => d.id)
           .distance(physics.linkDistance),
       )
-      .force('charge', d3.forceManyBody().strength(physics.chargeStrength))
-      .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('x', d3.forceX(width / 2).strength(physics.centerStrength))
-      .force('y', d3.forceY(height / 2).strength(physics.centerStrength))
-      .force('collide', d3.forceCollide().radius(physics.collideRadius))
+      .force('charge', forceManyBody().strength(physics.chargeStrength))
+      .force('center', forceCenter(width / 2, height / 2))
+      .force('x', forceX(width / 2).strength(physics.centerStrength))
+      .force('y', forceY(height / 2).strength(physics.centerStrength))
+      .force('collide', forceCollide().radius(physics.collideRadius))
 
     simulationRef.current = simulation
 
@@ -132,18 +133,16 @@ export function GraphView() {
     })
     resizeObserver.observe(container)
 
-    const zoom = d3
-      .zoom<HTMLCanvasElement, unknown>()
+    const zoomHandler = zoom<HTMLCanvasElement, unknown>()
       .scaleExtent(GRAPH_CONFIG.interaction.zoomExtent)
       .on('zoom', (event) => {
         transformRef.current = event.transform
         scheduleRender()
       })
 
-    d3.select(canvas).call(zoom)
+    select(canvas).call(zoomHandler)
 
-    const drag = d3
-      .drag<HTMLCanvasElement, unknown>()
+    const dragHandler = drag<HTMLCanvasElement, unknown>()
       .subject((event) => {
         const transform = transformRef.current
         const x = transform.invertX(event.x),
@@ -166,7 +165,7 @@ export function GraphView() {
         event.subject.fy = null
       })
 
-    d3.select(canvas).call(drag)
+    select(canvas).call(dragHandler)
 
     return () => {
       simulation.stop()
