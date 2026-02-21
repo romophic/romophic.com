@@ -45,7 +45,6 @@ This document provides a comprehensive and deep technical overview of **romophic
 - **Visualization:**
   - **Core Architecture:** `d3-force` + `d3-zoom` + `d3-drag` driving a raw HTML5 Canvas.
   - **Custom Interaction:** Manual hit-testing and coordinate transformation (`screen2GraphCoords`) for 100% reliability.
-- **PWA:** `@vite-pwa/astro` (Offline support, installable).
 
 ### Directory Structure & Codebase Complete Map
 
@@ -62,9 +61,8 @@ This document provides a comprehensive and deep technical overview of **romophic
 - **`common/`**: Reusable blocks.
     - `AppScript.astro`: **Crucial.** Central manager for theme and scripts across transitions (astro:page-load).
     - `AuthorCard.astro`: Profile display for authors.
-    - `Callout.astro`: Styled notice blocks for MDX.
     - `CopyCodeManager.astro`: Adds copy buttons to code blocks.
-    - `Favicons.astro`: Favicon link tags. **PWA manifest path corrected here.**
+    - `Favicons.astro`: Favicon link tags.
     - `Hero.astro`: The personal introduction section on the homepage.
     - `Link.astro`: Wrapper for `<a>` tags with prefetching.
     - `MDXImage.astro`: Server-side image optimization wrapper.
@@ -79,7 +77,6 @@ This document provides a comprehensive and deep technical overview of **romophic
     - `ActivityGraph.astro`: GitHub-style contribution heatmap.
     - `GiscusComments.astro`: Comment system integration.
     - `PageLoader.astro`: Page transition loader.
-    - `ReloadPrompt.astro`: PWA update prompt.
 - **`layout/`**: Structural components.
     - `Header.astro`: Navigation bar.
     - `Footer.astro`: Site footer with social links.
@@ -87,7 +84,7 @@ This document provides a comprehensive and deep technical overview of **romophic
     - `PageHead.astro`: SEO and meta tags per page.
     - `ThemeToggle.astro`: Switch button for dark/light mode.
 - **`ui/`**: Atomic, unstyled components (Shadcn-like).
-    - `button.tsx`, `dialog.tsx`, `badge.tsx`, `zoomable-image.tsx`, etc.
+    - `button.tsx`, `dialog.tsx`, `badge.tsx`, etc.
 
 #### `src/content/` (Data Source)
 - **`authors/`**: Author metadata in `.md`.
@@ -191,7 +188,7 @@ The project features a bi-directional linking system and a visualization graph.
 1.  **Input:** Local images in `src/content/...` or external URLs.
 2.  **Processing (`MDXImage.astro`):**
     - Calls `getImage()` (Astro Assets) to generate a **20px wide, 50% quality WebP** version of the image. This serves as the "BlurHash" style placeholder.
-3.  **Client-Side (`zoomable-image.tsx`):**
+3.  **Client-Side:**
     - **Modern LQIP**: Implements Low Quality Image Placeholders using **CSS Grid Stacking**.
     - **Implementation:** Both placeholder and main image occupy `grid-area: 1/1`.
     - **Visual:** A 20px blurred WebP placeholder is layered behind the main image (`filter: blur(40px)`, `scale(1.2)`).
@@ -254,8 +251,7 @@ The project features a bi-directional linking system and a visualization graph.
 ## 5. Configuration Reference
 
 ### `astro.config.ts` Highlights
-- **Integration**: React, MDX, PWA, Tailwind, Expressive Code.
-- **PWA**: Configured for `romophic.com`. **Manifest filename: `manifest.webmanifest`.**
+- **Integration**: React, MDX, Tailwind, Expressive Code.
 - **Markdown**: Uses `rehype-pretty-code` for syntax highlighting and `remark-math` for LaTeX.
 
 ## 6. Status & Future Roadmap
@@ -276,6 +272,7 @@ The project features a bi-directional linking system and a visualization graph.
 - [x] **Graph View:** Added tag node navigation and addressed resize/skeleton issues.
 - [x] **Config:** Standardized Expressive Code style (removed terminal frame for shell).
 - [x] **Content:** Added "Neural Network from Scratch" article.
+- [x] **Simplification:** Removed PWA features to reduce complexity and resolve caching issues (mobile loading bar).
 
 ### Future Features
 - [ ] **Performance (Graph):** Remove D3.js dependency by implementing a custom lightweight physics engine (Verlet integration) and zoom/drag handlers.
