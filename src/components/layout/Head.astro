@@ -14,9 +14,6 @@ import { ClientRouter } from 'astro:transitions'
   <meta name="generator" content={Astro.generator} />
 
   <meta name="HandheldFriendly" content="True" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta
     name="format-detection"
     content="telephone=no,date=no,address=no,email=no,url=no"
@@ -45,7 +42,10 @@ import { ClientRouter } from 'astro:transitions'
   <script is:inline>
     // Immediate theme initialization to prevent FOUC
     const getTheme = () => {
-      if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+      if (
+        typeof localStorage !== 'undefined' &&
+        localStorage.getItem('theme')
+      ) {
         return localStorage.getItem('theme')
       }
       if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -53,7 +53,7 @@ import { ClientRouter } from 'astro:transitions'
       }
       return 'light'
     }
-    
+
     const applyTheme = () => {
       if (getTheme() === 'dark') {
         document.documentElement.classList.add('dark')
@@ -63,7 +63,7 @@ import { ClientRouter } from 'astro:transitions'
     }
 
     applyTheme()
-    
+
     // Ensure the theme class is preserved during View Transitions
     document.addEventListener('astro:before-swap', (ev) => {
       const currentTheme = getTheme()

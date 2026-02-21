@@ -4,19 +4,16 @@ import '@/styles/typography.css'
 import '@fontsource-variable/noto-sans-jp'
 import 'katex/dist/katex.min.css'
 
-
-
 import ScrollProgress from '@/components/common/ScrollProgress.astro'
 import { CommandMenu } from '@/components/features/CommandMenu'
 
 import PageLoader from '@/components/features/PageLoader.astro'
-import ReloadPrompt from '@/components/features/ReloadPrompt.astro'
 import Footer from '@/components/layout/Footer.astro'
 import Head from '@/components/layout/Head.astro'
 import Header from '@/components/layout/Header.astro'
 import { SITE } from '@/consts'
-import { cn } from '@/lib/utils'
 import { getPostsForCommandMenu } from '@/lib/content/posts'
+import { cn } from '@/lib/utils'
 
 const cleanPosts = await getPostsForCommandMenu()
 
@@ -51,7 +48,6 @@ const { class: className } = Astro.props
     </main>
     <Footer />
     <PageLoader />
-    <ReloadPrompt />
     <CommandMenu client:idle posts={cleanPosts} />
   </body>
 </html>

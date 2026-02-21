@@ -4,7 +4,6 @@ import mdx from '@astrojs/mdx'
 import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
 import icon from 'astro-icon'
-import AstroPWA from '@vite-pwa/astro'
 import partytown from '@astrojs/partytown'
 
 import { rehypeHeadingIds } from '@astrojs/markdown-remark'
@@ -74,39 +73,7 @@ export default defineConfig({
     react(),
     sitemap(),
     icon(),
-    AstroPWA({
-      registerType: 'autoUpdate',
-      srcDir: 'src',
-      filename: 'pwa-sw.ts',
-      manifest: {
-        name: 'romophic.com',
-        short_name: 'romophic.com',
-        theme_color: '#f2f1f5',
-        background_color: '#000000',
-        display: 'standalone',
-        icons: [
-          {
-            src: '/web-app-manifest-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'maskable',
-          },
-          {
-            src: '/web-app-manifest-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable',
-          },
-        ],
-      },
-      injectManifest: {
-        globPatterns: ['**/*.{css,js,html,svg,png,ico,txt}'],
-      },
-      devOptions: {
-        enabled: true,
-        navigateFallbackAllowlist: [/^\/404$/],
-      },
-    }),
+    icon(),
     partytown({
       config: {
         forward: ['dataLayer.push'],
