@@ -1,0 +1,51 @@
+---
+import BlogCard from '@/components/blog/BlogCard.astro'
+import Hero from '@/components/common/Hero.astro'
+
+import { getButtonStyles } from '@/components/common/button.astro'
+import ActivityGraph from '@/components/features/ActivityGraph.astro'
+import GraphView from '@/components/features/GraphView.astro'
+import PageHead from '@/components/layout/PageHead.astro'
+import { SITE } from '@/consts'
+import { getLangFromUrl, localizePath } from '@/i18n/utils'
+import Layout from '@/layouts/Layout.astro'
+import { getRecentPosts } from '@/lib/data-utils'
+
+const lang = getLangFromUrl(Astro.url)
+const blog = await getRecentPosts(SITE.featuredPostCount, lang)
+---
+
+<Layout class="max-w-3xl">
+  <PageHead slot="head" title="Home" />
+  <Hero />
+  <section class="flex flex-col gap-y-8">
+    <div class="flex flex-col gap-y-4">
+      <h2 class="text-2xl font-medium">Knowledge Graph</h2>
+      <GraphView />
+    </div>
+    <ActivityGraph />
+    <div class="flex flex-col gap-y-4">
+      <h2 class="text-2xl font-medium">Latest posts</h2>
+      <ul class="flex flex-col gap-y-4">
+        {
+          blog.map((post) => (
+            <li>
+              <BlogCard entry={post} />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <div class="flex justify-center">
+      <a
+        href={localizePath('/blog', lang)}
+        class={getButtonStyles({ variant: 'ghost' }) + ' group'}
+      >
+        See all posts <span
+          class="ml-1.5 transition-transform group-hover:translate-x-1"
+          >&rarr;</span
+        >
+      </a>
+    </div>
+  </section>
+</Layout>

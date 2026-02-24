@@ -19,7 +19,7 @@ type GraphApiLink = {
 }
 
 export async function GET() {
-  const posts = await getAllPostsAndSubposts('ja')
+  const posts = await getAllPostsAndSubposts('en')
 
   const nodes: GraphApiNode[] = []
   const links: GraphApiLink[] = []

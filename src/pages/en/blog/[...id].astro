@@ -3,7 +3,7 @@ import BlogPost from '@/components/pages/BlogPost.astro'
 import { getAllPostsAndSubposts } from '@/lib/data-utils'
 
 export async function getStaticPaths() {
-  const posts = await getAllPostsAndSubposts('ja')
+  const posts = await getAllPostsAndSubposts('en')
   return posts.map((post) => ({
     params: { id: post.id },
     props: post,

@@ -2,7 +2,7 @@
 import TagList from '@/components/pages/TagList.astro'
 import { getSortedTags } from '@/lib/data-utils'
 
-const sortedTags = await getSortedTags('ja')
+const sortedTags = await getSortedTags('en')
 ---
 
 <TagList sortedTags={sortedTags} />

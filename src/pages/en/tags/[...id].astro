@@ -3,12 +3,12 @@ import TagDetail from '@/components/pages/TagDetail.astro'
 import { getAllTags, getPostsByTag } from '@/lib/data-utils'
 
 export async function getStaticPaths() {
-  const tagMap = await getAllTags('ja')
+  const tagMap = await getAllTags('en')
   const uniqueTags = Array.from(tagMap.keys())
 
   return Promise.all(
     uniqueTags.map(async (tag) => {
-      const posts = await getPostsByTag(tag, 'ja')
+      const posts = await getPostsByTag(tag, 'en')
       return {
         params: { id: tag },
         props: {

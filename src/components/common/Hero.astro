@@ -1,24 +1,28 @@
 ---
 import { getButtonStyles } from '@/components/common/button.astro'
 import { ICONS, SITE, SOCIAL_LINKS } from '@/consts'
+import { getLangFromUrl, localizePath, useTranslations } from '@/i18n/utils'
 import { Icon } from 'astro-icon/components'
 
+const lang = getLangFromUrl(Astro.url)
+const t = useTranslations(lang)
 const githubLink = SOCIAL_LINKS.find((s) => s.label === 'GitHub')
 ---
 
 <section class="py-12 sm:py-16">
   <div class="flex flex-col items-start gap-y-6">
     <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">
-      Hello, I'm {SITE.author}.
+      {t('hero.title', { author: SITE.author })}
     </h1>
     <p class="text-muted-foreground max-w-2xl text-lg sm:text-xl">
-      A developer passionate about algorithms, competitive programming, and
-      software engineering. I build digital gardens to document my journey and
-      share knowledge.
+      {t('hero.subtitle')}
     </p>
     <div class="flex flex-wrap gap-4">
-      <a href="/blog" class={getButtonStyles({ size: 'lg' })}>
-        Read Blog
+      <a
+        href={localizePath('/blog', lang)}
+        class={getButtonStyles({ size: 'lg' })}
+      >
+        {t('hero.readBlog')}
         <Icon name={ICONS.arrowRight} class="ml-2 size-4" />
       </a>
       {

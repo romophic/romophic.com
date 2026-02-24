@@ -33,7 +33,8 @@ export async function getStaticPaths() {
 }
 
 // In-memory cache for the font data.
-let fontsCache: { inter: ArrayBuffer; notoSansJP: ArrayBuffer | null } | null = null
+let fontsCache: { inter: ArrayBuffer; notoSansJP: ArrayBuffer | null } | null =
+  null
 
 const FONT_CACHE_DIR = path.join(
   process.cwd(),
@@ -172,13 +173,13 @@ export const GET = async ({
     weight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
     style: 'normal' | 'italic'
   }[] = [
-      {
-        name: 'Inter',
-        data: fonts.inter,
-        weight: 700,
-        style: 'normal',
-      },
-    ]
+    {
+      name: 'Inter',
+      data: fonts.inter,
+      weight: 700,
+      style: 'normal',
+    },
+  ]
 
   if (fonts.notoSansJP) {
     fontConfig.push({

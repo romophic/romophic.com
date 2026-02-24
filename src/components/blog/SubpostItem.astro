@@ -34,20 +34,15 @@ const {
         activeClassName,
       ]}
     >
-      <Icon
-        name={activeIcon}
-        class="size-4 flex-shrink-0"
-        aria-hidden="true"
-      />
+      <Icon name={activeIcon} class="size-4 flex-shrink-0" aria-hidden="true" />
       <div class="flex flex-col">
         <span class="line-clamp-2 text-pretty">{title}</span>
         {readingTime && (
           <span class="text-muted-foreground/80 text-xs">
             {readingTime}
-            {combinedReadingTime &&
-              combinedReadingTime !== readingTime && (
-                <span> ({combinedReadingTime} total)</span>
-              )}
+            {combinedReadingTime && combinedReadingTime !== readingTime && (
+              <span> ({combinedReadingTime} total)</span>
+            )}
           </span>
         )}
       </div>
@@ -60,20 +55,15 @@ const {
         linkClassName,
       ]}
     >
-      <Icon
-        name={icon}
-        class="size-4 flex-shrink-0"
-        aria-hidden="true"
-      />
+      <Icon name={icon} class="size-4 flex-shrink-0" aria-hidden="true" />
       <div class="flex flex-col">
         <span class="line-clamp-2 text-pretty">{title}</span>
         {readingTime && (
           <span class="text-muted-foreground/80 text-xs">
             {readingTime}
-            {combinedReadingTime &&
-              combinedReadingTime !== readingTime && (
-                <span> ({combinedReadingTime} total)</span>
-              )}
+            {combinedReadingTime && combinedReadingTime !== readingTime && (
+              <span> ({combinedReadingTime} total)</span>
+            )}
           </span>
         )}
       </div>

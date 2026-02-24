@@ -1,0 +1,37 @@
+---
+import { getBadgeStyles } from '@/components/common/badge.astro'
+import PageHead from '@/components/layout/PageHead.astro'
+import { ICONS } from '@/consts'
+import { getLangFromUrl, localizePath, useTranslations } from '@/i18n/utils'
+import Layout from '@/layouts/Layout.astro'
+import { Icon } from 'astro-icon/components'
+
+interface Props {
+  sortedTags: { tag: string; count: number }[]
+}
+
+const { sortedTags } = Astro.props
+const lang = getLangFromUrl(Astro.url)
+const t = useTranslations(lang)
+---
+
+<Layout class="max-w-3xl">
+  <PageHead slot="head" title={t('nav.tags') || 'Tags'} />
+
+  <div class="flex flex-col gap-4">
+    <div class="flex flex-wrap gap-2">
+      {
+        sortedTags.map(({ tag, count }) => (
+          <a
+            href={localizePath(`/tags/${tag}`, lang)}
+            class={getBadgeStyles({ variant: 'muted' })}
+          >
+            <Icon name={ICONS.hash} class="size-3" />
+            {tag}
+            <span class="text-muted-foreground ml-1.5">({count})</span>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</Layout>

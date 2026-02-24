@@ -11,7 +11,7 @@ export async function getStaticPaths() {
 }
 
 const { author } = Astro.props
-const authorPosts = await getPostsByAuthor(author.id, 'ja')
+const authorPosts = await getPostsByAuthor(author.id, 'en')
 ---
 
 <AuthorDetail author={author} authorPosts={authorPosts} />

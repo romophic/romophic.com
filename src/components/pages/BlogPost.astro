@@ -1,0 +1,127 @@
+---
+import Backlinks from '@/components/blog/Backlinks.astro'
+import PostHead from '@/components/blog/PostHead.astro'
+import PostHeader from '@/components/blog/PostHeader.astro'
+import PostNavigation from '@/components/blog/PostNavigation.astro'
+import SubpostsHeader from '@/components/blog/SubpostsHeader.astro'
+import SubpostsSidebar from '@/components/blog/SubpostsSidebar.astro'
+import TOCHeader from '@/components/blog/TOCHeader.astro'
+import TOCSidebar from '@/components/blog/TOCSidebar.astro'
+import ScrollToTop from '@/components/common/ScrollToTop.astro'
+import GiscusComments from '@/components/features/GiscusComments.astro'
+import Layout from '@/layouts/Layout.astro'
+import { getParentId, getPostPageData } from '@/lib/data-utils'
+import { Image } from 'astro:assets'
+import type { CollectionEntry } from 'astro:content'
+import { render } from 'astro:content'
+
+interface Props {
+  post: CollectionEntry<'blog'>
+}
+
+const { post } = Astro.props
+const currentPostId = post.id
+const { Content, headings } = await render(post)
+
+const {
+  authors,
+  isCurrentSubpost,
+  navigation,
+  hasChildPosts,
+  subpostCount,
+  postReadingTime,
+  combinedReadingTime,
+  tocSections,
+  backlinks,
+} = await getPostPageData(post)
+---
+
+<Layout>
+  <PostHead slot="head" post={post} image={`/og/${post.id}`} />
+  {
+    (hasChildPosts || isCurrentSubpost) && (
+      <SubpostsHeader
+        slot="subposts-navigation"
+        parentId={isCurrentSubpost ? getParentId(currentPostId) : currentPostId}
+      />
+    )
+  }
+  {
+    headings?.length > 0 &&
+      !(
+        isCurrentSubpost &&
+        headings.length === 1 &&
+        headings[0].text === post.data.title
+      ) && <TOCHeader slot="table-of-contents" headings={headings} />
+  }
+
+  <section
+    class="grid grid-cols-[minmax(0px,1fr)_min(calc(var(--breakpoint-md)-2rem),100%)_minmax(0px,1fr)] gap-y-6"
+  >
+    <div class="col-start-2"></div>
+
+    {
+      post.data.image && (
+        <Image
+          src={post.data.image}
+          alt={post.data.title}
+          width={1200}
+          height={630}
+          class="col-span-full mx-auto w-full max-w-5xl object-cover"
+          transition:name={`image-${post.id}`}
+        />
+      )
+    }
+
+    <PostHeader
+      post={post}
+      authors={authors}
+      postReadingTime={postReadingTime}
+      combinedReadingTime={combinedReadingTime}
+      subpostCount={subpostCount}
+    >
+      <PostNavigation
+        newerPost={navigation.newer}
+        olderPost={navigation.older}
+        parentPost={isCurrentSubpost ? navigation.parent : undefined}
+      />
+    </PostHeader>
+
+    {
+      tocSections.length > 0 && (
+        <TOCSidebar sections={tocSections} currentPostId={currentPostId} />
+      )
+    }
+
+    <article class="prose col-start-2 max-w-none">
+      <Content />
+    </article>
+
+    <div class="col-start-2 max-w-none">
+      <Backlinks backlinks={backlinks} />
+    </div>
+
+    <div class="col-start-2 max-w-none">
+      <GiscusComments />
+    </div>
+
+    {
+      (hasChildPosts || isCurrentSubpost) && (
+        <SubpostsSidebar
+          parentId={
+            isCurrentSubpost ? getParentId(currentPostId) : currentPostId
+          }
+          class="w-64"
+        />
+      )
+    }
+
+    <PostNavigation
+      newerPost={navigation.newer}
+      olderPost={navigation.older}
+      parentPost={isCurrentSubpost ? navigation.parent : undefined}
+    />
+  </section>
+
+  <ScrollToTop />
+</Layout>

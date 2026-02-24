@@ -1,0 +1,154 @@
+---
+import ProjectCard from '@/components/common/ProjectCard.astro'
+import PageHead from '@/components/layout/PageHead.astro'
+import { ICON_MAP, ICONS, SITE, SOCIAL_LINKS } from '@/consts'
+import { getLangFromUrl, useTranslations } from '@/i18n/utils'
+import Layout from '@/layouts/Layout.astro'
+import { getAllProjects } from '@/lib/data-utils'
+import { Icon } from 'astro-icon/components'
+
+const lang = getLangFromUrl(Astro.url)
+const t = useTranslations(lang)
+const projects = await getAllProjects(lang)
+---
+
+<Layout class="max-w-3xl">
+  <PageHead slot="head" title={t('about.title')} />
+
+  <section class="space-y-12">
+    {/* Page Title */}
+    <div>
+      <h1 class="text-3xl font-bold tracking-tight">{t('about.title')}</h1>
+    </div>
+
+    {/* Intro */}
+    <div class="prose dark:prose-invert">
+      <p>
+        {t('about.intro', { title: SITE.title })}
+      </p>
+    </div>
+
+    {/* Experience */}
+    <div>
+      <h2 class="mb-6 text-2xl font-semibold tracking-tight">
+        {t('about.experience')}
+      </h2>
+      <div class="border-muted relative ml-2 space-y-8 border-l-2 pl-6">
+        {
+          [
+            {
+              title: 'Goldman Sachs Engineering Workshop',
+              organization: '',
+              period: '2025/09',
+              description: '',
+            },
+            {
+              title: 'ICPC',
+              organization: '',
+              period: '2024/07',
+              description: '',
+            },
+            {
+              title:
+                'Institute of Science Tokyo (Tokyo Institute of Technology) EE',
+              organization: '',
+              period: '2024/04 - Present',
+              description: '',
+            },
+            {
+              title: 'UTokyoGSC 4期',
+              organization: '',
+              period: '2021 - 2024',
+              description:
+                '制約付き筋肉トレーニングにおける負荷効果最大化に関する数理モデル研究',
+            },
+            {
+              title: 'JOI本選',
+              organization: '',
+              period: '2020, 2022',
+              description: '',
+            },
+          ].map((item) => (
+            <div class="group relative">
+              {/* Timeline Dot */}
+              <div class="border-background bg-muted group-hover:bg-primary absolute top-1.5 -left-[31px] size-4 rounded-full border-2 shadow-sm transition-colors duration-300" />
+
+              <div class="flex flex-col gap-1">
+                <span class="text-muted-foreground font-mono text-xs">
+                  {item.period}
+                </span>
+                <h3 class="text-lg leading-none font-bold">{item.title}</h3>
+                {item.organization && (
+                  <p class="text-primary text-sm font-medium">
+                    {item.organization}
+                  </p>
+                )}
+                {item.description && (
+                  <p class="text-muted-foreground mt-1 text-sm leading-relaxed">
+                    {item.description}
+                  </p>
+                )}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    {/* Tech Stack */}
+    <div>
+      <h2 class="mb-6 text-2xl font-semibold tracking-tight">
+        {t('about.techStack')}
+      </h2>
+      <div class="flex flex-wrap gap-2">
+        {
+          ['C++', 'Python', 'React', 'Vue', 'Nuxt.js', 'Rust', 'Astro'].map(
+            (skill) => (
+              <span class="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 rounded-full border px-3 py-1 text-sm font-medium transition-colors">
+                {skill}
+              </span>
+            ),
+          )
+        }
+      </div>
+    </div>
+
+    {/* Connect */}
+    <div>
+      <h2 class="mb-6 text-2xl font-semibold tracking-tight">
+        {t('about.connect')}
+      </h2>
+      <div class="flex flex-wrap gap-4">
+        {
+          SOCIAL_LINKS.map((social) => (
+            <a
+              href={social.href}
+              class="text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2 rounded-md p-2 transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Icon
+                name={
+                  (ICON_MAP as Record<string, string>)[social.label] ||
+                  ICONS.link
+                }
+                class="size-5"
+              />
+              <span class="font-medium">{social.label}</span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+
+    {/* Projects */}
+    <div>
+      <h2 class="mb-6 text-2xl font-semibold tracking-tight">
+        {t('about.projects')}
+      </h2>
+      <div class="flex flex-col gap-4">
+        {projects.map((project) => <ProjectCard project={project} />)}
+      </div>
+    </div>
+  </section>
+</Layout>

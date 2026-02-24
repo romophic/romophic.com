@@ -1,0 +1,67 @@
+---
+import BlogCard from '@/components/blog/BlogCard.astro'
+import PageHead from '@/components/layout/PageHead.astro'
+import { getLangFromUrl, useTranslations } from '@/i18n/utils'
+import Layout from '@/layouts/Layout.astro'
+import { groupPostsByYear } from '@/lib/data-utils'
+import type { Page } from 'astro'
+import type { CollectionEntry } from 'astro:content'
+
+interface Props {
+  page: Page<CollectionEntry<'blog'>>
+}
+
+const { page } = Astro.props
+const lang = getLangFromUrl(Astro.url)
+const t = useTranslations(lang)
+
+const postsByYear = groupPostsByYear(page.data)
+const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
+---
+
+<Layout class="max-w-3xl">
+  <PageHead slot="head" title={t('nav.blog') || 'Blog'} />
+
+  <div class="flex min-h-[calc(100vh-18rem)] flex-col gap-y-8">
+    {
+      years.map((year) => (
+        <section class="flex flex-col gap-y-4">
+          <div class="font-medium">{year}</div>
+          <ul class="flex flex-col gap-4">
+            {postsByYear[year].map((post) => (
+              <li>
+                <BlogCard entry={post} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
+
+  <div class="mt-8 flex items-center justify-center gap-4">
+    {
+      page.url.prev && (
+        <a
+          href={page.url.prev}
+          class="border-border hover:bg-muted/50 rounded-md border px-4 py-2 transition-colors"
+        >
+          ← Previous
+        </a>
+      )
+    }
+    <span class="text-muted-foreground text-sm">
+      Page {page.currentPage} of {page.lastPage}
+    </span>
+    {
+      page.url.next && (
+        <a
+          href={page.url.next}
+          class="border-border hover:bg-muted/50 rounded-md border px-4 py-2 transition-colors"
+        >
+          Next →
+        </a>
+      )
+    }
+  </div>
+</Layout>
