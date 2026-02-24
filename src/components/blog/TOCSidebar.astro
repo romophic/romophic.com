@@ -1,6 +1,6 @@
 ---
 import { getParentId, isSubpost } from '@/lib/data-utils'
-import { cn, getHeadingMargin } from '@/lib/utils'
+import { getHeadingMargin } from '@/lib/utils'
 import type { TOCSection } from '@/types'
 
 type Props = {
@@ -46,13 +46,11 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
                   <ul class="flex list-none flex-col gap-y-2">
                     {section.headings.map((heading) => (
                       <li
-                        class={cn(
-                          'text-sm',
-                          getHeadingMargin(heading.depth),
+                        class={`text-sm ${getHeadingMargin(heading.depth)} ${
                           isCurrentSubpost
                             ? 'text-foreground/40'
-                            : 'text-foreground/60',
-                        )}
+                            : 'text-foreground/60'
+                        }`}
                       >
                         <a
                           href={
@@ -70,19 +68,17 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
                   </ul>
                 ) : (
                   <div
-                    class={cn(
-                      'rounded-md border p-2',
-                      section.subpostId === currentPostId ? 'bg-muted/50' : '',
-                    )}
+                    class={`rounded-md border p-2 ${
+                      section.subpostId === currentPostId ? 'bg-muted/50' : ''
+                    }`}
                   >
                     <ul class="flex list-none flex-col gap-y-2">
                       <li
-                        class={cn(
-                          'text-xs font-medium',
+                        class={`text-xs font-medium ${
                           section.subpostId === currentPostId
                             ? 'text-foreground'
-                            : 'text-foreground/60',
-                        )}
+                            : 'text-foreground/60'
+                        }`}
                       >
                         <a
                           href={
@@ -102,13 +98,7 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
                       </li>
                       {section.headings.map((heading) => (
                         <li
-                          class={cn(
-                            'text-xs',
-                            getHeadingMargin(heading.depth),
-                            section.subpostId === currentPostId
-                              ? 'text-foreground/60'
-                              : 'text-foreground/30',
-                          )}
+                          class={`sidebar-toc-link text-muted-foreground hover:text-foreground block text-sm transition-colors duration-200 ${heading.depth === 2 ? 'text-foreground/90 mt-3 font-semibold' : 'ml-4'} ${heading.depth === 4 ? 'ml-8 text-xs' : ''}`}
                         >
                           <a
                             href={

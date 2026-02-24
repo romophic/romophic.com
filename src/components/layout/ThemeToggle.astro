@@ -1,14 +1,14 @@
 ---
-import { Button } from '@/components/ui/button'
+import { getButtonStyles } from '@/components/common/button.astro'
 import { ICONS } from '@/consts'
 import { Icon } from 'astro-icon/components'
 ---
 
-<Button
-  variant="ghost"
-  size="icon"
+<button
+  type="button"
+  class={getButtonStyles({ variant: 'ghost', size: 'icon' })}
   title="Toggle theme"
-  className="-my-2 -me-2 size-8"
+  class="-my-2 -me-2 size-8"
   data-theme-toggle
 >
   <div class="relative flex items-center justify-center">
@@ -22,7 +22,7 @@ import { Icon } from 'astro-icon/components'
     />
   </div>
   <span class="sr-only">Toggle theme</span>
-</Button>
+</button>
 
 <script>
   function setupThemeToggle() {
@@ -35,11 +35,13 @@ import { Icon } from 'astro-icon/components'
 
       const isDark = element.classList.contains('dark')
       localStorage.setItem('theme', isDark ? 'dark' : 'light')
-      
+
       // Dispatch a custom event for other components (like Giscus) to react
-      window.dispatchEvent(new CustomEvent('theme-change', { 
-        detail: { theme: isDark ? 'dark' : 'light' } 
-      }))
+      window.dispatchEvent(
+        new CustomEvent('theme-change', {
+          detail: { theme: isDark ? 'dark' : 'light' },
+        }),
+      )
     }
 
     button.addEventListener('click', handleToggle)

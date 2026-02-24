@@ -1,12 +1,26 @@
 ---
 import { getAllPostsAndSubposts } from '@/lib/data-utils'
-import { cn } from '@/lib/utils'
+
+const INTENSITY_COLORS = [
+  'bg-muted',
+  'bg-primary/30',
+  'bg-primary/50',
+  'bg-primary/75',
+  'bg-primary',
+]
+
+function getIntensityColor(level: number) {
+  return (
+    INTENSITY_COLORS[Math.min(Math.max(level, 0), 4)] || INTENSITY_COLORS[0]
+  )
+}
 
 const posts = await getAllPostsAndSubposts()
 
 // 1. Create a map of date string (YYYY-MM-DD) -> count
 const activityMap = new Map<string, number>()
-posts.forEach((post) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+posts.forEach((post: any) => {
   const dateObj = post.data.date
   const dateStr = dateObj.toISOString().split('T')[0]
   activityMap.set(dateStr, (activityMap.get(dateStr) || 0) + 1)
@@ -55,14 +69,7 @@ const getLevel = (count: number) => {
 
             return (
               <div
-                class={cn(
-                  'size-3 rounded-sm transition-colors',
-                  level === 0 && 'bg-muted',
-                  level === 1 && 'bg-primary/30',
-                  level === 2 && 'bg-primary/50',
-                  level === 3 && 'bg-primary/75',
-                  level === 4 && 'bg-primary',
-                )}
+                class={`size-2.5 rounded-xs ring-1 ring-white/5 dark:ring-white/10 ${getIntensityColor(level)}`}
                 title={`${count} posts on ${dateStr}`}
               />
             )

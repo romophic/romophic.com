@@ -1,8 +1,7 @@
 ---
+import { getButtonStyles } from '@/components/common/button.astro'
 import PageHead from '@/components/layout/PageHead.astro'
-import { buttonVariants } from '@/components/ui/button'
 import Layout from '@/layouts/Layout.astro'
-import { cn } from '@/lib/utils'
 ---
 
 <Layout class="max-w-3xl">
@@ -26,10 +25,10 @@ import { cn } from '@/lib/utils'
       </p>
     </div>
     <div class="flex gap-4">
-      <a href="/" class={cn(buttonVariants(), 'flex gap-x-2')}> Go Home </a>
+      <a href="/" class={`${getButtonStyles()} flex gap-x-2`}> Go Home </a>
       <a
-        href="/blog"
-        class={cn(buttonVariants({ variant: 'outline' }), 'flex gap-x-2')}
+        href="javascript:history.back()"
+        class={`${getButtonStyles({ variant: 'outline' })} flex gap-x-2`}
       >
         Read Blog
       </a>
