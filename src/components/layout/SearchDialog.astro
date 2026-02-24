@@ -1,5 +1,8 @@
 ---
+import { getLangFromUrl } from '@/i18n/utils'
 import Search from 'astro-pagefind/components/Search'
+
+const lang = getLangFromUrl(Astro.url)
 ---
 
 <dialog
@@ -10,7 +13,11 @@ import Search from 'astro-pagefind/components/Search'
     <Search
       id="search"
       className="pagefind-ui"
-      uiOptions={{ showSubResults: true, showImages: false }}
+      uiOptions={{
+        showSubResults: true,
+        showImages: false,
+        mergeFilter: { language: lang },
+      }}
     />
   </div>
 </dialog>

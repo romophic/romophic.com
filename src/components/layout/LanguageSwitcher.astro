@@ -1,0 +1,29 @@
+---
+import { getButtonStyles } from '@/components/common/button.astro'
+import { getLangFromUrl } from '@/i18n/utils'
+
+const currentLang = getLangFromUrl(Astro.url)
+const targetLang = currentLang === 'ja' ? 'en' : 'ja'
+
+function getTargetUrl() {
+  const path = Astro.url.pathname
+  if (currentLang === 'en') {
+    // Remove /en prefix
+    return path.replace(/^\/en/, '') || '/'
+  } else {
+    // Add /en prefix
+    return `/en${path === '/' ? '' : path}`
+  }
+}
+---
+
+<a
+  href={getTargetUrl()}
+  class={getButtonStyles({ variant: 'ghost', size: 'icon' }) +
+    ' -my-2 -me-2 size-8'}
+  title={targetLang === 'ja' ? 'Switch to Japanese' : 'Switch to English'}
+  aria-label="Switch language"
+  transition:persist
+>
+  <span class="text-xs font-semibold uppercase">{targetLang}</span>
+</a>

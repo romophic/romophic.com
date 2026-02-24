@@ -3,12 +3,12 @@ import type { SocialLink, Site } from '@/types'
 export const SITE: Site = {
   title: 'romophic',
   description:
-    'romophic.com is a technical digital garden built with Astro, React, and Tailwind CSS.',
+    'romophic.com is a technical digital garden built with Astro, React, and Tailwind CSS.あああああああああああああああ',
   href: 'https://romophic.com',
   author: 'romophic',
-  locale: 'en-US',
-  featuredPostCount: 2,
-  postsPerPage: 3,
+  locale: 'ja-JP',
+  featuredPostCount: 3,
+  postsPerPage: 20,
 }
 
 export const NAV_LINKS: SocialLink[] = [
@@ -23,6 +23,10 @@ export const NAV_LINKS: SocialLink[] = [
   {
     href: '/about',
     label: 'about',
+  },
+  {
+    href: '/tags',
+    label: 'tags',
   },
 ]
 
@@ -53,8 +57,6 @@ export const ICON_MAP = {
   Email: 'lucide:mail',
   RSS: 'lucide:rss',
 } as const satisfies Record<string, string>
-
-
 
 export const GISCUS_CONFIG = {
   repo: 'romophic/romophic.com',

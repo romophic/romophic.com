@@ -1,9 +1,12 @@
 ---
 // src/components/features/GraphView.astro
+import { getLangFromUrl } from '@/i18n/utils'
+const lang = getLangFromUrl(Astro.url)
 ---
 
 <div
   id="graph-container"
+  data-lang={lang}
   class="bg-background relative h-[600px] w-full overflow-hidden rounded-lg border opacity-0 transition-opacity duration-100"
 >
   <canvas id="graph-canvas" class="block cursor-move"></canvas>
@@ -50,6 +53,7 @@
 
     private data: { nodes: D3GraphNode[]; links: D3GraphLink[] } | null = null
     private isDark = false
+    private lang: string
 
     private hoverNode: D3GraphNode | null = null
     private neighborIds: ReadonlySet<string> = EMPTY_SET
@@ -67,6 +71,7 @@
       ) as HTMLDivElement
       this.canvas = document.getElementById('graph-canvas') as HTMLCanvasElement
       this.ctx = this.canvas.getContext('2d')
+      this.lang = this.container?.getAttribute('data-lang') || 'ja'
 
       if (!this.container || !this.canvas || !this.ctx) return
 
@@ -101,7 +106,8 @@
 
     private async fetchData() {
       try {
-        const res = await fetch('/graph.json')
+        const endpoint = this.lang === 'en' ? '/en/graph.json' : '/graph.json'
+        const res = await fetch(endpoint)
         const fetchedData: { nodes: D3GraphNode[]; links: D3GraphLink[] } =
           await res.json()
 
@@ -335,10 +341,12 @@
       const target = this.hoverNode
       if (!target) return
 
+      const prefix = this.lang === 'en' ? '/en' : ''
+
       if (target.group === 'post') {
-        window.location.href = `/blog/${target.id}`
+        window.location.href = `${prefix}/blog/${target.id}`
       } else if (target.group === 'tag') {
-        window.location.href = `/tags/${target.id.replace(/^tag-/, '')}`
+        window.location.href = `${prefix}/tags/${target.id.replace(/^tag-/, '')}`
       }
     }
   }
