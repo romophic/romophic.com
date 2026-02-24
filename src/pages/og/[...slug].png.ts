@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import satori from 'satori'
+import satori, { type SatoriNode } from 'satori'
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog')
@@ -259,7 +259,7 @@ export const GET = async ({
           },
         ],
       },
-    } as unknown as React.ReactNode,
+    } as unknown as SatoriNode,
     {
       width: 1200,
       height: 630,

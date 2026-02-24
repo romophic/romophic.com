@@ -10,7 +10,6 @@ import Head from '@/components/layout/Head.astro'
 import Header from '@/components/layout/Header.astro'
 import SearchDialog from '@/components/layout/SearchDialog.astro'
 import { SITE } from '@/consts'
-import { cn } from '@/lib/utils'
 
 interface Props {
   class?: string
@@ -37,7 +36,7 @@ const { class: className } = Astro.props
       <slot name="table-of-contents" />
     </header>
     <main class="mx-auto flex w-full grow flex-col" data-pagefind-body>
-      <div class={cn('flex flex-col gap-y-6 w-full mx-auto px-4', className)}>
+      <div class={`flex flex-col gap-y-6 w-full mx-auto px-4 ${className}`}>
         <slot />
       </div>
     </main>

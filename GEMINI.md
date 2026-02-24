@@ -33,14 +33,13 @@ This document provides a comprehensive and deep technical overview of **romophic
 
 ### Framework & Core Libraries
 
-- **Framework:** [Astro v5](https://astro.build/) (SSG, Islands Architecture)
-- **UI Library:** [React v19](https://react.dev/) (For interactive islands)
+- **Framework:** [Astro v5](https://astro.build/) (Strict SSG, Zero-JS by default)
 - **Styling:** [Tailwind CSS v4](https://tailwindcss.com/) (configured via `@tailwindcss/vite`)
   - **Theme Strategy:** CSS Variables in `src/styles/global.css` (`--background`, `--foreground`, etc.) combined with `oklch` colors.
   - **Fonts:** `Geist` (Sans) and `Geist Mono` (Monospace).
 - **Content:** MDX
   - **Remark Plugins:** `remark-math` (Math support), `remark-emoji`.
-  - **Rehype Plugins:** `rehype-katex` (Math rendering), `rehype-pretty-code` (Code highlighting), `rehype-external-links`, `rehype-heading-ids`, `rehype-autolink-headings` (Anchor links).
+  - **Rehype Plugins:** `rehype-katex` (Math rendering), `rehype-external-links`, `rehype-heading-ids`, `rehype-autolink-headings` (Anchor links).
 - **Search:** [Pagefind](https://pagefind.app/) (Static search index)
 - **Visualization:**
   - **Core Architecture:** `d3-force` + `d3-zoom` + `d3-drag` driving a raw HTML5 Canvas.
@@ -70,9 +69,9 @@ This document provides a comprehensive and deep technical overview of **romophic
     - `ScrollProgress.astro`: Reading progress bar.
     - `ScrollToTop.astro`: Scroll to top button.
     - `SocialIcons.astro`: Social media icons.
-- **`features/`**: Complex interactive islands.
-    - `GraphView.tsx`: The Knowledge Graph implementation (D3 + Canvas).
-    - `GlobalLinkPreviews.tsx`: Hover preview for internal links (React).
+    - **Atomic UI**: `button.astro`, `badge.astro`, `separator.astro` (Formerly Shadcn, now pure Astro+Tailwind).
+- **`features/`**: Complex components encapsulating larger logic.
+    - `GraphView.astro`: The Knowledge Graph implementation (Pure SSG, D3 + Canvas natively invoked).
     - `ActivityGraph.astro`: GitHub-style contribution heatmap.
     - `GiscusComments.astro`: Comment system integration.
     - `PageLoader.astro`: Page transition loader.
@@ -83,7 +82,6 @@ This document provides a comprehensive and deep technical overview of **romophic
     - `PageHead.astro`: SEO and meta tags per page.
     - `SearchDialog.astro`: Native `<dialog>` for Pagefind static search integration.
     - `ThemeToggle.astro`: Switch button for dark/light mode.
-- **`ui/`**: Atomic, unstyled components (Shadcn-like) retained only where fundamentally necessary (`button.tsx`, `badge.tsx`, etc). Most structural bits (`Pagination`, `ScrollArea`) were stripped in favor of Astro native approaches.
 
 #### `src/content/` (Data Source)
 - **`authors/`**: Author metadata in `.md`.
@@ -131,7 +129,7 @@ The entire site revolves around the `blog` content collection. The rendering pip
       - `getTOCSections`: Generates the Table of Contents.
 4.  **Rendering:**
     - `Astro.render()` compiles the MDX to HTML.
-    - **Islands:** Interactive components (`CommandMenu`, `GraphView`, `GiscusComments`) are hydrated on the client.
+    - **No Islands:** Interactive components (like `GraphView` or `GiscusComments`) use standard Web Components, Astro Scripts, or native browser primitives rather than heavy framework hydration.
 
 ### 3.2. Subpost (Book/Series) Logic Specification
 
@@ -273,7 +271,7 @@ The project features a bi-directional linking system and a visualization graph.
 - [x] **Config:** Standardized Expressive Code style (removed terminal frame for shell).
 - [x] **Content:** Added "Neural Network from Scratch" article.
 - [x] **Simplification:** Removed PWA features to reduce complexity and resolve caching issues (mobile loading bar).
-- [x] **Codebase Audit:** Purged `CommandMenu`, React/Radix dependencies (`cmdk`, `@radix-ui`), and orphaned Shadcn UI templates (`Pagination`, `Avatar`, `ScrollArea`) in favor of native Astro components. Clean bill of health via `knip` (with `@iconify-json/lucide` explicitly ignored as a valid build-time asset).
+- [x] **React & Shadcn Execution:** Completely purged `React`, `@fontsource`, `@floating-ui/react`, `@radix-ui`, `cmdk`, and Shadcn from the repository in Phase 3 & Phase 4. Refactored interactive components like `GraphView` directly into Native Astro `<script>` rendering. Clean bill of health via `knip` static analysis.
 
 ### Future Features
 - [ ] **Performance (Graph):** Remove D3.js dependency by implementing a custom lightweight physics engine (Verlet integration) and zoom/drag handlers.
@@ -310,4 +308,4 @@ This codebase is now a living organism. It breathes through the D3 simulation an
 
 ---
 
-_Context Updated: 2026-02-21 (SearchDialog Migration & Radical Codebase Cleanup)_
+_Context Updated: 2026-02-24 (React Purge & Vanilla Astro Migration)_

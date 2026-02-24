@@ -21,8 +21,9 @@ export {
   getPostsByTag,
   getRecentPosts,
   getSortedTags,
-  isSubpost,
   getParentId,
+  isSubpost,
+  getSubpostCount,
   getCombinedReadingTime,
   groupPostsByYear,
 } from './content/posts'

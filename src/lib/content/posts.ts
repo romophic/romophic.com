@@ -12,11 +12,7 @@ const _cache = {
 /**
  * Reset all internal caches. Useful for testing.
  */
-  _cache.posts = null
-  _cache.topLevelPosts = null
-  _cache.allPostsAndSubposts = null
-  _cache.postMap = null
-}
+
 
 async function getCachedPosts(): Promise<CollectionEntry<'blog'>[]> {
   if (_cache.posts) return _cache.posts
