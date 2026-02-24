@@ -1,0 +1,59 @@
+
+> romophic.com@0.0.1 astro D:\Documents\GitHub\romophic.com
+> astro "check"
+
+[2m18:33:28[22m [34m[content][39m Syncing content
+[2m18:33:28[22m [34m[content][39m Synced content
+[2m18:33:28[22m [34m[types][39m Generated [2m845ms[22m
+[2m18:33:28[22m [34m[check][39m Getting diagnostics for Astro files in D:\Documents\GitHub\romophic.com...
+[96msrc/components/blog/TOCHeader.astro[0m:[93m52[0m:[93m32[0m - [91merror[0m[90m ts(2304): [0mCannot find name 'MarkdownHeading'.
+
+[7m52[0m         headings.map((heading: MarkdownHeading) => (
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~[0m
+[96msrc/components/blog/TOCHeader.astro[0m:[93m52[0m:[93m9[0m - [91merror[0m[90m ts(2304): [0mCannot find name 'headings'.
+
+[7m52[0m         headings.map((heading: MarkdownHeading) => (
+[7m  [0m [91m        ~~~~~~~~[0m
+[96msrc/components/blog/TOCHeader.astro[0m:[93m40[0m:[93m9[0m - [91merror[0m[90m ts(2304): [0mCannot find name 'headings'.
+
+[7m40[0m const { headings } = Astro.props
+[7m  [0m [91m        ~~~~~~~~[0m
+[96msrc/components/blog/TOCHeader.astro[0m:[93m39[0m:[93m16[0m - [91merror[0m[90m ts(2304): [0mCannot find name 'headings'.
+
+[7m39[0m type Props = { headings: MarkdownHeading[] }
+[7m  [0m [91m               ~~~~~~~~[0m
+[96msrc/components/blog/TOCHeader.astro[0m:[93m37[0m:[93m10[0m - [91merror[0m[90m ts(2304): [0mCannot find name 'Icon'.
+
+[7m37[0m import { Icon } from 'astro-icon/components'
+[7m  [0m [91m         ~~~~[0m
+[96msrc/components/blog/TOCHeader.astro[0m:[93m36[0m:[93m15[0m - [91merror[0m[90m ts(2304): [0mCannot find name 'MarkdownHeading'.
+
+[7m36[0m import type { MarkdownHeading } from 'astro'
+[7m  [0m [91m              ~~~~~~~~~~~~~~~[0m
+[96msrc/components/blog/TOCHeader.astro[0m:[93m35[0m:[93m10[0m - [91merror[0m[90m ts(2304): [0mCannot find name 'ICONS'.
+
+[7m35[0m import { ICONS } from '@/consts'
+[7m  [0m [91m         ~~~~~[0m
+[96msrc/components/blog/TOCHeader.astro[0m:[93m30[0m:[93m11[0m - [91merror[0m[90m ts(2304): [0mCannot find name 'ICONS'.
+
+[7m30[0m     name={ICONS.chevronDown}
+[7m  [0m [91m          ~~~~~[0m
+[96msrc/components/blog/TOCHeader.astro[0m:[93m29[0m:[93m4[0m - [91merror[0m[90m ts(2304): [0mCannot find name 'Icon'.
+
+[7m29[0m   <Icon
+[7m  [0m [91m   ~~~~[0m
+[96msrc/components/blog/TOCHeader.astro[0m:[93m39[0m:[93m44[0m - [91merror[0m[90m ts(1381): [0mUnexpected token. Did you mean `{'}'}` or `&rbrace;`?
+
+[7m39[0m type Props = { headings: MarkdownHeading[] }
+[7m  [0m [91m                                           ~[0m
+[96msrc/components/blog/TOCHeader.astro[0m:[93m39[0m:[93m24[0m - [91merror[0m[90m ts(1005): [0m'}' expected.
+
+[7m39[0m type Props = { headings: MarkdownHeading[] }
+[7m  [0m [91m                       ~[0m
+
+Result (72 files): 
+- 11 errors
+- 0 warnings
+- 0 hints
+
+窶右LIFECYCLE窶・Command failed with exit code 1.
