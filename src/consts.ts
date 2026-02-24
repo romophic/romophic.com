@@ -54,8 +54,7 @@ export const ICON_MAP = {
   RSS: 'lucide:rss',
 } as const satisfies Record<string, string>
 
-export const READING_SPEED_WPM = 200
-export const SCROLL_TO_TOP_THRESHOLD = 300
+
 
 export const GISCUS_CONFIG = {
   repo: 'romophic/romophic.com',
@@ -69,11 +68,6 @@ export const GISCUS_CONFIG = {
   inputPosition: 'bottom',
   lang: 'ja',
   loading: 'lazy',
-}
-
-export const OG_CONFIG = {
-  width: 1200,
-  height: 630,
 }
 
 export const GRAPH_CONFIG = {

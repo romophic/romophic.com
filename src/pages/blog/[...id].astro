@@ -9,8 +9,6 @@ import TOCHeader from '@/components/blog/TOCHeader.astro'
 import TOCSidebar from '@/components/blog/TOCSidebar.astro'
 import ScrollToTop from '@/components/common/ScrollToTop.astro'
 import GiscusComments from '@/components/features/GiscusComments.astro'
-import Breadcrumbs from '@/components/layout/Breadcrumbs.astro'
-import { ICONS } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import {
   getAllPostsAndSubposts,
@@ -36,7 +34,6 @@ const {
   authors,
   isCurrentSubpost,
   navigation,
-  parentPost,
   hasChildPosts,
   subpostCount,
   postReadingTime,
@@ -68,33 +65,7 @@ const {
   <section
     class="grid grid-cols-[minmax(0px,1fr)_min(calc(var(--breakpoint-md)-2rem),100%)_minmax(0px,1fr)] gap-y-6"
   >
-    <div class="col-start-2">
-      <Breadcrumbs
-        items={[
-          { href: '/blog', label: 'Blog', icon: ICONS.libraryBig },
-          ...(isCurrentSubpost && parentPost
-            ? [
-                {
-                  href: `/blog/${parentPost.id}`,
-                  label: parentPost.data.title,
-                  icon: ICONS.bookOpen,
-                },
-                {
-                  href: `/blog/${currentPostId}`,
-                  label: post.data.title,
-                  icon: ICONS.fileText,
-                },
-              ]
-            : [
-                {
-                  href: `/blog/${currentPostId}`,
-                  label: post.data.title,
-                  icon: ICONS.bookOpenText,
-                },
-              ]),
-        ]}
-      />
-    </div>
+    <div class="col-start-2"></div>
 
     {
       post.data.image && (

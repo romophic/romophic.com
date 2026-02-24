@@ -1,5 +1,4 @@
 ---
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { ICONS } from '@/consts'
 import { getSubpostsData } from '@/lib/data-utils'
 import { Icon } from 'astro-icon/components'
@@ -56,9 +55,8 @@ const {
           </div>
         </summary>
 
-        <ScrollArea
-          client:load
-          className="mx-auto max-w-3xl"
+        <div
+          class="mx-auto max-w-3xl overflow-x-hidden overflow-y-auto"
           data-subposts-header-scroll
         >
           <div class="max-h-[30vh]">
@@ -97,7 +95,7 @@ const {
               )}
             </ul>
           </div>
-        </ScrollArea>
+        </div>
       </details>
     </mobile-subposts>
   )
@@ -127,7 +125,7 @@ const {
     }
 
     init() {
-      this.scrollArea = this.querySelector('[data-radix-scroll-area-viewport]')
+      this.scrollArea = this.querySelector('[data-subposts-header-scroll]')
       this.detailsElement = this.querySelector('details')
       this.headerScrollArea = this.querySelector(
         '[data-subposts-header-scroll]',

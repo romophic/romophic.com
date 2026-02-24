@@ -1,9 +1,7 @@
 ---
 import BlogCard from '@/components/blog/BlogCard.astro'
 import AuthorCard from '@/components/common/AuthorCard.astro'
-import Breadcrumbs from '@/components/layout/Breadcrumbs.astro'
 import PageHead from '@/components/layout/PageHead.astro'
-import { ICONS } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import { getAllAuthors, getPostsByAuthor } from '@/lib/data-utils'
 import type { Person, WithContext } from 'schema-dts'
@@ -41,12 +39,6 @@ const personSchema: WithContext<Person> = {
     type="application/ld+json"
     slot="head"
     set:html={JSON.stringify(personSchema)}
-  />
-  <Breadcrumbs
-    items={[
-      { href: '/authors', label: 'Authors', icon: ICONS.users },
-      { label: author.data.name, icon: ICONS.user },
-    ]}
   />
 
   <section>

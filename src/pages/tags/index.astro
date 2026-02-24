@@ -1,11 +1,9 @@
 ---
-
-import Breadcrumbs from '@/components/layout/Breadcrumbs.astro'
 import PageHead from '@/components/layout/PageHead.astro'
 import { ICONS } from '@/consts'
-import { badgeVariants } from '@/lib/ui-utils'
 import Layout from '@/layouts/Layout.astro'
 import { getSortedTags } from '@/lib/data-utils'
+import { badgeVariants } from '@/lib/ui-utils'
 import { Icon } from 'astro-icon/components'
 
 const sortedTags = await getSortedTags()
@@ -13,16 +11,12 @@ const sortedTags = await getSortedTags()
 
 <Layout class="max-w-3xl">
   <PageHead slot="head" title="Tags" />
-  <Breadcrumbs items={[{ label: 'Tags', icon: ICONS.tags }]} />
 
   <div class="flex flex-col gap-4">
     <div class="flex flex-wrap gap-2">
       {
         sortedTags.map(({ tag, count }) => (
-          <a
-            href={`/tags/${tag}`}
-            class={badgeVariants({ variant: 'muted' })}
-          >
+          <a href={`/tags/${tag}`} class={badgeVariants({ variant: 'muted' })}>
             <Icon name={ICONS.hash} class="size-3" />
             {tag}
             <span class="text-muted-foreground ml-1.5">({count})</span>

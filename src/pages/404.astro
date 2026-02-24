@@ -1,16 +1,12 @@
 ---
-
-import Breadcrumbs from '@/components/layout/Breadcrumbs.astro'
 import PageHead from '@/components/layout/PageHead.astro'
 import { buttonVariants } from '@/components/ui/button'
-import { ICONS } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import { cn } from '@/lib/utils'
 ---
 
 <Layout class="max-w-3xl">
   <PageHead slot="head" title="404" />
-  <Breadcrumbs items={[{ label: '???', icon: ICONS.circleHelp }]} />
 
   <section
     class="flex flex-col items-center justify-center gap-y-6 py-24 text-center"
@@ -30,9 +26,7 @@ import { cn } from '@/lib/utils'
       </p>
     </div>
     <div class="flex gap-4">
-      <a href="/" class={cn(buttonVariants(), 'flex gap-x-2')}>
-        Go Home
-      </a>
+      <a href="/" class={cn(buttonVariants(), 'flex gap-x-2')}> Go Home </a>
       <a
         href="/blog"
         class={cn(buttonVariants({ variant: 'outline' }), 'flex gap-x-2')}

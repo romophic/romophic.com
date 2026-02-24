@@ -1,9 +1,7 @@
 ---
 import BlogCard from '@/components/blog/BlogCard.astro'
-import Breadcrumbs from '@/components/layout/Breadcrumbs.astro'
 import PageHead from '@/components/layout/PageHead.astro'
-import PaginationComponent from '@/components/ui/pagination'
-import { ICONS, SITE } from '@/consts'
+import { SITE } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import { getAllPosts, groupPostsByYear } from '@/lib/data-utils'
 import type { PaginateFunction } from 'astro'
@@ -25,12 +23,6 @@ const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
 
 <Layout class="max-w-3xl">
   <PageHead slot="head" title="Blog" />
-  <Breadcrumbs
-    items={[
-      { label: 'Blog', href: '/blog', icon: ICONS.libraryBig },
-      { label: `Page ${page.currentPage}`, icon: ICONS.bookCopy },
-    ]}
-  />
 
   <div class="flex min-h-[calc(100vh-18rem)] flex-col gap-y-8">
     {
@@ -49,10 +41,29 @@ const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
     }
   </div>
 
-  <PaginationComponent
-    currentPage={page.currentPage}
-    totalPages={page.lastPage}
-    baseUrl="/blog/"
-    client:load
-  />
+  <div class="mt-8 flex items-center justify-center gap-4">
+    {
+      page.url.prev && (
+        <a
+          href={page.url.prev}
+          class="border-border hover:bg-muted/50 rounded-md border px-4 py-2 transition-colors"
+        >
+          ← Previous
+        </a>
+      )
+    }
+    <span class="text-muted-foreground text-sm">
+      Page {page.currentPage} of {page.lastPage}
+    </span>
+    {
+      page.url.next && (
+        <a
+          href={page.url.next}
+          class="border-border hover:bg-muted/50 rounded-md border px-4 py-2 transition-colors"
+        >
+          Next →
+        </a>
+      )
+    }
+  </div>
 </Layout>

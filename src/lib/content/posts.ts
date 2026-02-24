@@ -226,18 +226,3 @@ export async function getCombinedReadingTime(postId: string): Promise<string> {
   return `${Math.ceil(totalMinutes)} min read`
 }
 
-/**
- * Returns a lightweight list of posts for the CommandMenu component.
- * Uses the internal cache to avoid redundant getCollection calls.
- */
-export async function getPostsForCommandMenu(): Promise<
-  { id: string; title: string; description: string; slug: string }[]
-> {
-  const posts = await getAllPosts()
-  return posts.map((post) => ({
-    id: post.id,
-    title: post.data.title,
-    description: post.data.description,
-    slug: post.id,
-  }))
-}

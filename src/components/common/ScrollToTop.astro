@@ -1,7 +1,9 @@
 ---
 import { Button } from '@/components/ui/button'
-import { ICONS, SCROLL_TO_TOP_THRESHOLD } from '@/consts'
+import { ICONS } from '@/consts'
 import { Icon } from 'astro-icon/components'
+
+const SCROLL_TO_TOP_THRESHOLD = 300
 ---
 
 <Button
@@ -33,8 +35,12 @@ import { Icon } from 'astro-icon/components'
 
       handleClick = () => window.scrollTo({ top: 0, behavior: 'smooth' })
       handleScroll = () => {
-        const isFooterVisible = footer.getBoundingClientRect().top <= window.innerHeight
-        btn.classList.toggle('hidden', window.scrollY <= SCROLL_TO_TOP_THRESHOLD || isFooterVisible)
+        const isFooterVisible =
+          footer.getBoundingClientRect().top <= window.innerHeight
+        btn.classList.toggle(
+          'hidden',
+          window.scrollY <= SCROLL_TO_TOP_THRESHOLD || isFooterVisible,
+        )
       }
 
       btn.addEventListener('click', handleClick)

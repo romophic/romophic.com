@@ -22,7 +22,6 @@ import Search from 'astro-pagefind/components/Search'
     ) as HTMLDialogElement | null
     if (!dialog) return
 
-    // @ts-ignore
     window.toggleCommandMenu = () => {
       if (dialog.open) {
         dialog.close()
@@ -39,7 +38,6 @@ import Search from 'astro-pagefind/components/Search'
     const handleKeydown = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
-        // @ts-ignore
         if (window.toggleCommandMenu) window.toggleCommandMenu()
       }
     }

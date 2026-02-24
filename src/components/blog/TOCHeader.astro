@@ -1,5 +1,4 @@
 ---
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { ICONS } from '@/consts'
 import { cn, getHeadingMargin } from '@/lib/utils'
 import type { MarkdownHeading } from 'astro'
@@ -59,9 +58,8 @@ const { headings } = Astro.props
           </div>
         </summary>
 
-        <ScrollArea
-          client:load
-          className="mx-auto max-w-3xl"
+        <div
+          class="mx-auto max-w-3xl overflow-x-hidden overflow-y-auto"
           data-toc-header-scroll
         >
           <div class="max-h-[30vh]">
@@ -88,7 +86,7 @@ const { headings } = Astro.props
               ))}
             </ul>
           </div>
-        </ScrollArea>
+        </div>
       </details>
     </mobile-toc>
   )
@@ -144,7 +142,7 @@ const { headings } = Astro.props
       )
       this.detailsElement = this.querySelector('details')
       this.listElement = this.querySelector('#mobile-table-of-contents')
-      this.scrollArea = this.querySelector('[data-radix-scroll-area-viewport]')
+      this.scrollArea = this.querySelector('[data-toc-header-scroll]')
 
       if (this.progressCircle) {
         this.progressCircle.style.strokeDasharray =

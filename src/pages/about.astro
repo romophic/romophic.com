@@ -1,6 +1,5 @@
 ---
 import ProjectCard from '@/components/common/ProjectCard.astro'
-import Breadcrumbs from '@/components/layout/Breadcrumbs.astro'
 import PageHead from '@/components/layout/PageHead.astro'
 import { ICONS } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
@@ -12,7 +11,6 @@ const projects = await getAllProjects()
 
 <Layout class="max-w-3xl">
   <PageHead slot="head" title="About" />
-  <Breadcrumbs items={[{ label: 'About', icon: ICONS.info }]} />
 
   <section class="space-y-12">
     {/* Page Title */}

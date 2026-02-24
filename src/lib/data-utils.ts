@@ -32,8 +32,6 @@ export {
   getPostReadingTime,
   getCombinedReadingTime,
   groupPostsByYear,
-  getPostsForCommandMenu,
-  resetPostsCache,
 } from './content/posts'
 
 export { parseAuthors, getAllAuthors, getPostsByAuthor } from './content/authors'
@@ -43,8 +41,6 @@ export {
   normalizeId,
   getBacklinks,
   extractInternalLinks,
-  MARKDOWN_LINK_REGEX,
-  resetBacklinksCache,
 } from './content/links'
 export { getSubpostsData } from './content/subposts-data'
 

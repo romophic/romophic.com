@@ -72,7 +72,6 @@ This document provides a comprehensive and deep technical overview of **romophic
     - `SocialIcons.astro`: Social media icons.
 - **`features/`**: Complex interactive islands.
     - `GraphView.tsx`: The Knowledge Graph implementation (D3 + Canvas).
-    - `CommandMenu.tsx`: Global search and navigation menu (React).
     - `GlobalLinkPreviews.tsx`: Hover preview for internal links (React).
     - `ActivityGraph.astro`: GitHub-style contribution heatmap.
     - `GiscusComments.astro`: Comment system integration.
@@ -82,9 +81,9 @@ This document provides a comprehensive and deep technical overview of **romophic
     - `Footer.astro`: Site footer with social links.
     - `Head.astro`: Global `<head>` contents.
     - `PageHead.astro`: SEO and meta tags per page.
+    - `SearchDialog.astro`: Native `<dialog>` for Pagefind static search integration.
     - `ThemeToggle.astro`: Switch button for dark/light mode.
-- **`ui/`**: Atomic, unstyled components (Shadcn-like).
-    - `button.tsx`, `dialog.tsx`, `badge.tsx`, etc.
+- **`ui/`**: Atomic, unstyled components (Shadcn-like) retained only where fundamentally necessary (`button.tsx`, `badge.tsx`, etc). Most structural bits (`Pagination`, `ScrollArea`) were stripped in favor of Astro native approaches.
 
 #### `src/content/` (Data Source)
 - **`authors/`**: Author metadata in `.md`.
@@ -175,9 +174,9 @@ The project features a bi-directional linking system and a visualization graph.
 
 ### 3.4. Search & Link Previews
 
-- **Search Engine:** **Pagefind** (Static Search) indexed post-build.
-- **Integration:** `CommandMenu.tsx` with thematic highlighting (`bg-primary/20`).
-- **UX Optimization:** Implements a `searching` state to prevent the "No results found" flicker while Pagefind is fetching results asynchronously.
+- **Search Engine:** **Pagefind** (Static Search, `@pagefind/default-ui`) indexed post-build.
+- **Integration:** Native HTML5 `<dialog>` component (`SearchDialog.astro`) wrapped with a lightweight Astro script payload. 
+- **UX Optimization:** Submits standard search queries via `astro-pagefind` natively instead of heavy `React-Cmdk` combinations for a drastic bundle size reduction.
 - **Link Previews (`GlobalLinkPreviews.tsx`):**
   - Client-side component that intercepts hover events on internal links.
   - Fetches and parses target HTML metadata.
@@ -273,6 +272,7 @@ The project features a bi-directional linking system and a visualization graph.
 - [x] **Config:** Standardized Expressive Code style (removed terminal frame for shell).
 - [x] **Content:** Added "Neural Network from Scratch" article.
 - [x] **Simplification:** Removed PWA features to reduce complexity and resolve caching issues (mobile loading bar).
+- [x] **Codebase Audit:** Purged `CommandMenu`, React/Radix dependencies (`cmdk`, `@radix-ui`), and orphaned Shadcn UI templates (`Pagination`, `Avatar`, `ScrollArea`) in favor of native Astro components. Clean bill of health via `knip`.
 
 ### Future Features
 - [ ] **Performance (Graph):** Remove D3.js dependency by implementing a custom lightweight physics engine (Verlet integration) and zoom/drag handlers.
@@ -309,4 +309,4 @@ This codebase is now a living organism. It breathes through the D3 simulation an
 
 ---
 
-_Context Updated: 2026-02-16 (Refactoring Round 2 & Snappy UX Implementation)_
+_Context Updated: 2026-02-21 (SearchDialog Migration & Radical Codebase Cleanup)_

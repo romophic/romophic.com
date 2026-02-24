@@ -1,5 +1,4 @@
 ---
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { ICONS } from '@/consts'
 import { getSubpostsData } from '@/lib/data-utils'
 import SubpostItem from './SubpostItem.astro'
@@ -20,9 +19,8 @@ const {
   id="subposts-sidebar-container"
   class="sticky top-20 col-start-3 row-span-1 mr-auto ml-8 hidden h-[calc(100vh-5rem)] max-w-md xl:block"
 >
-  <ScrollArea
-    client:load
-    className="flex max-h-[calc(100vh-8rem)] flex-col overflow-y-auto"
+  <div
+    class="flex max-h-[calc(100vh-8rem)] flex-col overflow-y-auto"
     data-subposts-sidebar-scroll
   >
     <div class="px-4">
@@ -65,7 +63,7 @@ const {
         }
       </ul>
     </div>
-  </ScrollArea>
+  </div>
 </div>
 
 <script>
@@ -110,7 +108,7 @@ const {
       )
       if (sidebarContainer) {
         state.scrollArea = sidebarContainer.querySelector(
-          '[data-radix-scroll-area-viewport]',
+          '[data-subposts-sidebar-scroll]',
         )
         state.sidebarScrollArea = sidebarContainer.querySelector(
           '[data-subposts-sidebar-scroll]',
