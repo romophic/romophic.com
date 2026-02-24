@@ -229,6 +229,13 @@ The project features a bi-directional linking system and a visualization graph.
 - **Data Source:** Projects are loaded from the `projects` content collection.
 - **SEO Fix:** Ensured proper heading hierarchy (`h1 -> h2 -> h3`) for better accessibility and ranking.
 
+### 3.12. Internationalization (i18n) Routing & Localization
+The site architecture natively supports full EN/JA bilingual rendering through an explicit route wrapper approach rather than middleware rewrites, maximizing static rendering determinism.
+- **Routing Strategy:** Astro's `i18n` config defaults to `ja` and keeps Japanese content at the root (`/`). English parallel content lives explicitly under `/en/`.
+- **Component Wrapping (DRY):** Global component templates (`BlogList.astro`, `Home.astro`, etc.) reside in `src/components/pages/`. Next, the physical `src/pages/` route indices simply wrap these layout templates and pass down their context's `lang` property.
+- **Data Filtering:** Data aggregators (`getAllPosts`, `getPostsByTag`, etc.) map and filter collections natively via a new `lang` dimension on Content schemas, with dedicated in-memory map caches for respective locales.
+- **UI Localization:** Language-agnostic strings are offloaded from static markup to `src/i18n/ui.ts` via dict lookups driven by localized paths inferred via `getLangFromUrl` (`src/i18n/utils.ts`).
+
 ## 4. Development Standards & Conventions
 
 ### 4.1. The "Vibe Loop"
@@ -278,7 +285,6 @@ The project features a bi-directional linking system and a visualization graph.
 - [ ] **Performance (Loading):** Switch GraphView to `client:visible` to defer JS execution until scroll.
 - [ ] **Performance (Fonts):** Implement font subsetting for Japanese characters to reduce font file size.
 - [ ] Content: Complete algorithms library placeholders (`//TODO`).
-- [ ] i18n: Multi-language support.
 
 ## 7. Philosophical Notes & Guiding Principles
 
@@ -308,4 +314,4 @@ This codebase is now a living organism. It breathes through the D3 simulation an
 
 ---
 
-_Context Updated: 2026-02-24 (React Purge & Vanilla Astro Migration)_
+_Context Updated: 2026-02-24 (i18n Architecture Implementation)_
