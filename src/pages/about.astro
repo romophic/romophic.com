@@ -1,7 +1,7 @@
 ---
 import ProjectCard from '@/components/common/ProjectCard.astro'
 import PageHead from '@/components/layout/PageHead.astro'
-import { ICONS } from '@/consts'
+import { ICON_MAP, ICONS, SITE, SOCIAL_LINKS } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import { getAllProjects } from '@/lib/data-utils'
 import { Icon } from 'astro-icon/components'
@@ -21,9 +21,9 @@ const projects = await getAllProjects()
     {/* Intro */}
     <div class="prose dark:prose-invert">
       <p>
-        romophic.com is a technical digital garden and personal portfolio. It
-        serves as a space for sharing knowledge, documenting projects, and
-        exploring interconnected ideas.
+        {SITE.title} is a technical digital garden and personal portfolio. It serves
+        as a space for sharing knowledge, documenting projects, and exploring interconnected
+        ideas.
       </p>
     </div>
 
@@ -113,32 +113,21 @@ const projects = await getAllProjects()
       <h2 class="mb-6 text-2xl font-semibold tracking-tight">Connect</h2>
       <div class="flex flex-wrap gap-4">
         {
-          [
-            {
-              name: 'GitHub',
-              href: 'https://github.com/romophic',
-              icon: ICONS.github,
-            },
-            {
-              name: 'Twitter',
-              href: 'https://twitter.com/romophic',
-              icon: ICONS.twitter,
-            },
-            {
-              name: 'Email',
-              href: 'mailto:nariyu.pub@gmail.com',
-              icon: ICONS.mail,
-            },
-            { name: 'RSS', href: '/rss.xml', icon: ICONS.rss },
-          ].map((social) => (
+          SOCIAL_LINKS.map((social) => (
             <a
               href={social.href}
               class="text-muted-foreground hover:text-foreground hover:bg-muted flex items-center gap-2 rounded-md p-2 transition-colors"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Icon name={social.icon} class="size-5" />
-              <span class="font-medium">{social.name}</span>
+              <Icon
+                name={
+                  (ICON_MAP as Record<string, string>)[social.label] ||
+                  ICONS.link
+                }
+                class="size-5"
+              />
+              <span class="font-medium">{social.label}</span>
             </a>
           ))
         }
