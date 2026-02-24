@@ -46,9 +46,7 @@ describe('links utils', () => {
     })
 
     it('strips query parameters before resolving', () => {
-      expect(resolveLinkToId('/blog/my-post?foo=bar', 'source')).toBe(
-        'my-post',
-      )
+      expect(resolveLinkToId('/blog/my-post?foo=bar', 'source')).toBe('my-post')
     })
 
     it('ignores protocol-relative URLs', () => {
@@ -96,7 +94,8 @@ describe('links utils', () => {
 describe('extractInternalLinks', () => {
   it('extracts absolute blog links from markdown body', async () => {
     const { extractInternalLinks } = await import('./links')
-    const body = 'See [my post](/blog/hello-world) and [another](/blog/parent/child) for details.'
+    const body =
+      'See [my post](/blog/hello-world) and [another](/blog/parent/child) for details.'
     const result = extractInternalLinks(body, 'source-post')
     expect(result).toEqual(['hello-world', 'parent/child'])
   })

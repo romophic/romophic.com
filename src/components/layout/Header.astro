@@ -1,15 +1,25 @@
 ---
-
+import LanguageSwitcher from '@/components/layout/LanguageSwitcher.astro'
 import ThemeToggle from '@/components/layout/ThemeToggle.astro'
 import { ICONS, NAV_LINKS, SITE } from '@/consts'
+import { defaultLang, ui } from '@/i18n/ui'
+import { getLangFromUrl, localizePath, useTranslations } from '@/i18n/utils'
 import { Icon } from 'astro-icon/components'
+
+type TranslationKey = keyof (typeof ui)[typeof defaultLang]
+
+const lang = getLangFromUrl(Astro.url)
+const t = useTranslations(lang)
 ---
 
 <div>
   <div
     class="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-3"
   >
-    <a href="/" class="flex shrink-0 items-center justify-center gap-3">
+    <a
+      href={localizePath('/', lang)}
+      class="flex shrink-0 items-center justify-center gap-3"
+    >
       <span
         class="hidden h-full text-lg leading-none font-medium min-[400px]:block"
         >{SITE.title}</span
@@ -20,10 +30,10 @@ import { Icon } from 'astro-icon/components'
         {
           NAV_LINKS.map((item) => (
             <a
-              href={item.href}
+              href={localizePath(item.href, lang)}
               class="text-foreground/60 hover:text-foreground capitalize transition-colors"
             >
-              {item.label}
+              {t(`nav.${item.label.toLowerCase()}` as TranslationKey)}
             </a>
           ))
         }
@@ -34,8 +44,9 @@ import { Icon } from 'astro-icon/components'
         aria-label="Open Command Menu"
       >
         <Icon name={ICONS.search} class="size-5" />
-        <span class="sr-only">Search</span>
+        <span class="sr-only">{t('search.placeholder')}</span>
       </button>
+      <LanguageSwitcher />
       <ThemeToggle transition:persist />
     </div>
   </div>

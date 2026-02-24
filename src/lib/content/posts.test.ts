@@ -3,10 +3,7 @@ import { isSubpost, getParentId, groupPostsByYear } from './posts'
 import type { CollectionEntry } from 'astro:content'
 
 // Helper to create a minimal post-like object for groupPostsByYear tests
-function createMockPost(
-  id: string,
-  date: Date,
-): CollectionEntry<'blog'> {
+function createMockPost(id: string, date: Date): CollectionEntry<'blog'> {
   return {
     id,
     data: { date, title: id, description: '', tags: [] },
@@ -78,4 +75,3 @@ describe('posts utils', () => {
     })
   })
 })
-

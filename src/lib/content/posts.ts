@@ -4,8 +4,8 @@ import readingTime from 'reading-time'
 /** Internal cache store. Use resetPostsCache() to clear in tests. */
 const _cache = {
   posts: null as CollectionEntry<'blog'>[] | null,
-  topLevelPosts: null as CollectionEntry<'blog'>[] | null,
-  allPostsAndSubposts: null as CollectionEntry<'blog'>[] | null,
+  topLevelPosts: new Map<string, CollectionEntry<'blog'>[]>(),
+  allPostsAndSubposts: new Map<string, CollectionEntry<'blog'>[]>(),
   postMap: null as Map<string, CollectionEntry<'blog'>> | null,
 }
 
@@ -13,40 +13,51 @@ const _cache = {
  * Reset all internal caches. Useful for testing.
  */
 
-
 async function getCachedPosts(): Promise<CollectionEntry<'blog'>[]> {
   if (_cache.posts) return _cache.posts
   _cache.posts = await getCollection('blog')
   return _cache.posts
 }
 
-export async function getAllPosts(): Promise<CollectionEntry<'blog'>[]> {
-  if (_cache.topLevelPosts) return _cache.topLevelPosts
+export async function getAllPosts(
+  lang: 'ja' | 'en' = 'ja',
+): Promise<CollectionEntry<'blog'>[]> {
+  if (_cache.topLevelPosts.has(lang)) return _cache.topLevelPosts.get(lang)!
   const posts = await getCachedPosts()
-  _cache.topLevelPosts = posts
-    .filter((post) => !post.data.draft && !isSubpost(post.id))
+  const filtered = posts
+    .filter(
+      (post) =>
+        !post.data.draft && !isSubpost(post.id) && post.data.lang === lang,
+    )
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  return _cache.topLevelPosts
+  _cache.topLevelPosts.set(lang, filtered)
+  return filtered
 }
 
-export async function getAllPostsAndSubposts(): Promise<
-  CollectionEntry<'blog'>[]
-> {
-  if (_cache.allPostsAndSubposts) return _cache.allPostsAndSubposts
+export async function getAllPostsAndSubposts(
+  lang: 'ja' | 'en' = 'ja',
+): Promise<CollectionEntry<'blog'>[]> {
+  if (_cache.allPostsAndSubposts.has(lang))
+    return _cache.allPostsAndSubposts.get(lang)!
   const posts = await getCachedPosts()
-  _cache.allPostsAndSubposts = posts
-    .filter((post) => !post.data.draft)
+  const filtered = posts
+    .filter((post) => !post.data.draft && post.data.lang === lang)
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  return _cache.allPostsAndSubposts
+  _cache.allPostsAndSubposts.set(lang, filtered)
+  return filtered
 }
 
-export async function getAllProjects(): Promise<CollectionEntry<'projects'>[]> {
+export async function getAllProjects(
+  lang: 'ja' | 'en' = 'ja',
+): Promise<CollectionEntry<'projects'>[]> {
   const projects = await getCollection('projects')
-  return projects.sort((a, b) => {
-    const dateA = a.data.startDate?.getTime() || 0
-    const dateB = b.data.startDate?.getTime() || 0
-    return dateB - dateA
-  })
+  return projects
+    .filter((project) => project.data.lang === lang)
+    .sort((a, b) => {
+      const dateA = a.data.startDate?.getTime() || 0
+      const dateB = b.data.startDate?.getTime() || 0
+      return dateB - dateA
+    })
 }
 
 export function isSubpost(postId: string): boolean {
@@ -63,8 +74,11 @@ export async function getPostById(
   postId: string,
 ): Promise<CollectionEntry<'blog'> | null> {
   if (!_cache.postMap) {
-    const allPosts = await getAllPostsAndSubposts()
-    _cache.postMap = new Map(allPosts.map((p) => [p.id, p]))
+    const allPostsJa = await getAllPostsAndSubposts('ja')
+    const allPostsEn = await getAllPostsAndSubposts('en')
+    _cache.postMap = new Map(
+      [...allPostsJa, ...allPostsEn].map((p) => [p.id, p]),
+    )
   }
   return _cache.postMap.get(postId) ?? null
 }
@@ -95,6 +109,10 @@ export async function getAdjacentPosts(currentId: string): Promise<{
   older: CollectionEntry<'blog'> | null
   parent: CollectionEntry<'blog'> | null
 }> {
+  const currentPost = await getPostById(currentId)
+  if (!currentPost) return { newer: null, older: null, parent: null }
+  const currentLang = currentPost.data.lang as 'ja' | 'en'
+
   if (isSubpost(currentId)) {
     const parentId = getParentId(currentId)
     const parent = (await getPostById(parentId)) || null
@@ -114,7 +132,7 @@ export async function getAdjacentPosts(currentId: string): Promise<{
     }
   }
 
-  const allPosts = await getAllPosts()
+  const allPosts = await getAllPosts(currentLang)
   const currentIndex = allPosts.findIndex((post) => post.id === currentId)
 
   if (currentIndex === -1) {
@@ -129,8 +147,10 @@ export async function getAdjacentPosts(currentId: string): Promise<{
   }
 }
 
-export async function getAllTags(): Promise<Map<string, number>> {
-  const posts = await getAllPosts()
+export async function getAllTags(
+  lang: 'ja' | 'en' = 'ja',
+): Promise<Map<string, number>> {
+  const posts = await getAllPosts(lang)
   return posts.reduce((acc, post) => {
     post.data.tags?.forEach((tag) => {
       acc.set(tag, (acc.get(tag) || 0) + 1)
@@ -141,22 +161,24 @@ export async function getAllTags(): Promise<Map<string, number>> {
 
 export async function getPostsByTag(
   tag: string,
+  lang: 'ja' | 'en' = 'ja',
 ): Promise<CollectionEntry<'blog'>[]> {
-  const posts = await getAllPosts()
+  const posts = await getAllPosts(lang)
   return posts.filter((post) => post.data.tags?.includes(tag))
 }
 
 export async function getRecentPosts(
   count: number,
+  lang: 'ja' | 'en' = 'ja',
 ): Promise<CollectionEntry<'blog'>[]> {
-  const posts = await getAllPosts()
+  const posts = await getAllPosts(lang)
   return posts.slice(0, count)
 }
 
-export async function getSortedTags(): Promise<
-  { tag: string; count: number }[]
-> {
-  const tagCounts = await getAllTags()
+export async function getSortedTags(
+  lang: 'ja' | 'en' = 'ja',
+): Promise<{ tag: string; count: number }[]> {
+  const tagCounts = await getAllTags(lang)
   return [...tagCounts.entries()]
     .map(([tag, count]) => ({ tag, count }))
     .sort((a, b) => {
@@ -171,7 +193,7 @@ export function groupPostsByYear(
   return posts.reduce(
     (acc: Record<string, CollectionEntry<'blog'>[]>, post) => {
       const year = post.data.date.getFullYear().toString()
-        ; (acc[year] ??= []).push(post)
+      ;(acc[year] ??= []).push(post)
       return acc
     },
     {},
@@ -220,4 +242,3 @@ export async function getCombinedReadingTime(postId: string): Promise<string> {
 
   return `${Math.ceil(totalMinutes)} min read`
 }
-

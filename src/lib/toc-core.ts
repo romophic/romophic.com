@@ -7,9 +7,9 @@
  */
 
 export type HeadingRegion = {
-    id: string
-    start: number
-    end: number
+  id: string
+  start: number
+  end: number
 }
 
 const HEADING_SELECTOR = '.prose h2, .prose h3, .prose h4, .prose h5, .prose h6'
@@ -20,27 +20,27 @@ const HEADING_SELECTOR = '.prose h2, .prose h3, .prose h4, .prose h5, .prose h6'
  * to the next heading's offset (or the end of the document).
  */
 export function buildHeadingRegions(): {
-    headings: HTMLElement[]
-    regions: HeadingRegion[]
+  headings: HTMLElement[]
+  regions: HeadingRegion[]
 } {
-    const headings = Array.from(
-        document.querySelectorAll<HTMLElement>(HEADING_SELECTOR),
-    )
+  const headings = Array.from(
+    document.querySelectorAll<HTMLElement>(HEADING_SELECTOR),
+  )
 
-    if (headings.length === 0) {
-        return { headings: [], regions: [] }
+  if (headings.length === 0) {
+    return { headings: [], regions: [] }
+  }
+
+  const regions = headings.map((heading, index) => {
+    const nextHeading = headings[index + 1]
+    return {
+      id: heading.id,
+      start: heading.offsetTop,
+      end: nextHeading ? nextHeading.offsetTop : document.body.scrollHeight,
     }
+  })
 
-    const regions = headings.map((heading, index) => {
-        const nextHeading = headings[index + 1]
-        return {
-            id: heading.id,
-            start: heading.offsetTop,
-            end: nextHeading ? nextHeading.offsetTop : document.body.scrollHeight,
-        }
-    })
-
-    return { headings, regions }
+  return { headings, regions }
 }
 
 /**
@@ -48,44 +48,44 @@ export function buildHeadingRegions(): {
  * Uses both direct heading visibility and region overlap detection.
  */
 export function getVisibleHeadingIds(
-    headings: HTMLElement[],
-    regions: HeadingRegion[],
-    headerOffset: number,
+  headings: HTMLElement[],
+  regions: HeadingRegion[],
+  headerOffset: number,
 ): string[] {
-    if (headings.length === 0) return []
+  if (headings.length === 0) return []
 
-    const viewportTop = window.scrollY + headerOffset
-    const viewportBottom = window.scrollY + window.innerHeight
-    const visibleIds = new Set<string>()
+  const viewportTop = window.scrollY + headerOffset
+  const viewportBottom = window.scrollY + window.innerHeight
+  const visibleIds = new Set<string>()
 
-    const isInViewport = (top: number, bottom: number) =>
-        (top >= viewportTop && top <= viewportBottom) ||
-        (bottom >= viewportTop && bottom <= viewportBottom) ||
-        (top <= viewportTop && bottom >= viewportBottom)
+  const isInViewport = (top: number, bottom: number) =>
+    (top >= viewportTop && top <= viewportBottom) ||
+    (bottom >= viewportTop && bottom <= viewportBottom) ||
+    (top <= viewportTop && bottom >= viewportBottom)
 
-    headings.forEach((heading) => {
+  headings.forEach((heading) => {
+    const headingBottom = heading.offsetTop + heading.offsetHeight
+    if (isInViewport(heading.offsetTop, headingBottom)) {
+      visibleIds.add(heading.id)
+    }
+  })
+
+  regions.forEach((region) => {
+    if (region.start <= viewportBottom && region.end >= viewportTop) {
+      const heading = document.getElementById(region.id)
+      if (heading) {
         const headingBottom = heading.offsetTop + heading.offsetHeight
-        if (isInViewport(heading.offsetTop, headingBottom)) {
-            visibleIds.add(heading.id)
+        if (
+          region.end > headingBottom &&
+          (headingBottom < viewportBottom || viewportTop < region.end)
+        ) {
+          visibleIds.add(region.id)
         }
-    })
+      }
+    }
+  })
 
-    regions.forEach((region) => {
-        if (region.start <= viewportBottom && region.end >= viewportTop) {
-            const heading = document.getElementById(region.id)
-            if (heading) {
-                const headingBottom = heading.offsetTop + heading.offsetHeight
-                if (
-                    region.end > headingBottom &&
-                    (headingBottom < viewportBottom || viewportTop < region.end)
-                ) {
-                    visibleIds.add(region.id)
-                }
-            }
-        }
-    })
-
-    return Array.from(visibleIds)
+  return Array.from(visibleIds)
 }
 
 /**
@@ -93,27 +93,27 @@ export function getVisibleHeadingIds(
  * Only scrolls if the distance exceeds the given threshold.
  */
 export function scrollToCenter(
-    scrollContainer: HTMLElement,
-    targetElement: Element,
-    threshold = 5,
+  scrollContainer: HTMLElement,
+  targetElement: Element,
+  threshold = 5,
 ) {
-    const { top: containerTop, height: containerHeight } =
-        scrollContainer.getBoundingClientRect()
-    const { top: itemTop, height: itemHeight } =
-        targetElement.getBoundingClientRect()
+  const { top: containerTop, height: containerHeight } =
+    scrollContainer.getBoundingClientRect()
+  const { top: itemTop, height: itemHeight } =
+    targetElement.getBoundingClientRect()
 
-    const currentItemTop = itemTop - containerTop + scrollContainer.scrollTop
-    const targetScroll = Math.max(
-        0,
-        Math.min(
-            currentItemTop - (containerHeight - itemHeight) / 2,
-            scrollContainer.scrollHeight - scrollContainer.clientHeight,
-        ),
-    )
+  const currentItemTop = itemTop - containerTop + scrollContainer.scrollTop
+  const targetScroll = Math.max(
+    0,
+    Math.min(
+      currentItemTop - (containerHeight - itemHeight) / 2,
+      scrollContainer.scrollHeight - scrollContainer.clientHeight,
+    ),
+  )
 
-    if (Math.abs(targetScroll - scrollContainer.scrollTop) > threshold) {
-        scrollContainer.scrollTop = targetScroll
-    }
+  if (Math.abs(targetScroll - scrollContainer.scrollTop) > threshold) {
+    scrollContainer.scrollTop = targetScroll
+  }
 }
 
 /**
@@ -121,35 +121,32 @@ export function scrollToCenter(
  * Shows top/bottom masks when content is scrollable in that direction.
  */
 export function updateScrollMaskClasses(
-    scrollContainer: HTMLElement,
-    maskTarget: HTMLElement,
-    options: {
-        topClass?: string
-        bottomClass?: string
-        threshold?: number
-    } = {},
+  scrollContainer: HTMLElement,
+  maskTarget: HTMLElement,
+  options: {
+    topClass?: string
+    bottomClass?: string
+    threshold?: number
+  } = {},
 ) {
-    const {
-        topClass = 'mask-t-from-90%',
-        bottomClass = 'mask-b-from-90%',
-        threshold = 5,
-    } = options
+  const {
+    topClass = 'mask-t-from-90%',
+    bottomClass = 'mask-b-from-90%',
+    threshold = 5,
+  } = options
 
-    const { scrollTop, scrollHeight, clientHeight } = scrollContainer
-    const isAtTop = scrollTop <= threshold
-    const isAtBottom = scrollTop >= scrollHeight - clientHeight - threshold
+  const { scrollTop, scrollHeight, clientHeight } = scrollContainer
+  const isAtTop = scrollTop <= threshold
+  const isAtBottom = scrollTop >= scrollHeight - clientHeight - threshold
 
-    maskTarget.classList.toggle(topClass, !isAtTop)
-    maskTarget.classList.toggle(bottomClass, !isAtBottom)
+  maskTarget.classList.toggle(topClass, !isAtTop)
+  maskTarget.classList.toggle(bottomClass, !isAtBottom)
 }
 
 /**
  * Compare two string arrays for equality (used for active heading diffing).
  */
-export function headingIdsChanged(
-    oldIds: string[],
-    newIds: string[],
-): boolean {
-    if (oldIds.length !== newIds.length) return true
-    return oldIds.some((id, i) => id !== newIds[i])
+export function headingIdsChanged(oldIds: string[], newIds: string[]): boolean {
+  if (oldIds.length !== newIds.length) return true
+  return oldIds.some((id, i) => id !== newIds[i])
 }

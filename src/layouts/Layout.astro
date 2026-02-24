@@ -9,20 +9,18 @@ import Footer from '@/components/layout/Footer.astro'
 import Head from '@/components/layout/Head.astro'
 import Header from '@/components/layout/Header.astro'
 import SearchDialog from '@/components/layout/SearchDialog.astro'
-import { SITE } from '@/consts'
+import { getLangFromUrl } from '@/i18n/utils'
 
 interface Props {
   class?: string
 }
 
 const { class: className } = Astro.props
+const lang = getLangFromUrl(Astro.url)
 ---
 
 <!doctype html>
-<html
-  class="bg-background text-foreground scheme-light-dark"
-  lang={SITE.locale}
->
+<html class="bg-background text-foreground scheme-light-dark" lang={lang}>
   <Head>
     <slot name="head" />
   </Head>

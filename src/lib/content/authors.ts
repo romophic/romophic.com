@@ -8,8 +8,9 @@ export async function getAllAuthors(): Promise<CollectionEntry<'authors'>[]> {
 
 export async function getPostsByAuthor(
   authorId: string,
+  lang: 'ja' | 'en' = 'ja',
 ): Promise<CollectionEntry<'blog'>[]> {
-  const posts = await getAllPosts()
+  const posts = await getAllPosts(lang)
   return posts.filter((post) => post.data.authors?.includes(authorId))
 }
 
