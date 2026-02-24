@@ -209,8 +209,9 @@ The project features a bi-directional linking system and a visualization graph.
 
 ### 3.8. Icon System
 
-- **Source:** `public/icon.webp`.
-- **Generation:** `scripts/generate-icons.ts` creates all PNG/ICO variants.
+- **Primary Source:** Native custom icons in `public/icon.webp` (generated via old `scripts/generate-icons.ts` which has since been removed).
+- **UI Icons:** `@iconify-json/lucide` is utilized via `astro-icon` (`<Icon name="lucide:arrow-right" />`).
+  - **Performance Note:** While heavy in `node_modules` (acting strictly as a dev-environment sprite gallery), `astro-icon` natively tree-shakes this dependency at build time. Only the specifically referenced SVGs are injected into the final bundle, resulting in **zero** client-side overhead. This is verified by ensuring it sits solely in `devDependencies`. There is no need manually copy SVGs.
 
 ### 3.9. Verification & Well-known Path
 
@@ -272,7 +273,7 @@ The project features a bi-directional linking system and a visualization graph.
 - [x] **Config:** Standardized Expressive Code style (removed terminal frame for shell).
 - [x] **Content:** Added "Neural Network from Scratch" article.
 - [x] **Simplification:** Removed PWA features to reduce complexity and resolve caching issues (mobile loading bar).
-- [x] **Codebase Audit:** Purged `CommandMenu`, React/Radix dependencies (`cmdk`, `@radix-ui`), and orphaned Shadcn UI templates (`Pagination`, `Avatar`, `ScrollArea`) in favor of native Astro components. Clean bill of health via `knip`.
+- [x] **Codebase Audit:** Purged `CommandMenu`, React/Radix dependencies (`cmdk`, `@radix-ui`), and orphaned Shadcn UI templates (`Pagination`, `Avatar`, `ScrollArea`) in favor of native Astro components. Clean bill of health via `knip` (with `@iconify-json/lucide` explicitly ignored as a valid build-time asset).
 
 ### Future Features
 - [ ] **Performance (Graph):** Remove D3.js dependency by implementing a custom lightweight physics engine (Verlet integration) and zoom/drag handlers.

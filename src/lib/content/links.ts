@@ -3,7 +3,7 @@ import { getAllPostsAndSubposts } from './posts'
 import type { CollectionEntry } from 'astro:content'
 
 // Global regex for capturing markdown link URLs: [label](url)
-export const MARKDOWN_LINK_REGEX = /\[.*?\]\((.*?)\)/g
+const MARKDOWN_LINK_REGEX = /\[.*?\]\((.*?)\)/g
 
 /**
  * Extract all resolved internal link target IDs from a post's body.
@@ -27,7 +27,6 @@ let _backlinksMap: Map<string, CollectionEntry<'blog'>[]> | null = null
 /**
  * Reset the backlinks cache. Useful for testing.
  */
-export function resetBacklinksCache() {
   _backlinksMap = null
 }
 

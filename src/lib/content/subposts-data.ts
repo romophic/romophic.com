@@ -8,13 +8,13 @@ import {
     isSubpost,
 } from './posts'
 
-export type SubpostWithReadingTime = Awaited<
+type SubpostWithReadingTime = Awaited<
     ReturnType<typeof getSubpostsForParent>
 >[number] & {
     readingTime: string
 }
 
-export type SubpostsData = {
+type SubpostsData = {
     activePost: Awaited<ReturnType<typeof getPostById>>
     isActivePost: boolean
     isCurrentSubpost: boolean

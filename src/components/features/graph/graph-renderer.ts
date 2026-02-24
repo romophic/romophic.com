@@ -55,7 +55,7 @@ export function getNodeColor(
 /**
  * Draw a small directional arrow at the end of a link.
  */
-export function drawArrow(
+function drawArrow(
     ctx: CanvasRenderingContext2D,
     x1: number,
     y1: number,

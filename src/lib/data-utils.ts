@@ -18,28 +18,18 @@ export {
   getAllPostsAndSubposts,
   getAllProjects,
   getAllTags,
-  getAdjacentPosts,
-  getParentPost,
-  getPostById,
   getPostsByTag,
   getRecentPosts,
   getSortedTags,
-  getSubpostsForParent,
-  hasSubposts,
   isSubpost,
   getParentId,
-  getSubpostCount,
-  getPostReadingTime,
   getCombinedReadingTime,
   groupPostsByYear,
 } from './content/posts'
 
 export { parseAuthors, getAllAuthors, getPostsByAuthor } from './content/authors'
-export { getTOCSections } from './content/toc'
 export {
-  resolveLinkToId,
   normalizeId,
-  getBacklinks,
   extractInternalLinks,
 } from './content/links'
 export { getSubpostsData } from './content/subposts-data'

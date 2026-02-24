@@ -12,7 +12,6 @@ const _cache = {
 /**
  * Reset all internal caches. Useful for testing.
  */
-export function resetPostsCache() {
   _cache.posts = null
   _cache.topLevelPosts = null
   _cache.allPostsAndSubposts = null
