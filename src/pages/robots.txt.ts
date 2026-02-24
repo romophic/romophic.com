@@ -1,10 +1,12 @@
 import type { APIRoute } from 'astro'
 
+import { SITE } from '@/consts'
+
 const robotsTxt = `
 User-agent: *
 Allow: /
 
-Sitemap: https://romophic.com/sitemap-index.xml
+Sitemap: ${SITE.href}/sitemap-index.xml
 `.trim()
 
 export const GET: APIRoute = () => {

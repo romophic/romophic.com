@@ -1,3 +1,4 @@
+import { SITE } from '@/consts'
 import { getAllAuthors, getAllPosts, getAllProjects } from '@/lib/data-utils'
 import type { APIRoute } from 'astro'
 
@@ -6,9 +7,8 @@ export const GET: APIRoute = async ({ site }) => {
   const projects = await getAllProjects()
   const authors = await getAllAuthors()
 
-  const siteTitle = 'romophic.com'
-  const siteDescription =
-    'A personal blog and portfolio by romophic, focusing on software engineering, competitive programming, and mathematics.'
+  const siteTitle = SITE.title
+  const siteDescription = SITE.description
 
   let content = `# ${siteTitle}\n\n`
   content += `> ${siteDescription}\n\n`
