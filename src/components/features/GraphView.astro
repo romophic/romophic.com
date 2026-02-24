@@ -1,0 +1,352 @@
+---
+// src/components/features/GraphView.astro
+---
+
+<div
+  id="graph-container"
+  class="bg-background relative h-[600px] w-full overflow-hidden rounded-lg border opacity-0 transition-opacity duration-100"
+>
+  <canvas id="graph-canvas" class="block cursor-move"></canvas>
+</div>
+
+<script>
+  import { GRAPH_CONFIG } from '@/consts'
+  import type { D3GraphLink, D3GraphNode } from '@/types'
+  import { drag } from 'd3-drag'
+  import {
+    forceCenter,
+    forceCollide,
+    forceLink,
+    forceManyBody,
+    forceSimulation,
+    forceX,
+    forceY,
+    type Simulation,
+  } from 'd3-force'
+  import { select } from 'd3-selection'
+  import { zoom, zoomIdentity, type ZoomTransform } from 'd3-zoom'
+  import { renderGraph } from './graph/graph-renderer'
+
+  const EMPTY_SET: ReadonlySet<string> = new Set()
+
+  function buildNeighborIds(
+    nodeId: string,
+    links: D3GraphLink[],
+  ): ReadonlySet<string> {
+    const ids = new Set<string>()
+    for (const l of links) {
+      const sId = typeof l.source === 'object' ? l.source.id : l.source
+      const tId = typeof l.target === 'object' ? l.target.id : l.target
+      if (sId === nodeId) ids.add(tId)
+      else if (tId === nodeId) ids.add(sId)
+    }
+    return ids
+  }
+
+  class GraphViewManager {
+    private container: HTMLDivElement
+    private canvas: HTMLCanvasElement
+    private ctx: CanvasRenderingContext2D | null
+
+    private data: { nodes: D3GraphNode[]; links: D3GraphLink[] } | null = null
+    private isDark = false
+
+    private hoverNode: D3GraphNode | null = null
+    private neighborIds: ReadonlySet<string> = EMPTY_SET
+    private simulation: Simulation<D3GraphNode, D3GraphLink> | null = null
+    private currentTransform: ZoomTransform = zoomIdentity
+
+    private size = { width: 0, height: 0 }
+    private animationFrameId: number | null = null
+    private needsRedraw = true
+    private resizeObserver: ResizeObserver | null = null
+
+    constructor() {
+      this.container = document.getElementById(
+        'graph-container',
+      ) as HTMLDivElement
+      this.canvas = document.getElementById('graph-canvas') as HTMLCanvasElement
+      this.ctx = this.canvas.getContext('2d')
+
+      if (!this.container || !this.canvas || !this.ctx) return
+
+      this.checkTheme = this.checkTheme.bind(this)
+      this.handleMouseMove = this.handleMouseMove.bind(this)
+      this.handleClick = this.handleClick.bind(this)
+      this.scheduleRender = this.scheduleRender.bind(this)
+      this.render = this.render.bind(this)
+      this.updateCanvasSize = this.updateCanvasSize.bind(this)
+
+      this.initThemeDetection()
+      this.fetchData().then(() => {
+        this.initVisualization()
+      })
+    }
+
+    private initThemeDetection() {
+      this.checkTheme()
+      const observer = new MutationObserver(this.checkTheme)
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'data-theme'],
+      })
+    }
+
+    private checkTheme() {
+      this.isDark =
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.documentElement.classList.contains('dark')
+      if (this.data) this.scheduleRender()
+    }
+
+    private async fetchData() {
+      try {
+        const res = await fetch('/graph.json')
+        const fetchedData: { nodes: D3GraphNode[]; links: D3GraphLink[] } =
+          await res.json()
+
+        const seenIds = new Set<string>()
+        const nodes: D3GraphNode[] = []
+
+        fetchedData.nodes.forEach((n) => {
+          if (!n.id || seenIds.has(n.id)) return
+          seenIds.add(n.id)
+          nodes.push({ ...n, val: 5, degree: 0 })
+        })
+
+        const nodeMap = new Map<string, D3GraphNode>(
+          nodes.map((n) => [n.id, n]),
+        )
+        const links: D3GraphLink[] = []
+
+        let categoryIdx = 0
+        const tagToCategory = new Map<string, number>()
+
+        fetchedData.links.forEach((l) => {
+          const sourceId = typeof l.source === 'object' ? l.source.id : l.source
+          const targetId = typeof l.target === 'object' ? l.target.id : l.target
+
+          if (nodeMap.has(sourceId) && nodeMap.has(targetId)) {
+            links.push(l)
+            const s = nodeMap.get(sourceId)!
+            const t = nodeMap.get(targetId)!
+            s.degree = (s.degree || 0) + 1
+            t.degree = (t.degree || 0) + 1
+          }
+        })
+
+        nodes.forEach((n) => {
+          if (n.group === 'tag') {
+            tagToCategory.set(
+              n.id,
+              categoryIdx % GRAPH_CONFIG.theme.palettes.dark.length,
+            )
+            n.category = categoryIdx % GRAPH_CONFIG.theme.palettes.dark.length
+            categoryIdx++
+          }
+        })
+
+        const nodeToTag = new Map<string, string>()
+        links.forEach((l) => {
+          const sId =
+            typeof l.source === 'object' ? l.source.id : String(l.source)
+          const tId =
+            typeof l.target === 'object' ? l.target.id : String(l.target)
+          if (nodeMap.get(tId)?.group === 'tag' && !nodeToTag.has(sId)) {
+            nodeToTag.set(sId, tId)
+          } else if (nodeMap.get(sId)?.group === 'tag' && !nodeToTag.has(tId)) {
+            nodeToTag.set(tId, sId)
+          }
+        })
+
+        nodes.forEach((n) => {
+          if (n.group === 'post') {
+            const tagId = nodeToTag.get(n.id)
+            if (tagId) {
+              n.category = tagToCategory.get(tagId)
+            }
+          }
+        })
+
+        const initialX = 400
+        const initialY = 300
+        const { initialRadius } = GRAPH_CONFIG.physics
+        nodes.forEach((n) => {
+          n.x = initialX + (Math.random() - 0.5) * initialRadius
+          n.y = initialY + (Math.random() - 0.5) * initialRadius
+        })
+
+        this.data = { nodes, links }
+
+        // Match the previous React 100ms visibility delay
+        setTimeout(() => {
+          this.container.classList.remove('opacity-0')
+          this.container.classList.add('opacity-100')
+        }, 100)
+      } catch (err) {
+        console.error('Failed to load graph data:', err)
+      }
+    }
+
+    private updateCanvasSize() {
+      const width = this.container.clientWidth
+      const height = this.container.clientHeight
+      const dpr = window.devicePixelRatio || 1
+      this.canvas.width = width * dpr
+      this.canvas.height = height * dpr
+      this.canvas.style.width = `${width}px`
+      this.canvas.style.height = `${height}px`
+      this.ctx!.setTransform(dpr, 0, 0, dpr, 0, 0)
+      this.size = { width, height }
+    }
+
+    private initVisualization() {
+      if (!this.data || !this.ctx) return
+
+      this.updateCanvasSize()
+      const { width, height } = this.size
+      const { physics } = GRAPH_CONFIG
+
+      this.simulation = forceSimulation<D3GraphNode>(this.data.nodes)
+        .force(
+          'link',
+          forceLink<D3GraphNode, D3GraphLink>(this.data.links)
+            .id((d) => d.id)
+            .distance(physics.linkDistance),
+        )
+        .force('charge', forceManyBody().strength(physics.chargeStrength))
+        .force('center', forceCenter(width / 2, height / 2))
+        .force('x', forceX(width / 2).strength(physics.centerStrength))
+        .force('y', forceY(height / 2).strength(physics.centerStrength))
+        .force('collide', forceCollide().radius(physics.collideRadius))
+
+      this.simulation.on('tick', this.scheduleRender)
+
+      this.resizeObserver = new ResizeObserver(() => {
+        this.updateCanvasSize()
+        this.scheduleRender()
+      })
+      this.resizeObserver.observe(this.container)
+
+      const zoomHandler = zoom<HTMLCanvasElement, unknown>()
+        .scaleExtent(GRAPH_CONFIG.interaction.zoomExtent)
+        .on('zoom', (event) => {
+          this.currentTransform = event.transform
+          this.scheduleRender()
+        })
+
+      select(this.canvas).call(zoomHandler)
+
+      const dragHandler = drag<HTMLCanvasElement, unknown>()
+        .subject((event) => {
+          const transform = this.currentTransform
+          const x = transform.invertX(event.x),
+            y = transform.invertY(event.y)
+          return this.data!.nodes.find(
+            (n) => Math.hypot(n.x! - x, n.y! - y) < 20,
+          )
+        })
+        .on('start', (event) => {
+          if (!event.active && this.simulation)
+            this.simulation.alphaTarget(physics.alphaTarget).restart()
+          event.subject.fx = event.subject.x
+          event.subject.fy = event.subject.y
+        })
+        .on('drag', (event) => {
+          const transform = this.currentTransform
+          event.subject.fx = transform.invertX(event.sourceEvent.offsetX)
+          event.subject.fy = transform.invertY(event.sourceEvent.offsetY)
+        })
+        .on('end', (event) => {
+          if (!event.active && this.simulation) this.simulation.alphaTarget(0)
+          event.subject.fx = null
+          event.subject.fy = null
+        })
+
+      select(this.canvas).call(dragHandler)
+
+      this.canvas.addEventListener('mousemove', this.handleMouseMove)
+      this.canvas.addEventListener('click', this.handleClick)
+
+      this.scheduleRender()
+    }
+
+    private scheduleRender() {
+      this.needsRedraw = true
+      if (this.animationFrameId === null) {
+        this.animationFrameId = requestAnimationFrame(() => {
+          this.animationFrameId = null
+          this.render()
+        })
+      }
+    }
+
+    private render() {
+      if (!this.needsRedraw || !this.data || !this.ctx) return
+
+      const { width: w, height: h } = this.size
+      const { theme } = GRAPH_CONFIG
+      const activeTheme = this.isDark ? theme.dark : theme.light
+
+      renderGraph(
+        this.ctx,
+        w,
+        h,
+        this.data.nodes,
+        this.data.links,
+        this.currentTransform,
+        this.isDark,
+        activeTheme,
+        this.hoverNode,
+        this.neighborIds,
+      )
+
+      this.needsRedraw = false
+    }
+
+    private handleMouseMove(e: MouseEvent) {
+      if (!this.data) return
+
+      const transform = this.currentTransform
+      const x = transform.invertX(e.offsetX)
+      const y = transform.invertY(e.offsetY)
+
+      const hovered =
+        this.data.nodes.find((node) => {
+          if (node.x === undefined || node.y === undefined) return false
+          return (
+            Math.hypot(node.x - x, node.y - y) <
+            GRAPH_CONFIG.interaction.hitRadius
+          )
+        }) || null
+
+      if (hovered?.id !== this.hoverNode?.id) {
+        this.hoverNode = hovered
+        this.neighborIds = hovered
+          ? buildNeighborIds(hovered.id, this.data.links)
+          : EMPTY_SET
+        this.scheduleRender()
+      }
+
+      document.body.style.cursor = hovered ? 'pointer' : 'default'
+    }
+
+    private handleClick() {
+      const target = this.hoverNode
+      if (!target) return
+
+      if (target.group === 'post') {
+        window.location.href = `/blog/${target.id}`
+      } else if (target.group === 'tag') {
+        window.location.href = `/tags/${target.id.replace(/^tag-/, '')}`
+      }
+    }
+  }
+
+  // Initialize when the DOM is ready and during Astro view transitions
+  document.addEventListener('astro:page-load', () => {
+    if (document.getElementById('graph-container')) {
+      new GraphViewManager()
+    }
+  })
+</script>

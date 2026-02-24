@@ -1,9 +1,5 @@
-import type { D3GraphNode, D3GraphLink } from '@/types'
 
-export interface GraphData {
-    nodes: D3GraphNode[]
-    links: D3GraphLink[]
-}
+
 
 export interface GraphThemeColors {
     background: string

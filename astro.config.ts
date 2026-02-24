@@ -1,10 +1,8 @@
 import { defineConfig } from 'astro/config'
 
 import mdx from '@astrojs/mdx'
-import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
 import icon from 'astro-icon'
-import partytown from '@astrojs/partytown'
 import pagefind from 'astro-pagefind'
 
 import { rehypeHeadingIds } from '@astrojs/markdown-remark'
@@ -12,7 +10,6 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import expressiveCode from 'astro-expressive-code'
 import rehypeExternalLinks from 'rehype-external-links'
 import rehypeKatex from 'rehype-katex'
-import rehypePrettyCode from 'rehype-pretty-code'
 import remarkEmoji from 'remark-emoji'
 import remarkMath from 'remark-math'
 import remarkReadingTime from 'remark-reading-time'
@@ -71,15 +68,9 @@ export default defineConfig({
       },
     }),
     mdx(),
-    react(),
     sitemap(),
     icon(),
     pagefind(),
-    partytown({
-      config: {
-        forward: ['dataLayer.push'],
-      },
-    }),
   ],
   vite: {
     plugins: [tailwindcss()],
@@ -127,15 +118,6 @@ export default defineConfig({
         {
           output: 'htmlAndMathml',
           throwOnError: false,
-        },
-      ],
-      [
-        rehypePrettyCode,
-        {
-          theme: {
-            light: 'github-light',
-            dark: 'github-dark',
-          },
         },
       ],
     ],
