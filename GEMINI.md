@@ -230,11 +230,21 @@ The project features a bi-directional linking system and a visualization graph.
 - **SEO Fix:** Ensured proper heading hierarchy (`h1 -> h2 -> h3`) for better accessibility and ranking.
 
 ### 3.12. Internationalization (i18n) Routing & Localization
-The site architecture natively supports full EN/JA bilingual rendering through an explicit route wrapper approach rather than middleware rewrites, maximizing static rendering determinism.
-- **Routing Strategy:** Astro's `i18n` config defaults to `ja` and keeps Japanese content at the root (`/`). English parallel content lives explicitly under `/en/`.
-- **Component Wrapping (DRY):** Global component templates (`BlogList.astro`, `Home.astro`, etc.) reside in `src/components/pages/`. Next, the physical `src/pages/` route indices simply wrap these layout templates and pass down their context's `lang` property.
-- **Data Filtering:** Data aggregators (`getAllPosts`, `getPostsByTag`, etc.) map and filter collections natively via a new `lang` dimension on Content schemas, with dedicated in-memory map caches for respective locales.
+The site architecture achieves full EN/JA bilingual rendering using Astro's static routing and a DRY content setup, completely bypassing middleware for maximum static rendering determinism.
+- **Routing Strategy (`[...lang]`):** The entire site is rendered from a single set of dynamic routes inside `src/pages/[...lang]/`. The `getStaticPaths` function maps `lang: undefined` to the Japanese root (`/`) and `lang: 'en'` to the English subdirectory (`/en/`). This guarantees 100% DRY code without needing duplicate wrappers like `/en/index.astro`.
+- **Content Strategy (`.en.mdx` suffix):** Translated posts live identically alongside the primary language posts in `src/content/`. English files are suffixed with `.en.mdx` and set `lang: 'en'` in their frontmatter. This strictly preserves file-based navigation (Subpost series) and shared asset relative paths.
+- **URL Normalization:** During routing (`blog/[...id].astro`), the `.en` suffix on the collection ID is programmatically stripped (`id.replace(/\.en$/, '')`), ensuring the URL slug remains clean and identical across languages (e.g. `/blog/neural-network` and `/en/blog/neural-network`).
 - **UI Localization:** Language-agnostic strings are offloaded from static markup to `src/i18n/ui.ts` via dict lookups driven by localized paths inferred via `getLangFromUrl` (`src/i18n/utils.ts`).
+
+### 3.13. Home Page: Glass Dashboard → Graph Scroll Experience
+
+The home page (`src/components/pages/Home.astro`) implements a "Glass Dashboard to Fullscreen Graph" concept.
+
+- **Architecture:** A fixed `#graph-wrapper` sits at `z-0` behind a scrollable `<main id="dashboard-content">` at `z-10`. The dashboard is a full-width frosted glass pane (`bg-background/60 backdrop-blur-md`) with rounded bottom corners, containing Hero, Activity Log, and Latest Writings.
+- **Scroll-Driven Transition:** The user scrolls naturally past the glass content. A spacer `div` (`h-[100vh]`) after the content guarantees the page is always scrollable. When scrolled to the bottom, JS toggles `pointer-events` — disabling the dashboard and enabling the graph for full interaction.
+- **Graph Rotation:** A custom D3 force (`forceRotate`) applies a tangential velocity to each node for a gentle counter-clockwise orbit while the graph is in background mode. The rotation strength is smoothly interpolated (`lerp` at 2%/tick) for gradual start/stop. A `MutationObserver` on the wrapper's `style` attribute detects when `pointer-events` changes to toggle rotation.
+- **Exit Button:** A fixed "Back to Content" button appears when the graph is interactive; clicking it scrolls to the top, naturally restoring the dashboard.
+- **Mobile Responsiveness:** Tighter spacing (`px-3 pt-8 gap-4`), smaller avatar (`h-20 w-20`), and CSS `scale` transforms on the Activity Graph (`scale-[0.55]` mobile, `scale-75` tablet) ensure a comfortable fit on all screen sizes.
 
 ## 4. Development Standards & Conventions
 
@@ -279,6 +289,9 @@ The site architecture natively supports full EN/JA bilingual rendering through a
 - [x] **Content:** Added "Neural Network from Scratch" article.
 - [x] **Simplification:** Removed PWA features to reduce complexity and resolve caching issues (mobile loading bar).
 - [x] **React & Shadcn Execution:** Completely purged `React`, `@fontsource`, `@floating-ui/react`, `@radix-ui`, `cmdk`, and Shadcn from the repository in Phase 3 & Phase 4. Refactored interactive components like `GraphView` directly into Native Astro `<script>` rendering. Clean bill of health via `knip` static analysis.
+- [x] **SEO Perfection:** Globally fixed canonical URLs to self-reference properly, injected localized bilingual `hreflang` tags across all documents, and unblocked Subpost indexing by removing legacy `noindex` directives.
+- [x] **UI Polish & Minimalism (Home Page Remaster):** Radically simplified `Hero.astro` to feature a minimalist avatar and about link. Re-architected `Home.astro` to utilize a vertical layout emphasizing the Knowledge Graph. Refined Experience timelines (thinned, high-contrast borders) and tightened MDX image captions.
+- [x] **Glass Dashboard → Graph Scroll Experience:** Implemented a full-width frosted glass dashboard that naturally scrolls away to reveal a fullscreen interactive Knowledge Graph. Added a custom rotational D3 force for ambient animation, scroll-driven `pointer-events` toggling, and responsive mobile layout with CSS `scale` transforms on the Activity Graph.
 
 ### Future Features
 - [ ] **Performance (Graph):** Remove D3.js dependency by implementing a custom lightweight physics engine (Verlet integration) and zoom/drag handlers.
@@ -314,4 +327,4 @@ This codebase is now a living organism. It breathes through the D3 simulation an
 
 ---
 
-_Context Updated: 2026-02-24 (i18n Architecture Implementation)_
+_Context Updated: 2026-02-25 (Glass Dashboard → Graph Scroll Experience)_
