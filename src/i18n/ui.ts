@@ -9,10 +9,9 @@ export type UiType = Record<string, string>
 
 export const ui = {
   ja: {
+    'nav.home': 'home',
     'nav.blog': 'blog',
-    'nav.authors': 'authors',
     'nav.about': 'about',
-    'nav.tags': 'tags',
     'footer.connect': 'Connect',
     'hero.title': "Hello, I'm {author}.",
     'hero.subtitle':
@@ -29,9 +28,7 @@ export const ui = {
   },
   en: {
     'nav.blog': 'blog',
-    'nav.authors': 'authors',
     'nav.about': 'about',
-    'nav.tags': 'tags',
     'footer.connect': 'Connect',
     'hero.title': "Hello, I'm {author}.",
     'hero.subtitle':

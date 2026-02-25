@@ -11,7 +11,7 @@ export function useTranslations(lang: keyof typeof ui) {
     key: keyof (typeof ui)[typeof defaultLang],
     ...args: Record<string, string | number>[]
   ) {
-    let result: string = ui[lang][key] || ui[defaultLang][key]
+    let result: string = (ui[lang] as Record<string, string>)[key] || (ui[defaultLang] as Record<string, string>)[key]
 
     // Simple interpolation for variables like {author} or {title}
     if (args.length > 0 && typeof args[0] === 'object') {
