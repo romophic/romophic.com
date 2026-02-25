@@ -45,51 +45,45 @@ const FONT_CACHE_DIR = path.join(
 
 async function getFonts() {
   if (fontsCache) return fontsCache
-  try {
-    // Load Inter from node_modules (Reliable)
-    const interPath = path.join(
-      process.cwd(),
-      'node_modules',
-      '@fontsource',
-      'inter',
-      'files',
-      'inter-latin-700-normal.woff',
-    )
-    const interBuffer = await readFile(interPath)
-    const inter = new Uint8Array(interBuffer).buffer as ArrayBuffer
 
-    // Fetch Noto Sans JP with disk cache
-    let notoSansJP: ArrayBuffer | null = null
-    const notoSansCachePath = path.join(FONT_CACHE_DIR, 'NotoSansJP-Bold.ttf')
-
+  async function fetchAndCache(
+    cacheName: string,
+    url: string,
+  ): Promise<ArrayBuffer | null> {
+    const cachePath = path.join(FONT_CACHE_DIR, cacheName)
     try {
-      if (existsSync(notoSansCachePath)) {
-        // Load from disk cache
-        const cached = await readFile(notoSansCachePath)
-        notoSansJP = new Uint8Array(cached).buffer as ArrayBuffer
-      } else {
-        // Fetch from network and save to disk
-        const res = await fetch(
-          'https://raw.githubusercontent.com/google/fonts/main/ofl/notosansjp/NotoSansJP-Bold.ttf',
-        )
-        if (res.ok) {
-          notoSansJP = await res.arrayBuffer()
-          await mkdir(FONT_CACHE_DIR, { recursive: true })
-          await writeFile(notoSansCachePath, new Uint8Array(notoSansJP))
-        } else {
-          console.warn(`Failed to fetch Noto Sans JP: ${res.statusText}`)
-        }
+      if (existsSync(cachePath)) {
+        const cached = await readFile(cachePath)
+        return new Uint8Array(cached).buffer as ArrayBuffer
       }
+      const res = await fetch(url)
+      if (!res.ok) {
+        console.warn(`Failed to fetch font ${cacheName}: ${res.statusText}`)
+        return null
+      }
+      const buf = await res.arrayBuffer()
+      await mkdir(FONT_CACHE_DIR, { recursive: true })
+      await writeFile(cachePath, new Uint8Array(buf))
+      return buf
     } catch (e) {
-      console.warn('Failed to load Noto Sans JP:', e)
+      console.warn(`Failed to load font ${cacheName}:`, e)
+      return null
     }
-
-    fontsCache = { inter, notoSansJP }
-    return fontsCache
-  } catch (e) {
-    console.error('Font load error:', e)
-    throw e
   }
+
+  const inter = await fetchAndCache(
+    'Inter-Bold.ttf',
+    'https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf',
+  )
+  const notoSansJP = await fetchAndCache(
+    'NotoSansJP-Bold.otf',
+    'https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/SubsetOTF/JP/NotoSansJP-Bold.otf',
+  )
+
+  if (!inter) throw new Error('Failed to load Inter font for OG images')
+
+  fontsCache = { inter, notoSansJP }
+  return fontsCache
 }
 
 const CACHE_DIR = path.join(
@@ -173,13 +167,13 @@ export const GET = async ({
     weight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
     style: 'normal' | 'italic'
   }[] = [
-    {
-      name: 'Inter',
-      data: fonts.inter,
-      weight: 700,
-      style: 'normal',
-    },
-  ]
+      {
+        name: 'Inter',
+        data: fonts.inter,
+        weight: 700,
+        style: 'normal',
+      },
+    ]
 
   if (fonts.notoSansJP) {
     fontConfig.push({
