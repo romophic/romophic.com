@@ -45,7 +45,7 @@ const { post, authors, postReadingTime, combinedReadingTime, subpostCount } =
                 />
                 {author.isRegistered ? (
                   <a
-                    href={`/authors/${author.id}`}
+                    href={`/about`}
                     class="text-foreground decoration-muted-foreground hover:decoration-foreground underline underline-offset-[3px]"
                   >
                     <span>{author.name}</span>
@@ -96,7 +96,7 @@ const { post, authors, postReadingTime, combinedReadingTime, subpostCount } =
           post.data.tags.length > 0 &&
           post.data.tags.map((tag) => (
             <a
-              href={`/tags/${tag}`}
+              href={`/blog?tag=${encodeURIComponent(tag)}`}
               class={getBadgeStyles({ variant: 'muted' })}
             >
               <Icon name={ICONS.hash} class="size-3" />
