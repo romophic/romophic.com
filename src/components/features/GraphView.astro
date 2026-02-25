@@ -2,14 +2,28 @@
 // src/components/features/GraphView.astro
 import { getLangFromUrl } from '@/i18n/utils'
 const lang = getLangFromUrl(Astro.url)
+
+interface Props {
+  class?: string
+  fullInteraction?: boolean
+}
+
+const {
+  class:
+    className = 'bg-background relative h-[600px] w-full rounded-lg border',
+  fullInteraction = true,
+} = Astro.props
 ---
 
 <div
   id="graph-container"
   data-lang={lang}
-  class="bg-background relative h-[600px] w-full overflow-hidden rounded-lg border opacity-0 transition-opacity duration-100"
+  data-full-interaction={fullInteraction.toString()}
+  class={`overflow-hidden opacity-0 transition-opacity duration-100 ${className}`}
 >
-  <canvas id="graph-canvas" class="block cursor-move"></canvas>
+  <canvas
+    id="graph-canvas"
+    class={`block ${fullInteraction ? 'cursor-move' : ''}`}></canvas>
 </div>
 
 <script>
@@ -54,6 +68,7 @@ const lang = getLangFromUrl(Astro.url)
     private data: { nodes: D3GraphNode[]; links: D3GraphLink[] } | null = null
     private isDark = false
     private lang: string
+    private fullInteraction = true
 
     private hoverNode: D3GraphNode | null = null
     private neighborIds: ReadonlySet<string> = EMPTY_SET
@@ -72,6 +87,8 @@ const lang = getLangFromUrl(Astro.url)
       this.canvas = document.getElementById('graph-canvas') as HTMLCanvasElement
       this.ctx = this.canvas.getContext('2d')
       this.lang = this.container?.getAttribute('data-lang') || 'ja'
+      this.fullInteraction =
+        this.container?.getAttribute('data-full-interaction') !== 'false'
 
       if (!this.container || !this.canvas || !this.ctx) return
 
@@ -174,8 +191,9 @@ const lang = getLangFromUrl(Astro.url)
           }
         })
 
-        const initialX = 400
-        const initialY = 300
+        const initialX = this.container.clientWidth / 2 || window.innerWidth / 2
+        const initialY =
+          this.container.clientHeight / 2 || window.innerHeight / 2
         const { initialRadius } = GRAPH_CONFIG.physics
         nodes.forEach((n) => {
           n.x = initialX + (Math.random() - 0.5) * initialRadius
@@ -234,45 +252,93 @@ const lang = getLangFromUrl(Astro.url)
       })
       this.resizeObserver.observe(this.container)
 
-      const zoomHandler = zoom<HTMLCanvasElement, unknown>()
-        .scaleExtent(GRAPH_CONFIG.interaction.zoomExtent)
-        .on('zoom', (event) => {
-          this.currentTransform = event.transform
-          this.scheduleRender()
-        })
+      if (this.fullInteraction) {
+        const zoomHandler = zoom<HTMLCanvasElement, unknown>()
+          .scaleExtent(GRAPH_CONFIG.interaction.zoomExtent)
+          .on('zoom', (event) => {
+            this.currentTransform = event.transform
+            this.scheduleRender()
+          })
 
-      select(this.canvas).call(zoomHandler)
+        select(this.canvas).call(zoomHandler)
 
-      const dragHandler = drag<HTMLCanvasElement, unknown>()
-        .subject((event) => {
-          const transform = this.currentTransform
-          const x = transform.invertX(event.x),
-            y = transform.invertY(event.y)
-          return this.data!.nodes.find(
-            (n) => Math.hypot(n.x! - x, n.y! - y) < 20,
-          )
-        })
-        .on('start', (event) => {
-          if (!event.active && this.simulation)
-            this.simulation.alphaTarget(physics.alphaTarget).restart()
-          event.subject.fx = event.subject.x
-          event.subject.fy = event.subject.y
-        })
-        .on('drag', (event) => {
-          const transform = this.currentTransform
-          event.subject.fx = transform.invertX(event.sourceEvent.offsetX)
-          event.subject.fy = transform.invertY(event.sourceEvent.offsetY)
-        })
-        .on('end', (event) => {
-          if (!event.active && this.simulation) this.simulation.alphaTarget(0)
-          event.subject.fx = null
-          event.subject.fy = null
-        })
+        const dragHandler = drag<HTMLCanvasElement, unknown>()
+          .subject((event) => {
+            const transform = this.currentTransform
+            const x = transform.invertX(event.x),
+              y = transform.invertY(event.y)
+            return this.data!.nodes.find(
+              (n) => Math.hypot(n.x! - x, n.y! - y) < 20,
+            )
+          })
+          .on('start', (event) => {
+            if (!event.active && this.simulation)
+              this.simulation.alphaTarget(physics.alphaTarget).restart()
+            event.subject.fx = event.subject.x
+            event.subject.fy = event.subject.y
+          })
+          .on('drag', (event) => {
+            const transform = this.currentTransform
+            event.subject.fx = transform.invertX(event.sourceEvent.offsetX)
+            event.subject.fy = transform.invertY(event.sourceEvent.offsetY)
+          })
+          .on('end', (event) => {
+            if (!event.active && this.simulation) this.simulation.alphaTarget(0)
+            event.subject.fx = null
+            event.subject.fy = null
+          })
 
-      select(this.canvas).call(dragHandler)
+        select(this.canvas).call(dragHandler)
+      }
 
       this.canvas.addEventListener('mousemove', this.handleMouseMove)
       this.canvas.addEventListener('click', this.handleClick)
+
+      // Custom rotational force: gentle counter-clockwise orbit
+      const TARGET_STRENGTH = 0.001
+      let currentStrength = TARGET_STRENGTH
+      let targetStrength = TARGET_STRENGTH
+      const self = this
+      this.simulation.force('rotate', () => {
+        if (!self.data) return
+        // Smoothly interpolate strength toward target
+        currentStrength += (targetStrength - currentStrength) * 0.02
+        if (Math.abs(currentStrength) < 0.00001) return
+        const cx = self.size.width / 2
+        const cy = self.size.height / 2
+        for (const node of self.data.nodes) {
+          if (node.fx != null || node.fy != null) continue
+          const dx = (node.x ?? 0) - cx
+          const dy = (node.y ?? 0) - cy
+          // Counter-clockwise: vx += dy, vy -= dx
+          node.vx = (node.vx ?? 0) + dy * currentStrength
+          node.vy = (node.vy ?? 0) - dx * currentStrength
+        }
+      })
+
+      // Keep simulation alive while rotating
+      this.simulation.alphaTarget(0.02).restart()
+
+      // Watch for interactive mode toggle via pointer-events on wrapper
+      const wrapper =
+        this.container.closest('#graph-wrapper') || this.container.parentElement
+      if (wrapper) {
+        const styleObserver = new MutationObserver(() => {
+          const isInteractive =
+            (wrapper as HTMLElement).style.pointerEvents === 'auto'
+          if (isInteractive) {
+            targetStrength = 0
+            if (this.simulation) this.simulation.alphaTarget(0)
+          } else {
+            targetStrength = TARGET_STRENGTH
+            if (this.simulation) this.simulation.alphaTarget(0.02).restart()
+          }
+        })
+        styleObserver.observe(wrapper, {
+          attributes: true,
+          attributeFilter: ['style'],
+        })
+      }
 
       this.scheduleRender()
     }
@@ -346,7 +412,7 @@ const lang = getLangFromUrl(Astro.url)
       if (target.group === 'post') {
         window.location.href = `${prefix}/blog/${target.id}`
       } else if (target.group === 'tag') {
-        window.location.href = `${prefix}/tags/${target.id.replace(/^tag-/, '')}`
+        window.location.href = `${prefix}/blog?tag=${encodeURIComponent(target.id.replace(/^tag-/, ''))}`
       }
     }
   }

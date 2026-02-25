@@ -3,30 +3,26 @@ import type { SocialLink, Site } from '@/types'
 export const SITE: Site = {
   title: 'romophic',
   description:
-    'romophic.com is a technical digital garden built with Astro, React, and Tailwind CSS.あああああああああああああああ',
+    'romophic.com is a technical digital garden built with Astro, React, and Tailwind CSS.',
   href: 'https://romophic.com',
   author: 'romophic',
   locale: 'ja-JP',
-  featuredPostCount: 3,
+  featuredPostCount: 2,
   postsPerPage: 20,
 }
 
 export const NAV_LINKS: SocialLink[] = [
   {
+    href: '/',
+    label: 'home',
+  },
+  {
     href: '/blog',
     label: 'blog',
   },
   {
-    href: '/authors',
-    label: 'authors',
-  },
-  {
     href: '/about',
     label: 'about',
-  },
-  {
-    href: '/tags',
-    label: 'tags',
   },
 ]
 
@@ -34,10 +30,6 @@ export const SOCIAL_LINKS: SocialLink[] = [
   {
     href: 'https://github.com/romophic',
     label: 'GitHub',
-  },
-  {
-    href: 'https://twitter.com/romophic',
-    label: 'Twitter',
   },
   {
     href: 'mailto:nariyu.pub@gmail.com',
@@ -76,7 +68,7 @@ export const GRAPH_CONFIG = {
   physics: {
     linkDistance: 60,
     chargeStrength: -150,
-    centerStrength: 0.05,
+    centerStrength: 0.15,
     collideRadius: 15,
     initialRadius: 10,
     alphaTarget: 0.3,
