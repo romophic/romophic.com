@@ -1,0 +1,40 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+import { Image } from 'astro:assets'
+
+interface Props extends HTMLAttributes<'img'> {
+  src: string | any
+  alt?: string
+}
+
+const { alt, src, class: className, ...props } = Astro.props
+
+const isLocalImage = typeof src === 'object' && src !== null
+---
+
+<figure class="my-8 flex flex-col items-center justify-center gap-0.5">
+  {
+    isLocalImage ? (
+      <Image
+        src={src}
+        alt={alt || ''}
+        class={`!m-0 rounded-xl border ${className || ''}`}
+        {...(props as any)}
+      />
+    ) : (
+      <img
+        src={src as string}
+        alt={alt || ''}
+        class={`!m-0 rounded-xl border ${className || ''}`}
+        {...(props as any)}
+      />
+    )
+  }
+  {
+    alt && (
+      <figcaption class="text-muted-foreground text-center text-sm font-medium">
+        {alt}
+      </figcaption>
+    )
+  }
+</figure>

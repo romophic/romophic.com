@@ -22,14 +22,20 @@ const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
 <Layout class="max-w-3xl">
   <PageHead slot="head" title={t('nav.blog') || 'Blog'} />
 
-  <div class="flex min-h-[calc(100vh-18rem)] flex-col gap-y-8">
+  <div
+    class="flex min-h-[calc(100vh-18rem)] flex-col gap-y-8"
+    id="blog-list-container"
+  >
     {
       years.map((year) => (
-        <section class="flex flex-col gap-y-4">
+        <section class="blog-year-section flex flex-col gap-y-4">
           <div class="font-medium">{year}</div>
           <ul class="flex flex-col gap-4">
             {postsByYear[year].map((post) => (
-              <li>
+              <li
+                class="blog-post-item"
+                data-tags={post.data.tags?.join(',') || ''}
+              >
                 <BlogCard entry={post} />
               </li>
             ))}
@@ -65,3 +71,35 @@ const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
     }
   </div>
 </Layout>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const params = new URLSearchParams(window.location.search)
+    const tagToFilter = params.get('tag')
+
+    if (tagToFilter) {
+      const posts = document.querySelectorAll('.blog-post-item')
+      const sections = document.querySelectorAll('.blog-year-section')
+
+      posts.forEach((post) => {
+        const tagsString = post.getAttribute('data-tags')
+        const tags = tagsString ? tagsString.split(',') : []
+        if (tags.includes(tagToFilter)) {
+          ;(post as HTMLElement).style.display = 'block'
+        } else {
+          ;(post as HTMLElement).style.display = 'none'
+        }
+      })
+
+      // Hide empty year sections
+      sections.forEach((section) => {
+        const visiblePosts = Array.from(
+          section.querySelectorAll('.blog-post-item'),
+        ).filter((p) => (p as HTMLElement).style.display !== 'none')
+        if (visiblePosts.length === 0) {
+          ;(section as HTMLElement).style.display = 'none'
+        }
+      })
+    }
+  })
+</script>
