@@ -1,12 +1,11 @@
 ---
 import { getButtonStyles } from '@/components/common/button.astro'
-import { ICONS, SOCIAL_LINKS } from '@/consts'
+import { ICONS } from '@/consts'
 import { getLangFromUrl, localizePath, useTranslations } from '@/i18n/utils'
 import { Icon } from 'astro-icon/components'
 
 const lang = getLangFromUrl(Astro.url)
 const t = useTranslations(lang)
-const githubLink = SOCIAL_LINKS.find((s) => s.label === 'GitHub')
 ---
 
 <section class="relative overflow-hidden py-12 sm:py-16">

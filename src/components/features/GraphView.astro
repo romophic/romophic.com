@@ -298,15 +298,14 @@ const {
       const TARGET_STRENGTH = 0.001
       let currentStrength = TARGET_STRENGTH
       let targetStrength = TARGET_STRENGTH
-      const self = this
       this.simulation.force('rotate', () => {
-        if (!self.data) return
+        if (!this.data) return
         // Smoothly interpolate strength toward target
         currentStrength += (targetStrength - currentStrength) * 0.02
         if (Math.abs(currentStrength) < 0.00001) return
-        const cx = self.size.width / 2
-        const cy = self.size.height / 2
-        for (const node of self.data.nodes) {
+        const cx = this.size.width / 2
+        const cy = this.size.height / 2
+        for (const node of this.data.nodes) {
           if (node.fx != null || node.fy != null) continue
           const dx = (node.x ?? 0) - cx
           const dy = (node.y ?? 0) - cy
