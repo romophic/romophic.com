@@ -31,7 +31,8 @@ export function getBadgeStyles({
     destructive:
       'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
     outline: 'text-foreground',
-    muted: 'border-transparent bg-muted text-foreground hover:bg-muted/80',
+    muted:
+      'border-primary/10 dark:border-primary/20 bg-primary/5 dark:bg-primary/10 text-primary hover:bg-primary/10 dark:hover:bg-primary/20',
   }
 
   return `${baseStyles} ${variantStyles[variant]} ${userClass}`

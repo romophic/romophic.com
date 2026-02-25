@@ -16,11 +16,26 @@ const {
 } = Astro.props
 
 const imageUrl = new URL(image, Astro.site)
+const canonicalURL = new URL(Astro.url.pathname, Astro.site)
+
+const isEnglish = Astro.url.pathname.startsWith('/en/')
+const jaPath = isEnglish
+  ? Astro.url.pathname.replace(/^\/en/, '')
+  : Astro.url.pathname
+const enPath = isEnglish
+  ? Astro.url.pathname
+  : `/en${Astro.url.pathname === '/' ? '' : Astro.url.pathname}`
+
+const jaUrl = new URL(jaPath, Astro.site)
+const enUrl = new URL(enPath, Astro.site)
 ---
 
 <title>{`${title} | ${SITE.title}`}</title>
 <meta name="description" content={description} />
-<link rel="canonical" href={SITE.href} />
+<link rel="canonical" href={canonicalURL} />
+<link rel="alternate" hreflang="ja" href={jaUrl} />
+<link rel="alternate" hreflang="en" href={enUrl} />
+<link rel="alternate" hreflang="x-default" href={jaUrl} />
 {noindex && <meta name="robots" content="noindex, nofollow" />}
 
 <meta property="og:title" content={title} />

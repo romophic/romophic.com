@@ -7,9 +7,13 @@ import Layout from '@/layouts/Layout.astro'
 import { getAllProjects } from '@/lib/data-utils'
 import { Icon } from 'astro-icon/components'
 
+import { getTechBadge, TECH_BADGES } from '@/lib/tech-badges'
+
 const lang = getLangFromUrl(Astro.url)
 const t = useTranslations(lang)
 const projects = await getAllProjects(lang)
+
+const TECH_STACK = Object.keys(TECH_BADGES)
 ---
 
 <Layout class="max-w-3xl">
@@ -41,12 +45,14 @@ const projects = await getAllProjects(lang)
               organization: '',
               period: '2025/09',
               description: '',
+              techs: ['Python'],
             },
             {
               title: 'ICPC',
               organization: '',
               period: '2024/07',
               description: '',
+              techs: ['C++'],
             },
             {
               title:
@@ -61,17 +67,19 @@ const projects = await getAllProjects(lang)
               period: '2021 - 2024',
               description:
                 '制約付き筋肉トレーニングにおける負荷効果最大化に関する数理モデル研究',
+              techs: ['Python'],
             },
             {
               title: 'JOI本選',
               organization: '',
               period: '2020, 2022',
               description: '',
+              techs: ['C++'],
             },
           ].map((item) => (
-            <div class="group relative">
+            <div class="relative">
               {/* Timeline Dot */}
-              <div class="border-background bg-muted group-hover:bg-primary absolute top-1.5 -left-[31px] size-4 rounded-full border-2 shadow-sm transition-colors duration-300" />
+              <div class="border-foreground bg-background absolute top-1.5 -left-[31px] size-4 rounded-full border shadow-sm" />
 
               <div class="flex flex-col gap-1">
                 <span class="text-muted-foreground font-mono text-xs">
@@ -88,6 +96,25 @@ const projects = await getAllProjects(lang)
                     {item.description}
                   </p>
                 )}
+                {item.techs && (
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    {item.techs.map((tech) => {
+                      const badge = getTechBadge(tech)
+                      return badge ? (
+                        <span
+                          class={`flex items-center justify-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${badge.colorClass}`}
+                        >
+                          <Icon name={badge.icon} class="size-3" />
+                          {tech}
+                        </span>
+                      ) : (
+                        <span class="bg-primary/5 dark:bg-primary/10 text-primary border-primary/10 dark:border-primary/20 flex items-center justify-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors">
+                          {tech}
+                        </span>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           ))
@@ -102,13 +129,21 @@ const projects = await getAllProjects(lang)
       </h2>
       <div class="flex flex-wrap gap-2">
         {
-          ['C++', 'Python', 'React', 'Vue', 'Nuxt.js', 'Rust', 'Astro'].map(
-            (skill) => (
-              <span class="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 rounded-full border px-3 py-1 text-sm font-medium transition-colors">
-                {skill}
+          TECH_STACK.map((tech) => {
+            const badge = getTechBadge(tech)
+            return badge ? (
+              <span
+                class={`hover:bg-opacity-80 flex items-center justify-center gap-1.5 rounded-full border px-3 py-1 text-sm font-medium transition-colors ${badge.colorClass}`}
+              >
+                <Icon name={badge.icon} class="size-4" />
+                {tech}
               </span>
-            ),
-          )
+            ) : (
+              <span class="bg-primary/5 dark:bg-primary/10 text-primary border-primary/10 dark:border-primary/20 flex items-center justify-center gap-1.5 rounded-full border px-3 py-1 text-sm font-medium transition-colors">
+                {tech}
+              </span>
+            )
+          })
         }
       </div>
     </div>

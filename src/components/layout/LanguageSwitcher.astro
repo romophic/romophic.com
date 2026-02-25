@@ -19,11 +19,19 @@ function getTargetUrl() {
 
 <a
   href={getTargetUrl()}
-  class={getButtonStyles({ variant: 'ghost', size: 'icon' }) +
-    ' -my-2 -me-2 size-8'}
+  class={getButtonStyles({ variant: 'ghost', size: 'sm' }) +
+    ' -my-2 -me-2 flex gap-1 px-3 py-2 leading-none'}
   title={targetLang === 'ja' ? 'Switch to Japanese' : 'Switch to English'}
   aria-label="Switch language"
-  transition:persist
 >
-  <span class="text-xs font-semibold uppercase">{targetLang}</span>
+  <span
+    class={`text-[11px] font-bold uppercase transition-colors ${currentLang === 'ja' ? 'text-foreground' : 'text-muted-foreground/60'}`}
+    >ja</span
+  >
+  <span class="text-muted-foreground/40 text-[11px] font-bold uppercase">/</span
+  >
+  <span
+    class={`text-[11px] font-bold uppercase transition-colors ${currentLang === 'en' ? 'text-foreground' : 'text-muted-foreground/60'}`}
+    >en</span
+  >
 </a>

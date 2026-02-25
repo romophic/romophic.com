@@ -135,16 +135,35 @@ export function renderGraph(
       : RENDER.link.widthDefault
     ctx.stroke()
 
-    if (isRelated) {
-      ctx.fillStyle = activeTheme.linkHighlight
-      drawArrow(
-        ctx,
-        source.x!,
-        source.y!,
-        target.x!,
-        target.y!,
-        RENDER.arrow.targetOffset,
-      )
+    // Fixed directional arrows: tag -> post
+    const isTagToPost = source.group === 'tag' && target.group === 'post'
+    const isPostToTag = source.group === 'post' && target.group === 'tag'
+
+    // Draw arrow natively for hover/related, or permanently for tag->post relationships
+    if (isRelated || isTagToPost || isPostToTag) {
+      ctx.fillStyle = isRelated ? activeTheme.linkHighlight : activeTheme.link
+
+      // If the link is explicitly post->tag, we reverse the arrow to point to the post (since posts belong to tags)
+      // Otherwise (tag->post or normal related link), point to target.
+      if (isPostToTag) {
+        drawArrow(
+          ctx,
+          target.x!,
+          target.y!,
+          source.x!,
+          source.y!,
+          RENDER.arrow.targetOffset,
+        )
+      } else {
+        drawArrow(
+          ctx,
+          source.x!,
+          source.y!,
+          target.x!,
+          target.y!,
+          RENDER.arrow.targetOffset,
+        )
+      }
     }
   })
 
