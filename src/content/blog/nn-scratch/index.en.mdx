@@ -1,171 +1,159 @@
 ---
-title: '[EN] C++でMNISTの手書き数字認識をニューラルネットワークで行う'
+title: 'Building a Neural Network from Scratch in C++ for MNIST Digit Recognition'
 date: 2026-02-10
-description: "Define limit by using Epsilon Ball"
+description: "Building a Neural Network from scratch in C++ to classify MNIST handwritten digits without any deep learning frameworks."
 authors: ['romophic']
 tags: ['c++', 'machine learning']
 image: img-excel.png
 lang: 'en'
 ---
 
-> **Notice:** This is an English translation version which is currently under construction.
-
-
-
-授業課題で実装を行ったので、備忘録として  
-ディープラーニングのフレームワークを一切使わず、C++で行列演算からバックプロパゲーションまでを自前実装し、MNIST手書き数字を分類する
+As a memorandum for a university assignment I implemented:
+I created a neural network from scratch in C++ to classify MNIST handwritten digits, implementing everything from matrix operations to backpropagation without using any deep learning frameworks.
 
 repo: https://github.com/romophic/MNIST_cpp
 
+## 1. Principles
+I will explain how data is processed within the constructed neural network.
 
+### 1.1 Flow from Input to Output
+A neural network is made up of multiple stacked layers. Data flows in one direction from the input layer to the hidden layers, and finally to the output layer. This is called **forward propagation**.
 
-## 1. 原理
-構築したニューラルネットワークの中でデータがどのように処理されるかを説明する。
-
-### 1.1 入力から出力までの流れ
-ニューラルネットワークは、複数の層が重なってできている。データは入力層から隠れ層、そして出力層へと一方向に流れていく。これを**順伝搬**と言う。
-
-
-
-ある層から次の層へデータが伝わるとき、それぞれの信号は重みによって強さが変えられる。
-入力データを $\bm{x}$、次の層へ伝わる信号を $\bm{u}$、重みをまとめた行列を $\bm{W}$ とすると、この関係は以下のように単純な行列の積で表せる。
+When data is transmitted from one layer to the next, the strength of each signal is modified by weights.
+If we let the input data be $\bm{x}$, the signal transmitted to the next layer be $\bm{u}$, and the matrix consolidating the weights be $\bm{W}$, this relationship can be expressed simply as a matrix product:
 
 $$
 \bm{u} = \bm{W} \bm{x}
 $$
 
-この式は、前の層の全ニューロンからの信号が、それぞれ重みを掛けられて次の層のニューロンに集まってくることを意味している。
-集まってきた信号 $\bm{u}$ は、そのまま次の層へ送られるのではなく、活性化関数と呼ばれるフィルターを通る。これがニューロンの発火（信号を次に伝えるか）を決める役割を果たす。本実験では2種類の関数を使用した。
+This equation means that signals from all neurons in the previous layer are multiplied by their respective weights and gathered at the neurons in the next layer.
+The gathered signal $\bm{u}$ is not sent to the next layer as is, but passes through a filter called an activation function. This determines the neuron's firing (whether to transmit the signal to the next node). In this experiment, two types of functions were used.
 
-
-
-隠れ層では**ReLU関数**を用いた。これは入力が負の値なら0を出力し、正の値ならそのまま出力するという働きをする。
+For the hidden layer, the **ReLU function** was used. This outputs 0 if the input is negative, and outputs the value as is if it is positive.
 
 $$
 f(x) = \max(0, x)
 $$
 
-これにより、不要な情報をカットし、重要な特徴だけを次の層へ伝えることができる。計算が非常に単純であるため、学習が速く進むという利点がある。
+This allows filtering out unnecessary information and transmitting only the important features to the next layer. Because the calculation is extremely simple, it has the advantage of speeding up the learning process.
 
-最後の出力層では**Sigmoid関数**を用いた。これはどんな値が来ても $0$ から $1$ の間の数値に変換する。
+For the final output layer, the **Sigmoid function** was used. This converts any given value into a number between $0$ and $1$.
 
 $$
 f(x) = \frac{1}{1 + e^{-x}}
 $$
 
-出力が $0$ から $1$ の間に収まるため、その数字である確率として解釈することができる。
+Since the output falls between $0$ and $1$, it can be interpreted as the probability of the digit being a specific number.
 
-### 1.2 学習の仕組み（誤差逆伝播）
-最初は重み $\bm{W}$ がランダムな値になっているため、正しい答えが出ない。そこで、ネットワークが出した答えと、教師データとの誤差を計算する。
-この誤差を小さくするように、出力層から入力層に向かって逆方向に重みを少しずつ修正していく。これを繰り返すことで、ニューラルネットワークは徐々に正しい判断ができるようになっていく。
-
-
+### 1.2 Learning Mechanism (Backpropagation)
+Initially, the weights $\bm{W}$ are set to random values, so the network will not produce the correct answers. Therefore, we calculate the error between the network's answer and the training data.
+To minimize this error, we incrementally adjust the weights backward from the output layer to the input layer. By repeating this process, the neural network gradually becomes capable of making correct judgments.
 
 ---
 
-## 2. 手法
-実装にはC++23およびコンパイラとしてClang version 21.1.7を使用した。行列計算にはEigenライブラリを使用した。
-本実験で構築したモデルの詳細は以下の通りである。
+## 2. Methodology
+The implementation utilizes C++23 with Clang version 21.1.7 as the compiler. The Eigen library was used for matrix calculations.
+The details of the model constructed in this experiment are as follows:
 
-* **入力層**: 784ノード（$28 \times 28$ピクセルの画像データに対応）
-* **隠れ層**: 128ノード（活性化関数: ReLU）
-* **出力層**: 10ノード（活性化関数: Sigmoid、数字の0〜9に対応）
+* **Input layer**: 784 nodes (corresponding to $28 \times 28$ pixel image data)
+* **Hidden layer**: 128 nodes (Activation function: ReLU)
+* **Output layer**: 10 nodes (Activation function: Sigmoid, corresponding to digits 0-9)
 
-学習をスムーズに開始するため、重みの初期値は慎重に決める必要がある。
-隠れ層の重み初期化にはHe初期化を、出力層の重み初期化にはXavier初期化という手法を用いた。これはデータのバラつき具合を保つように乱数を設定する方法で、これを用いることで学習が途中で止まってしまうことを防いでいる。
+To ensure smooth learning, the initial values of the weights must be carefully determined.
+He initialization was used for the hidden layer weights, and Xavier initialization was used for the output layer weights. These methods set random numbers to preserve the variance of the data, which prevents the learning process from stalling early on.
 
-### 2.1 学習アルゴリズム
-学習部分のソースコードを段階に分けて説明する。以下は、ニューラルネットワークを扱う `class NeuralNetwork` の実装の概要である。
+### 2.1 Learning Algorithm
+The source code for the learning component is explained in stages. Below is an overview of the implementation of the `class NeuralNetwork`, which handles the neural network.
 
-**リスト1: NeuralNetworkクラスの実装（概要）**
+**Listing 1: NeuralNetwork Class Implementation (Overview)**
 ```cpp
 class NeuralNetwork {
  private:
-  Eigen::MatrixXd w_ih;            // 入力層 → 隠れ層の重み
-  Eigen::MatrixXd w_ho;            // 隠れ層 → 出力層の重み
-  Eigen::VectorXd hidden_outputs;  // 隠れ層の出力
+  Eigen::MatrixXd w_ih;            // Input layer -> Hidden layer weights
+  Eigen::MatrixXd w_ho;            // Hidden layer -> Output layer weights
+  Eigen::VectorXd hidden_outputs;  // Hidden layer outputs
 
  public:
-  // 初期化
+  // Initialization
   NeuralNetwork();
-  // 順伝播を行う
+  // Perform forward propagation
   Eigen::VectorXd query(const Eigen::VectorXd& _inputs);
-  // 学習
+  // Train
   void train(const Eigen::VectorXd& _inputs, const Eigen::VectorXd& _targets) {}
 };
 ```
 
-変数として入力層・隠れ層・出力層の重み行列を持つ。続いて、以下に初期化を行う `NeuralNetwork` の内容を記す。
+It holds the weight matrices for the input, hidden, and output layers as variables. Next, the content of `NeuralNetwork` responsible for initialization is shown below.
 
-**リスト2: 初期化の実装**
+**Listing 2: Initialization Implementation**
 ```cpp
 NeuralNetwork() {
-  // 隠れ層
-  double weight_scale_ih = sqrt(2.0 / INPUT_NODES); // He初期化係数
-  w_ih = Eigen::MatrixXd::Random(HIDDEN_NODES, INPUT_NODES) * weight_scale_ih; // He初期化
-  // 出力層
-  double weight_scale_ho = sqrt(1.0 / HIDDEN_NODES);  // Xavier初期化係数
-  w_ho = Eigen::MatrixXd::Random(OUTPUT_NODES, HIDDEN_NODES) * weight_scale_ho;  // Xavier初期化
+  // Hidden layer
+  double weight_scale_ih = sqrt(2.0 / INPUT_NODES); // He initialization coefficient
+  w_ih = Eigen::MatrixXd::Random(HIDDEN_NODES, INPUT_NODES) * weight_scale_ih; // He initialization
+  // Output layer
+  double weight_scale_ho = sqrt(1.0 / HIDDEN_NODES);  // Xavier initialization coefficient
+  w_ho = Eigen::MatrixXd::Random(OUTPUT_NODES, HIDDEN_NODES) * weight_scale_ho;  // Xavier initialization
 }
 ```
 
-以下に順伝搬を行う関数 `query` の内容を示す。
+The contents of the function `query`, which performs forward propagation, are shown below.
 
-**リスト3: 順伝播の実装**
+**Listing 3: Forward Propagation Implementation**
 ```cpp
-// 順伝播を行う
+// Perform forward propagation
 Eigen::VectorXd query(const Eigen::VectorXd& _inputs) {
-  // 隠れ層
-  Eigen::VectorXd hidden_inputs = w_ih * _inputs;   // 重み行列と入力行列を掛けた結果を出力とする
-  hidden_outputs = hidden_inputs.unaryExpr(&relu);  // 出力にReluを適応する
+  // Hidden layer
+  Eigen::VectorXd hidden_inputs = w_ih * _inputs;   // The result of multiplying the weight matrix and the input matrix is the output
+  hidden_outputs = hidden_inputs.unaryExpr(&relu);  // Apply ReLU to the output
 
-  // 出力層
+  // Output layer
   Eigen::VectorXd final_inputs =
-      w_ho * hidden_outputs;  // 重み行列と隠れ層の出力行列を掛けた結果を出力とする
-  Eigen::VectorXd final_outputs = final_inputs.unaryExpr(&sigmoid);  // 出力にSigmoidを適応する
+      w_ho * hidden_outputs;  // The result of multiplying the weight matrix and the hidden layer output matrix is the output
+  Eigen::VectorXd final_outputs = final_inputs.unaryExpr(&sigmoid);  // Apply Sigmoid to the output
   return final_outputs;
 }
 ```
 
-最後に、学習を行う部分である `train` の実装を説明する。
+Finally, the implementation of `train`, the section where learning occurs, is explained.
 
-**リスト4: 学習（誤差逆伝播）の実装**
+**Listing 4: Learning (Backpropagation) Implementation**
 ```cpp
-// 学習
+// Learning
 void train(const Eigen::VectorXd& _inputs, const Eigen::VectorXd& _targets) {
-  Eigen::VectorXd final_outputs = query(_inputs);  // 順伝搬
+  Eigen::VectorXd final_outputs = query(_inputs);  // Forward propagation
 
-  Eigen::VectorXd output_errors = _targets - final_outputs;          // 誤差計算
-  Eigen::VectorXd hidden_errors = w_ho.transpose() * output_errors;  // 隠れ層の誤差計算
+  Eigen::VectorXd output_errors = _targets - final_outputs;          // Error calculation
+  Eigen::VectorXd hidden_errors = w_ho.transpose() * output_errors;  // Hidden layer error calculation
 
-  // 出力層の勾配
+  // Output layer gradients
   Eigen::VectorXd output_gradients =
       output_errors.cwiseProduct(final_outputs.unaryExpr(&sigmoid_d));
-  w_ho += LEARNING_RATE * (output_gradients * hidden_outputs.transpose());  // 出力層の重み更新
+  w_ho += LEARNING_RATE * (output_gradients * hidden_outputs.transpose());  // Update output layer weights
 
-  // 隠れ層の勾配
+  // Hidden layer gradients
   Eigen::VectorXd hidden_gradients =
       hidden_errors.cwiseProduct(hidden_outputs.unaryExpr(&relu_d));
-  w_ih += LEARNING_RATE * (hidden_gradients * _inputs.transpose());  // 隠れ層の重み更新
+  w_ih += LEARNING_RATE * (hidden_gradients * _inputs.transpose());  // Update hidden layer weights
 }
 ```
 
-### 2.2 MNISTデータセットの読み込み
-MNISTデータセットは、以下の4つのファイルから構成されている。これらはビッグエンディアン形式で記録されているため、4バイトずつ読み込み、バイト順を反転させて数値を再構成する処理が必要となる。
+### 2.2 Loading the MNIST Dataset
+The MNIST dataset consists of the following 4 files. Since they are recorded in big-endian format, they must be read 4 bytes at a time, reversing the byte order to reconstruct the numerical values.
 
-* `train-images-idx3-ubyte`: 学習用画像データ
-* `train-labels-idx1-ubyte`: 学習用ラベルデータ
-* `t10k-images-idx3-ubyte`: テスト用画像データ
-* `t10k-labels-idx1-ubyte`: テスト用ラベルデータ
+* `train-images-idx3-ubyte`: Training image data
+* `train-labels-idx1-ubyte`: Training label data
+* `t10k-images-idx3-ubyte`: Test image data
+* `t10k-labels-idx1-ubyte`: Test label data
 
-画像データ本体はヘッダの後に続いており、各ピクセルが0から255の値で格納されている。読み込み時に全ピクセル値を255で割り、正規化して入力データとした。
+The actual image data follows the header, with each pixel stored as a value from 0 to 255. Upon reading, all pixel values were divided by 255 to normalize them before being used as input data.
 
 ![img of excel](img-excel.png)
 
-### 2.3 ソースコード
-以下に実験で使用したソースコード全文を記す。
+### 2.3 Source Code
+The full source code used in the experiment is provided below.
 
-**リスト5: main.cpp（全文）**
+**Listing 5: main.cpp (Full text)**
 ```cpp
 #include <algorithm>
 #include <cmath>
@@ -318,26 +306,26 @@ int main() {
 }
 ```
 
-**コンパイルコマンド:**
+**Compilation Command:**
 ```bash
 clang++ -std=c++23 -O3 -march=native main.cpp
 ```
 
 ---
 
-## 3. 結果
-学習用データ60,000枚を使って10エポックの学習を行い、テストデータ10,000枚で正解率を測定した。認識精度は約**97.53%**となり、高い精度を確認した。
+## 3. Results
+Using 60,000 training images, learning was conducted for 10 epochs, and the accuracy was measured with 10,000 test images. The recognition accuracy was approximately **97.53%**, confirming a high level of precision.
 
 ---
 
-## 4. 考察
-* **活性化関数**: 隠れ層のReLUにより勾配消失を回避し、効率的な学習を実現した。
-* **学習率**: 0.01という設定は、収束の安定性と速度において適切であった。
+## 4. Discussion
+* **Activation Function**: Using ReLU in the hidden layer prevented the vanishing gradient problem, achieving efficient learning.
+* **Learning Rate**: A setting of 0.01 proved appropriate for both stability and convergence speed.
 
 ---
 
-## 5. 参考文献
-1. [C++日本語リファレンス](https://cpprefjp.github.io)
+## 5. References
+1. [C++ Japanese Reference](https://cpprefjp.github.io)
 2. [Eigen Library](https://eigen.tuxfamily.org)
-3. [MNIST バイナリファイル読み込み](https://tatsy.github.io/programming-for-beginners/python/read-binary)
-4. [Qiita: C++で作るニューラルネットワーク](https://qiita.com/Luke02561/items/e68948da075893cff43d)
+3. [Reading MNIST Binary Files](https://tatsy.github.io/programming-for-beginners/python/read-binary)
+4. [Qiita: Creating a Neural Network in C++](https://qiita.com/Luke02561/items/e68948da075893cff43d)
