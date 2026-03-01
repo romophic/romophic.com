@@ -13,9 +13,8 @@ export async function getStaticPaths() {
   }))
 
   const enPaths = enPosts.map((post) => {
-    const cleanId = post.id.replace(/\.en$/, '')
     return {
-      params: { lang: 'en', id: cleanId },
+      params: { lang: 'en', id: post.id },
       props: post,
     }
   })

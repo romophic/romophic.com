@@ -15,7 +15,15 @@ const _cache = {
 
 async function getCachedPosts(): Promise<CollectionEntry<'blog'>[]> {
   if (_cache.posts) return _cache.posts
-  _cache.posts = await getCollection('blog')
+  const rawPosts = await getCollection('blog')
+  _cache.posts = rawPosts.map((post) => {
+    let newId = post.id
+    if (post.data.lang === 'en') {
+      newId = newId.replace(/\.?en$/, '')
+    }
+    newId = newId.replace(/\/index$/, '')
+    return Object.assign({}, post, { id: newId })
+  })
   return _cache.posts
 }
 
@@ -193,7 +201,7 @@ export function groupPostsByYear(
   return posts.reduce(
     (acc: Record<string, CollectionEntry<'blog'>[]>, post) => {
       const year = post.data.date.getFullYear().toString()
-      ;(acc[year] ??= []).push(post)
+        ; (acc[year] ??= []).push(post)
       return acc
     },
     {},
