@@ -9,7 +9,7 @@ lang: 'en'
 
 ## Purpose
 
-$ f: D \rightarrow \mathbb{R} $の返り値が定義域$ D $で最大になるような$x \in D$を求める. 焼きなまし法です.
+Find an $x \in D$ such that the return value of $f: D \rightarrow \mathbb{R}$ is maximized in the domain $D$. This is Simulated Annealing.
 
 ## Time Complexity
 
@@ -20,37 +20,37 @@ $ O\left(\text{epoch} \left \lceil \dfrac{\log \text{(target temp)} - \log {\tex
 ### Declaration
 
 ```cpp
-struct State{ // 状態を表す構造体
+struct State{ // Structure representing the state
   double x;
 
   // f(x) = -x^4 + x^3 + x^2 + x
   // max f(x): 2.33.... (x = 1.28...)
-  double eval(){ // 評価関数
+  double eval(){ // Evaluation function
     return -pow(x,4)+pow(x,3)+pow(x,2)+x;
   }
-  void modify(){ // 遷移
+  void modify(){ // State transition
     x += ((double)rand() / (RAND_MAX))-0.5;
   }
 };
 
 ESAnnealing<State> sa;
-// sa内のStateの初期設定をする
+// Initialize the state inside sa
 sa.state.x=0;
 ```
 
-`State`の中身を目的に応じて書き換えてください
+Please rewrite the contents of `State` according to your purpose.
 
-### Hyperparameterの設定 & 焼なます
+### Hyperparameter Setup & Annealing
 
 ```cpp
-// (epoch当たりの試行回数, 初期温度, 目標温度, 冷却係数)
+// (trials per epoch, initial temperature, target temperature, cooling coefficient)
 sa.annealing(100,100000,0.1,0.99);
 ```
 
-### 結果の参照
+### Result Reference
 
 ```cpp
-// 結果はクラス内のstateで参照できる
+// The result can be referenced by 'state' in the class
 std::cout << "Solution: " << "f(x) = " << sa.state.eval() << ", x = " << sa.state.x << std::endl;
 ```
 

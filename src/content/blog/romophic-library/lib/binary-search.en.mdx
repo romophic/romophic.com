@@ -9,7 +9,7 @@ lang: 'en'
 
 ## Purpose
 
-二分探索する.
+Performs binary search.
 
 ## Time Complexity
 
@@ -17,8 +17,8 @@ $O(\log n)$
 
 ## Usage
 
-`dichotomy(探索下限, 探索上限, λ:int -> boolのlambda)`でλがtrueになる最小の数が返される. 探索範囲は半開区間で渡し, 区間にλがtrueになるものがなかった場合は探索上限値を返す.
-例えば
+`dichotomy(lower_bound, upper_bound, λ:int -> bool lambda)` returns the minimum number for which λ is true. The search range is passed as a half-open interval, and if no evaluation is true within the interval, the upper bound is returned.
+For example
 
 ```cpp
 dichotomy(0, 100, [](int n){
@@ -26,7 +26,7 @@ dichotomy(0, 100, [](int n){
 });
 ```
 
-の返り値は$ 50 < n $を満たす最小のnで51が返される.
+returns 51, which is the minimum n satisfying $ 50 < n $.
 
 ## Implementation
 

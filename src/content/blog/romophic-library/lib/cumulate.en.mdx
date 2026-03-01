@@ -9,14 +9,14 @@ lang: 'en'
 
 ## Purpose
 
-累積和を取り, 連続部分, 矩形, 長方形状の和を$O(1)$で求める.
+Calculates the prefix sum to find the sum of continuous segments, rectangles, or cuboids in $O(1)$.
 
 ## Time Complexity
 
-構築: $O(n)$  
-クエリ: $O(1)$
+Initialization: $O(n)$  
+Query: $O(1)$
 
-### 初期化
+### Initialization
 
 ```cpp
 Cumulate1D c1(vector);
@@ -24,9 +24,9 @@ Cumulate2D c2(matrix);
 Cumulate3D c3(tensor);
 ```
 
-`vector`はvector, `matrix`は`vector<vector>`, `tensor`は`vector<vector<vector>>`.
+`vector` is vector, `matrix` is `vector<vector>`, `tensor` is `vector<vector<vector>>`.
 
-### クエリ
+### Query
 
 ```cpp
 c1.query(x1,x2);
@@ -34,7 +34,7 @@ c2.query(y1,x1,y2,x2);
 c3.query(z1,y1,x1,z2,y2,x2);
 ```
 
-c1であれば区間$[x1,x2)$の和を返す.
+returns the sum of the interval $[x1,x2)$ for c1.
 
 ## Implementation
 

@@ -9,7 +9,7 @@ lang: 'en'
 
 ## Purpose
 
-指定した始点から終点への最短距離を求める. 負の辺でもOK. 負の閉路を検出可能.
+Finds the shortest distance from a specified starting point to the destination. Negative edges are supported. Negative cycles can be detected.
 
 ## Time Complexity
 
@@ -27,9 +27,9 @@ $ O(|V||E|) $
 auto res = bellmanford(g, s, e);
 ```
 
-`res.path`でsからeへの最短パスを得る.  
-`res.distances`でｓから各頂点への最短距離を得る. 経路が存在しなければINF.  
-`res.hascycle`でgに負の閉路があるかを得る.
+Get the shortest path from s to e using `res.path`.  
+Get the shortest distance from s to each vertex using `res.distances`. If no path exists, it returns INF.  
+Check if a negative cycle exists in g using `res.hascycle`.
 
 ## Implementation
 

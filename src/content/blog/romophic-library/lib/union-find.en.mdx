@@ -9,11 +9,11 @@ lang: 'en'
 
 ## Purpose
 
-要素がどの集合に属しているかを判定し,部分集合の濃度や部分集合の集合を得る.
+Determines which set elements belong to, and obtains the sizes of subsets and sets of subsets.
 
 ## Time Complexity
 
-$ O(\alpha(n)) $, $\alpha$はAckermann関数の逆関数
+$ O(\alpha(n)) $, where $\alpha$ is the inverse Ackermann function.
 
 ## Usage
 
@@ -23,39 +23,39 @@ $ O(\alpha(n)) $, $\alpha$はAckermann関数の逆関数
 UnionFind uf(要素数);
 ```
 
-### クエリ
+### Query
 
-#### マージ
+#### Merge
 
 ```cpp
 uf.merge(a,b);
 ```
 
-aが属する集合と,bが属する集合をマージする
+Merges the set that a belongs to with the set that b belongs to.
 
-#### 同一の集合か判定
+#### Determine if in the same set
 
 ```cpp
 uf.isSame(a,b);
 ```
 
-a,bが同一の集合に属しているか判定する
+Determines whether a and b belong to the same set.
 
-#### 集合サイズ
+#### Set Size
 
 ```cpp
 uf.size(a);
 ```
 
-aが属する集合の濃度を返す
+Returns the size of the set to which a belongs.
 
-#### 部分集合の集合
+#### Set of Subsets
 
 ```cpp
 uf.groups();
 ```
 
-で`vector{部分集合0, 部分集合1, ...}`を得る.
+returns `vector{subset 0, subset 1, ...}`.
 
 ## Implementation
 

@@ -9,53 +9,53 @@ lang: 'en'
 
 ## Purpose
 
-UnionFindに重みを持たせて要素間の距離も管理できるようにしたもの.
+A Union-Find with weights to manage distances between elements.
 
 ## Time Complexity
 
-$ O(\alpha(n)) $, $\alpha$はAckermann関数の逆関数
+$ O(\alpha(n)) $, where $\alpha$ is the inverse Ackermann function.
 
 ## Usage
 
 ### Declaration
 
 ```cpp
-WeightedUnionFind<距離を表すclass> wuf(要素数);
+WeightedUnionFind<distance_class> wuf(num_elements);
 ```
 
-### クエリ
+### Query
 
-#### マージ
+#### Merge
 
 ```cpp
 uf.merge(a,b,w);
 ```
 
-aが属する集合と,bが属する集合をbの重み-aの重み = w、つまりaよりbの方がw重みがあるようにマージする.
+Merges the set containing a and the set containing b such that (weight of b) - (weight of a) = w, meaning b is heavier than a by w.
 
-#### 同一の集合か判定
+#### Determine if in the same set
 
 ```
 wuf.isSame(a,b);
 ```
 
-a,bが同一の集合に属しているか判定する
+Determines whether a and b belong to the same set.
 
-#### 集合サイズ
+#### Set Size
 
 ```cpp
 wuf.size(a);
 ```
 
-aが属する集合の濃度を返す
+Returns the size of the set to which a belongs.
 
-#### 重みの差
+#### Difference in Weight
 
 ```cpp
 wuf.diff(a,b);
 ```
 
-でbの重み-aの重みを得る.
+returns (weight of b) - (weight of a).
 
 ## Implementation
 

@@ -9,12 +9,12 @@ lang: 'en'
 
 ## Purpose
 
-強連結成分分解をする. 巡回可能な部分ごとにグラフを分けてまとめ, それらのDAGを作る.
+Performs Strongly Connected Components (SCC) decomposition. It partitions and groups the graph into cyclable components, and creates a DAG of those components.
 
 ## Example
 
-![イメージ](scc-scs.png)  
-上図においてグループ0とグループ1内ではそれぞれ互いに移動可能であり, またグループ間の移動についてグループ0からグループ1のみに移動可能である. 感覚的にはグラフの圧縮.
+![Image](scc-scs.png)  
+In the figure above, movement is mutually possible within group 0 and group 1 respectively, and movement between groups is only possible from group 0 to group 1. Intuitively, it is graph compression.
 
 ## Time Complexity
 
@@ -28,11 +28,11 @@ $ O(|V| + |E|) $
 auto res = scc(g);
 ```
 
-gは`vector<vector<int>>`.  
-`res.indexToContracted[i]`で頂点iが属する強連結成分のindexを得る.  
-`res.contractedGraph`で強連結成分ごとにまとめられたグラフを得る(`vector<vector<int>>`).
+g is a `vector<vector<int>>`.  
+Get the index of the strongly connected component to which vertex i belongs using `res.indexToContracted[i]`.  
+Get the graph grouped by strongly connected components using `res.contractedGraph` (`vector<vector<int>>`).
 
-[Example](#example)での実行結果は:
+The execution result for [Example](#example) is:
 
 ```cpp
 res.indexToContracted = {
@@ -47,7 +47,7 @@ res.contractedGraph = {
 }
 ```
 
-となる.
+.
 
 ## Implementation
 

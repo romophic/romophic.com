@@ -9,7 +9,7 @@ lang: 'en'
 
 ## Purpose
 
-文字列の`i`th以降で文字cが出現する最小のindexを返す. 存在しなければ文字列長を返す.
+Returns the minimum index where character c appears at or after the `i`-th character of the string. Returns the string length if it doesn't exist.
 
 ## Time Complexity
 
@@ -21,7 +21,7 @@ $ O(n) $
 auto res = nextCharIndex(s);
 ```
 
-`s`は`std::string`, `res[i][j]`で`i`th以降(`i`thも含む)で文字`c`が出現するindexを得る.
+`s` is a `std::string`. Use `res[i][j]` to get the index where character `c` appears at or after the `i`-th character (inclusive).
 
 ## Implementation
 

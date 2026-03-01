@@ -9,28 +9,28 @@ lang: 'en'
 
 ## Purpose
 
-文字列が一致しているかの判定を定数時間で行う. ロリハ.
+Checks if strings match in constant time. Rolling Hash.
 
 ## Time Complexity
 
-構築: $ O(n) $  
-クエリ: $ O(1) $
+Initialization: $ O(n) $  
+Query: $ O(1) $
 
 ## Usage
 
-### 構築
+### Initialization
 
 ```cpp
 RollingHash rh(s);
 ```
 
-### ハッシュ
+### Hash
 
 ```cpp
 rh.get(l,r)
 ```
 
-$[l,r)$のハッシュを得る.
+Get the hash for $[l,r)$.
 
 ## Implementation(WIP)
 

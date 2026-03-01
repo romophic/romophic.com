@@ -9,7 +9,7 @@ lang: 'en'
 
 ## Purpose
 
-指定した頂点から他全てへの頂点への最短距離を求める. 負の辺が無いことを前提とする.
+Finds the shortest distance from a specified vertex to all other vertices. Assumes no negative edges.
 
 ## Time Complexity
 
@@ -27,7 +27,7 @@ $ O(|E|\log|V|) $
 auto res = dijkstra(g,s);
 ```
 
-`res[i]`で頂点sから頂点iの最短距離を得る.
+Get the shortest distance from vertex s to vertex i using `res[i]`.
 
 ## Implementation
 

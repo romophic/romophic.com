@@ -9,47 +9,47 @@ lang: 'en'
 
 ## Purpose
 
-[SegmentTree](/en/blog/romophic-library/lib/segment-tree)の一点更新を区間更新として$O(\log n)$で行う.
+Performs point updates of a [SegmentTree](/en/blog/romophic-library/lib/segment-tree) as range updates in $O(\log n)$.
 
 ## Time Complexity
 
-初期化: $O(n)$  
-クエリ: $\log(n)$
+Initialization: $O(n)$  
+Query: $\log(n)$
 
 ## Usage
 
 ### Declaration
 
 ```cpp
-LazySegmentTree<class> lseg(配列長, 二項演算するlambda, 単位元);
+LazySegmentTree<class> lseg(array_length, lambda_for_binary_operation, identity_element);
 ```
 
-### 構築&更新
+### Build & Update
 
 ```cpp
 lseg.update(a, b, x);
 ```
 
-で$ [a,b) $をxで更新する.
+updates $ [a,b) $ with x.
 
-### クエリ
+### Query
 
 ```cpp
 lseg.query(a,b)
 ```
 
-で半開区間$ \left[ a,b \right) $に演算を適応した値が得られる.
+returns the evaluated binary operation over the half-open interval $ \left[ a,b \right) $.
 
 ## Implementation
 
-例として区間和を求める場合、`update(a,b,x)`の動作を
+For example, when finding the range sum, the behavior of `update(a,b,x)` differs:
 
-- 区間更新: $ \text{seg}\_i \rightarrow x$
-- 区間加算: $ \text{seg}\_i \rightarrow \text{seg}\_i + x $
+- Range update: $ \text{seg}\_i \rightarrow x$
+- Range addition: $ \text{seg}\_i \rightarrow \text{seg}\_i + x $
 
-にするかで実装が異なる
+depending on whether it is an update or an addition.
 
-### 区間更新型ver
+### Range Update Version
 
 ```cpp
 template <class T>
@@ -103,7 +103,7 @@ struct LazySegmentTree {
 };
 ```
 
-### 区間加算型ver
+### Range Add Version
 
 ```cpp
 template <class T>
@@ -165,17 +165,17 @@ struct LazySegmentTree {
 
 //TODO
 
-## 例
+## Example
 
-連続区間の和を高速に求めたいとして:
+To quickly compute the sum of a continuous interval:
 
 ```cpp
 LazySegmentTree<int> lseg(n, [](int a, int b){ return a+b; }, 0);
 
-// ~構築~
+// ~build~
 ```
 
-の様にlambdaをおけばよい.
+you just need to provide a lambda like this.
 
 ```
 

@@ -9,7 +9,7 @@ lang: 'en'
 
 ## Purpose
 
-重み付き有向グラフの全頂点ペアの最短距離を求める. 負の閉路が無いことを前提とする.
+Finds the shortest distances between all pairs of vertices in a weighted directed graph. Assumes no negative cycles.
 
 ## Time Complexity
 
@@ -26,7 +26,7 @@ $ O(n^3) $
 auto res = warshallfloyd(g);
 ```
 
-`res.dist[s][e]`で頂点sからeの距離, `res.next[s][e]`で頂点sからeへ最短で到達するために次に到達すべき頂点を得る.
+Get the distance from vertex s to e using `res.dist[s][e]`. Get the next vertex to visit to reach e from s via the shortest path using `res.next[s][e]`.
 
 ## Implementation
 

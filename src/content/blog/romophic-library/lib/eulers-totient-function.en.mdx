@@ -9,20 +9,20 @@ lang: 'en'
 
 ## Purpose
 
-オイラーのトーシェント関数. $ n \in \mathbb{N} $に対して, $n$と互いに素である$1$以上$n$以下の自然数の個数$φ(n)$を与える.  
-nの素因数分解が
+Euler's totient function. For $ n \in \mathbb{N} $, it gives $φ(n)$, the number of natural numbers up to $n$ that are coprime to $n$.  
+When the prime factorization of n is expressed as
 
 $$
   n = \prod_{k=1}^{d}p_k^{e_k}
 $$
 
-と表されるとき,
+,
 
 $$
   \phi (n) = \prod_{k=1}^{d}\left(p_k^{e_k} - p_k^{e_k-1}\right) = n\prod_{k=1}^{d}\left(1-\frac{1}{p_k}\right)
 $$
 
-と変形できることを利用して計算する。
+we calculate using this transformation.
 
 ## Time Complexity
 
