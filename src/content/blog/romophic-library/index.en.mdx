@@ -1,0 +1,86 @@
+﻿---
+title: 'romophic-library'
+date: 2024-07-30T22:01:37+09:00
+description: 'Library for Competitive Programming'
+authors: ['romophic']
+tags: ['c++','competitive programming']
+lang: 'en'
+---
+
+This is a haphazard compilation of the library I originally maintained at [github.com/romophic/Compro](https://github.com/romophic/Compro). I started this because someone recommended I cultivate a "digital bonsai".  
+Prerequisite template:
+
+```cpp
+#pragma GCC optimize("Ofast")
+#include <bits/stdc++.h>
+#define int long long
+#define double long double
+#define uint unsigned long long
+#define int128 __int128
+#define uint128 unsigned __int128
+using namespace std;
+constexpr int INF = 1LL << 60;
+template <class T>
+bool chmax(T &a, const T &b) { return a < b ? a = b, 1 : 0; }
+template <class T>
+bool chmin(T &a, const T &b) { return a > b ? a = b, 1 : 0; }
+```
+
+## Algorithms
+
+### Graphs
+
+- [DirectedGraph](/en/blog/romophic-library/lib/directed-graph)
+  - [WarshallFloyd](/en/blog/romophic-library/lib/warshall-floyd)
+  - [Dijkstra](/en/blog/romophic-library/lib/dijkstra)
+  - [BellmanFord](/en/blog/romophic-library/lib/bellman-ford)
+  - [TopologicalSort](/en/blog/romophic-library/lib/topological-sort)
+  - [getFarthestVertex (Find the farthest vertex)](/en/blog/romophic-library/lib/get-farthest-vertex)
+  - [getGraphDiameter (Find the diameter of a tree)](/en/blog/romophic-library/lib/get-graph-diameter)
+- [UndirectedGraph](/en/blog/romophic-library/lib/undirected-graph)
+  - [Kruskal](/en/blog/romophic-library/lib/kruskal)
+- [Strongly Connected Components (SCC)](/en/blog/romophic-library/lib/scc)
+
+### Data Structures
+
+- [UnionFind](/en/blog/romophic-library/lib/union-find)
+- [WeightedUnionFind](/en/blog/romophic-library/lib/weighted-union-find)
+- [SegmentTree](/en/blog/romophic-library/lib/segment-tree)
+- [LazySegmentTree](/en/blog/romophic-library/lib/lazy-segment-tree)
+
+### Mathematics
+
+- [Prime Factorization](/en/blog/romophic-library/lib/prime-factorization)
+- [Divisor Enumeration](/en/blog/romophic-library/lib/divisor-enumeration)
+- [Binary Exponentiation (Repeated Squaring)](/en/blog/romophic-library/lib/binary-exponentiation)
+- [ModInt](/en/blog/romophic-library/lib/modint)
+- [Base Conversion](/en/blog/romophic-library/lib/conv-notation)
+- ["Euler's totient function"](/en/blog/romophic-library/lib/eulers-totient-function)
+- [Multi-precision Integer (BigInt)](/en/blog/romophic-library/lib/big-int)
+
+### Strings
+
+- [Minimum index evaluating to character $c$ after $i$-th character](/en/blog/romophic-library/lib/next-char-index)
+- [RollingHash](/en/blog/romophic-library/lib/rolling-hash)
+- [SuffixArray](/en/blog/romophic-library/lib/suffix-array)
+
+### Utilities & Others
+
+- [Binary Search](/en/blog/romophic-library/lib/binary-search)
+- [chmax/chmin](/en/blog/romophic-library/lib/chmaxchmin)
+- [Utility to cin/cout STL data structures directly](/en/blog/stl-data-structure-istream-ostream)
+- [Fast I/O](/en/blog/romophic-library/lib/fast-io)
+- [Mo's Algorithm](/en/blog/romophic-library/lib/mo)
+- [Prefix Sums (1d, 2d, 3d)](/en/blog/romophic-library/lib/cumulate)
+- [Index Conversion (1d, 2d, 3d)](/en/blog/romophic-library/lib/conv-index)
+
+## Heuristics
+
+- [SimulatedAnnealing](/en/blog/romophic-library/lib/simulated-annealing)
+
+## Acknowledged Libraries
+
+I referred to and implemented these taking inspiration only from sources that explicitly stated they were free to use.
+
+- https://ei1333.github.io/luzhiled
+- https://github.com/tatyam-prime/kyopro_library
