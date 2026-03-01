@@ -292,6 +292,8 @@ The home page (`src/components/pages/Home.astro`) implements a "Glass Dashboard 
 - [x] **SEO Perfection:** Globally fixed canonical URLs to self-reference properly, injected localized bilingual `hreflang` tags across all documents, and unblocked Subpost indexing by removing legacy `noindex` directives.
 - [x] **UI Polish & Minimalism (Home Page Remaster):** Radically simplified `Hero.astro` to feature a minimalist avatar and about link. Re-architected `Home.astro` to utilize a vertical layout emphasizing the Knowledge Graph. Refined Experience timelines (thinned, high-contrast borders) and tightened MDX image captions.
 - [x] **Glass Dashboard → Graph Scroll Experience:** Implemented a full-width frosted glass dashboard that naturally scrolls away to reveal a fullscreen interactive Knowledge Graph. Added a custom rotational D3 force for ambient animation, scroll-driven `pointer-events` toggling, and responsive mobile layout with CSS `scale` transforms on the Activity Graph.
+- [x] **Bilingual i18n Translation:** Fully completed manual LLM-driven English translations for all 38 remaining `.en.mdx` files (including the entirety of `romophic-library`). Removed all messy temporary automated scripts to ensure authentic, grammatically natural nuance in technical code explanations.
+- [x] **SEO Audit & Excellence:** Verified that the site's metadata perfectly satisfies modern search engine requirements. Validated dynamic canonical URL assignments (`rel="canonical"`), precise international targeting (`hreflang` for `ja`, `en`, and `x-default`), correct standard `robots.txt`, and rich JSON-LD snippet generation across all articles.
 
 ### Future Features
 - [ ] **Performance (Graph):** Remove D3.js dependency by implementing a custom lightweight physics engine (Verlet integration) and zoom/drag handlers.
@@ -327,4 +329,4 @@ This codebase is now a living organism. It breathes through the D3 simulation an
 
 ---
 
-_Context Updated: 2026-02-25 (Glass Dashboard → Graph Scroll Experience)_
+_Context Updated: 2026-03-02 (Bilingual i18n Translation & SEO Audit)_
