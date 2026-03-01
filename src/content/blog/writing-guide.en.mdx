@@ -1,0 +1,173 @@
+---
+title: '[EN] romophic.com 記事執筆ガイド：マークダウンと拡張機能のすべて'
+date: 2026-03-01T20:40:00+09:00
+description: '本サイト(romophic.com)の記事において利用可能なFrontmatter要素や、独自のMDX拡張機能・記法について詳細な具体例とともに解説します。'
+tags: ['guide', 'markdown', 'mdx', 'astro']
+authors: ['romophic']
+lang: 'en'
+---
+
+> **Notice:** This is an English translation version which is currently under construction.
+
+
+
+本サイト（romophic.com）は、高いパフォーマンスと「God-Tier UX」、そして記事間の相互接続性（Interconnectivity）をテーマに構築されたテクニカルなデジタルガーデンです。
+
+この記事では、新しく記事を投稿する際に設定できるメタデータ（Frontmatter）の仕様と、本文中で使用できるマークダウンの拡張機能、具体的なコンポーネントの利用方法について完全網羅しています。
+
+## 1. ポストのメタデータ (Frontmatter)
+
+各記事の先頭には、YAML形式でメタデータ（Frontmatter）を記述します。`src/content.config.ts` で定義されているスキーマに従って、以下の属性を設定できます。
+
+### 必須の属性
+
+- **`title`**: 記事のタイトル。ページの見出しやOGP画像に使用されます。
+- **`description`**: 記事の概要文。検索エンジン向けのメタディスクリプションや、記事一覧のプレビューカードに表示されます。
+- **`date`**: 記事の作成・公開日時。`YYYY-MM-DD` などのISO 8601形式を推奨します。
+
+### 任意の属性
+
+- **`lang`**: `ja` または `en`（デフォルト: `ja`）。多言語対応に使用され、記事の言語を明示します。
+- **`tags`**: 記事の分類を示すタグの配列。例: `['c++', 'algorithm']`
+- **`authors`**: 著者のID配列。`src/content/authors` に定義されたファイル名と対応し、著者名やアバターアイコンがレンダリングされます。例: `['romophic']`
+- **`image`**: 記事固有のアイキャッチ画像のパス。指定がない場合は、AstroによってOGP画像（タイトルや著者が入った動的画像）がビルド時に自動生成されます。
+- **`draft`**: `true` にすると下書き状態となり、本番ビルドの対象から除外されます。
+- **`order`**: サブポスト（シリーズ物や本のような階層記事）において、前後の記事へのナビゲーション順序を明示的に制御する数値です。
+
+#### 具体的なFrontmatterの記述例
+
+```yaml
+---
+title: 'romophic.com 記事執筆ガイド'
+date: 2026-03-01T20:00:00+09:00
+description: '本サイトの執筆ルールと拡張記法を具体例とともに解説します。'
+tags: ['guide', 'markdown']
+authors: ['romophic']
+---
+```
+
+## 2. 標準的なマークダウン記法・文書構造
+
+通常のマークダウン記法がそのまま、モダンなタイポグラフィ（Geistフォント）とともに美しく組み上げられます。
+
+見出し（`##` 等の H2〜H6）には**自動的にアンカーリンクのIDが付加**され、スマホ・デスクトップ両サイドの目次（Table of Contents）と連動するスクロールスパイ（Active Scroll Spy）が機能します。
+
+- 箇条書きリスト
+- 番号付きリスト
+- 引用（`>` によるブロッククオート）機能
+- 太字（`**strong**`）や取り消し線などの標準装飾
+
+## 3. 拡張されたリッチメディア表現とプラグイン
+
+技術記事を書く上で必要不可欠なリッチな表現を、SSG・ゼロJSのパフォーマンスを落とさずに提供します。
+
+### 数式レンダリング（LaTeX）
+
+`remark-math` プラグインと `rehype-katex` によって、美しく軽量な数式のサーバーサイド・レンダリングが可能です。
+
+**インライン数式**
+
+```md
+計算量は $\mathcal{O}(N \log N)$ となります。
+```
+計算量は $\mathcal{O}(N \log N)$ となります。
+
+**ブロック形式の数式**
+
+```katex
+$$
+\int_{-\infty}^\infty e^{-x^2} dx = \sqrt{\pi}
+$$
+```
+
+$$
+\int_{-\infty}^\infty e^{-x^2} dx = \sqrt{\pi}
+$$
+
+### コードブロックとシンタックスハイライト
+
+Astroの強力なコードブロックによって、シンタックスハイライトとクリップボードへのコピー機能付きのリッチなウィンドウプレビューが生成されます。
+
+` ```cpp ` のように言語を指定することで、指定したプログラミング言語ごとの適切なハイライトが行われます。
+
+```cpp
+#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "Welcome to romophic.com!" << endl;
+    return 0;
+}
+```
+
+### 絵文字・ショートコード (Emoji)
+
+`remark-emoji` を導入しているため、`:rocket:` などのショートコードを打ち込むだけで、そのまま絵文字 🚀 に自動変換されます。
+
+### LQIP付きの最適化画像 (Image Optimization)
+
+マークダウンの標準的な画像構文 `![代替テキスト](/path/to/image.png)` を使用するだけで、システム内部では画像を自動的に WebP 形式に軽量化・最適化します。
+
+同時に **LQIP (Low Quality Image Placeholder)** 技術が適用され、CSS Gridとブラーエフェクトによって低解像度の縮小画像が高速で裏側に敷き詰められ、読み込み完了時にフェードインすることで、画像の読み込みによる「ガタつき（Layout Shift）」が起こりません。
+
+## 4. 多言語対応（i18n）: 英語記事の作成方法
+
+本サイトは、静的ルーティングを用いた完全な日英バイリンガル対応（i18n）を実現しています。英語の翻訳記事を作成する場合は、以下の簡単なルールに従います。
+
+### 1. ファイルの命名規則 (`.en.mdx`)
+
+日本語のメイン記事と同じディレクトリに、ファイルの拡張子を `.en.mdx` とした新しいファイルを作成します。
+
+例:
+- 日本語記事: `src/content/blog/romophic-library/lib/binary-search.mdx`
+- 英語記事: `src/content/blog/romophic-library/lib/binary-search.en.mdx`
+
+### 2. Frontmatterの `lang` 属性
+
+作成した `.en.mdx` ファイルのFrontmatterに、必ず `lang: 'en'` を指定します。
+
+```yaml
+---
+title: 'romophic.com Writing Guide: Markdown and Extensions'
+date: 2026-03-01T20:40:00+09:00
+description: 'A comprehensive guide to writing articles on romophic.com, including Frontmatter attributes and custom MDX extensions.'
+lang: 'en'  # ← これが必須です
+tags: ['guide', 'markdown', 'mdx', 'astro']
+authors: ['romophic']
+---
+```
+
+システムが `.en` サフィックスを自動的に取り除き、日本語と英語で同じURLスラグ（例: `/blog/binary-search` と `/en/blog/binary-search`）を持つようにルーティングを生成します。
+
+## 5. 独自の連携機能・「God-Tier UX」アーキテクチャ
+
+当サイトを技術的デジタルガーデンたらしめる、最大の特徴「Interconnectivity（相互接続性）」です。
+
+### 双方向リンク（Backlinks）とナレッジグラフ
+
+文中で他の記事へのリンクを張ると、裏側で巨大な被リンクのインデックスがシステムによって動的に構築されます（計算量 $\mathcal{O}(N)$ ）。
+
+- **簡単な記述ルール**: 以下のように、関連する記事への相対（または絶対）パスを標準のリンク形式で書くだけです。
+  ```md
+  [別の記事のタイトル](../other-post-id)
+  ```
+- **被リンク（Backlinks）の自動表示**: リンク先として参照された記事の末尾には、「この記事は以下の記事からリンクされています」という `Backlinks` コンポーネントが自動的に生成されます。
+- **動的 Knowledge Graph への反映**: トップページの背景にあるD3.jsベースの物理演算ネットワーク「ナレッジグラフ（Knowledge Graph）」に新しいノードとエッジとして自動反映され、関連性が視覚化されます。
+
+### MDXとAstroコンポーネントの直接インポート
+
+`.mdx`（Markdown + JSX）形式を採用しているため、通常のテキストの中に直接 `src/components/` 配下のAstro/Reactコンポーネントを埋め込むことができます。
+
+**使用例:** サイト上に設置されている自身のアクティビティグラフを直接記事に埋め込む場合。
+
+```mdx
+import ActivityGraph from '../../components/features/ActivityGraph.astro';
+
+<ActivityGraph />
+```
+
+この機能により、静的な記事だけでなく、動的なUIコンポーネントやデータビジュアライゼーションを含んだインタラクティブな記事が執筆可能です。
+
+---
+
+romophic.com における記事執筆は、ただのマークダウン入力ではありません。あなたのナレッジが双方向に結びつき、デジタルガーデンの中で一つの美しいノードとして育てられていくプロセスをお楽しみください。

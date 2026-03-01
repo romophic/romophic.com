@@ -1,0 +1,51 @@
+﻿---
+title: 'DirectedGraph'
+date: 2024-07-30T22:01:37+09:00
+description: 'romophic-library'
+tags: ['c++', 'competitive programming']
+authors: ['romophic']
+lang: 'en'
+---
+
+## Purpose
+
+Handles weighted directed graphs.
+
+## Usage
+
+### Declaration
+
+```cpp
+DirectedGraph g(n);
+```
+
+### Add weighted directed edge
+
+```cpp
+g.add(パス始点, パス終点, 重み);
+```
+
+## Implementation
+
+```cpp
+class DirectedGraph {
+public:
+  struct Edge {
+    int to, cost;
+  };
+  const int n;
+  vector<vector<Edge>> g;
+  DirectedGraph(int _n) : n(_n), g(_n) {}
+  void add(int s, int t, int cost) {
+    g[s].push_back({t, cost});
+  }
+};
+```
+
+## Depended on
+
+- **[WarshallFloyd](/en/blog/romophic-library/lib/warshall-floyd)**
+- **[Dijkstra](/en/blog/romophic-library/lib/dijkstra)**
+- **[BellmanFord](/en/blog/romophic-library/lib/bellman-ford)**
+- **[TopologicalSort](/en/blog/romophic-library/lib/topological-sort)**
+- **[getFarthestVertex(Find the farthest vertex)](/en/blog/romophic-library/lib/get-farthest-vertex)**

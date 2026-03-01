@@ -1,0 +1,47 @@
+﻿---
+title: 'Kruskal'
+date: 2024-07-30T22:01:37+09:00
+description: 'romophic-library'
+tags: ['c++', 'competitive programming']
+authors: ['romophic']
+lang: 'en'
+---
+
+## Purpose
+
+最小全域木を求める.
+
+## Time Complexity
+
+$ O(|E|\log|E|) $
+
+## Depends
+
+- **[UndirectedGraph](/en/blog/romophic-library/lib/undirected-graph)**
+- **[UnionFind](/en/blog/romophic-library/lib/union-find)**
+
+## Usage
+
+### Declaration
+
+```cpp
+auto res = kruskal(g);
+```
+
+`res`に最小全域木の[UndirectedGraph](/en/blog/romophic-library/lib/undirected-graph)を得る.
+
+## Implementation
+
+```cpp
+UndirectedGraph kruskal(UndirectedGraph &_g) {
+  UnionFind uf(_g.n);
+  UndirectedGraph res(_g.n);
+  sort(_g.g.begin(), _g.g.end(), [](auto &l, auto &r) { return l.cost < r.cost; });
+  for (auto &[u, v, cost] : _g.g) {
+    if (uf.merge(u, v)) {
+      res.add(u,v,cost);
+    }
+  }
+  return res;
+}
+```
