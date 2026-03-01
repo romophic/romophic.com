@@ -92,6 +92,7 @@ export function renderGraph(
   activeTheme: GraphThemeColors,
   hoverNode: D3GraphNode | null,
   neighborIds: ReadonlySet<string>,
+  isInteractive: boolean,
 ) {
   ctx.clearRect(0, 0, width, height)
 
@@ -204,6 +205,9 @@ export function renderGraph(
     ctx.shadowBlur = 0
 
     // Label
+    // If we are currently behind the glass pane (isInteractive is false), skip heavy label rendering completely.
+    if (!isInteractive) return
+
     const degree = node.degree || 0
     const isImportant = degree > GRAPH_CONFIG.interaction.importantDegree
     if (

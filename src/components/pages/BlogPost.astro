@@ -34,10 +34,13 @@ const {
   tocSections,
   backlinks,
 } = await getPostPageData(post)
+
+const ogSlug = hasChildPosts ? `${post.id}/index` : post.id
+const ogImageUrl = `/og/${ogSlug.replaceAll('/', '-')}.png`
 ---
 
 <Layout>
-  <PostHead slot="head" post={post} image={`/og/${post.id}`} />
+  <PostHead slot="head" post={post} image={ogImageUrl} />
   {
     (hasChildPosts || isCurrentSubpost) && (
       <SubpostsHeader

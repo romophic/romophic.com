@@ -50,161 +50,173 @@ const blog = await getRecentPosts(SITE.featuredPostCount, lang)
     {/* 3. THE GLASS DASHBOARD (Scrollable Foreground) */}
     <main
       id="dashboard-content"
-      class="pointer-events-auto relative z-10 flex flex-col"
+      class="pointer-events-none relative z-10 flex min-h-[100.1vh] flex-col"
     >
-      {/* Giant Full-Width Glass Pane */}
-      <div
-        class="border-border/40 bg-background/60 dark:bg-background/50 relative z-10 w-full rounded-b-2xl border-b pb-10 shadow-[0_20px_50px_rgba(0,0,0,0.08)] backdrop-blur-md sm:rounded-b-[3rem] sm:pb-20 dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]"
-      >
-        {/* Global Header */}
+      {/* Content Container ensures pointer events */}
+      <div class="pointer-events-auto flex min-h-[100svh] w-full flex-col">
+        {/* Giant Full-Width Glass Pane */}
         <div
-          class="border-border/20 bg-background/40 sticky top-0 z-50 border-b backdrop-blur-sm"
+          class="border-border/40 bg-background/60 dark:bg-background/50 relative z-10 flex w-full grow transform-gpu flex-col rounded-b-2xl border-b pb-10 shadow-[0_20px_50px_rgba(0,0,0,0.08)] backdrop-blur-md will-change-transform sm:rounded-b-[3rem] sm:pb-16 dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]"
         >
-          <Header />
-        </div>
-
-        <div
-          class="mx-auto flex w-full max-w-5xl grow flex-col px-3 pt-8 sm:px-8 sm:pt-16"
-        >
-          {/* A. Hero Section */}
-          <div class="mx-auto mb-8 w-full max-w-3xl p-3 sm:mb-16 sm:p-8">
-            <div
-              class="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
-            >
-              <div
-                class="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left"
-              >
-                <div
-                  class="border-border/50 relative h-20 w-20 shrink-0 overflow-hidden rounded-[22.5%] border shadow-md sm:h-28 sm:w-28"
-                >
-                  <img
-                    src="/icon.webp"
-                    alt="romophic avatar"
-                    class="h-full w-full object-cover"
-                  />
-                </div>
-                <div class="flex flex-col gap-1.5">
-                  <h1
-                    class="text-2xl font-extrabold tracking-tight sm:text-4xl"
-                  >
-                    romophic
-                  </h1>
-                  <p class="text-muted-foreground font-medium">
-                    Developer & Writer
-                  </p>
-                </div>
-              </div>
-
-              <div class="flex flex-col items-center gap-4 sm:items-end">
-                <div class="flex flex-wrap justify-center gap-2 sm:justify-end">
-                  {
-                    SOCIAL_LINKS.map((link) => (
-                      <a
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="bg-background/80 hover:bg-muted text-muted-foreground hover:text-foreground inline-flex size-10 items-center justify-center rounded-xl border shadow-sm transition-colors"
-                        aria-label={link.label}
-                      >
-                        <Icon
-                          name={
-                            (ICON_MAP as Record<string, string>)[link.label] ||
-                            ICONS.link
-                          }
-                          class="size-5"
-                        />
-                      </a>
-                    ))
-                  }
-                </div>
-                <a
-                  href={localizePath('/about', lang)}
-                  class={getButtonStyles({ variant: 'default', size: 'sm' }) +
-                    ' rounded-xl shadow-sm'}
-                >
-                  <span class="font-medium">About Me</span>
-                  <Icon name={ICONS.arrowRight} class="ml-2 size-4" />
-                </a>
-              </div>
-            </div>
+          {/* Global Header */}
+          <div
+            class="border-border/20 bg-background/40 sticky top-0 z-50 border-b backdrop-blur-sm"
+          >
+            <Header />
           </div>
 
-          {/* B. Content Grid (Activity & Posts) */}
           <div
-            class="flex w-full flex-col gap-6 sm:gap-12 xl:flex-row xl:items-start xl:justify-between"
+            class="mx-auto flex w-full max-w-5xl grow flex-col px-3 pt-8 sm:px-8 sm:pt-12"
           >
-            {/* Left Column: Activity Log */}
-            <div class="flex w-full shrink-0 flex-col gap-y-4 xl:w-[420px]">
-              <div class="flex items-center px-2 pt-2">
-                <h2
-                  class="flex items-center gap-2 text-xl font-bold tracking-tight"
-                >
-                  <Icon name="lucide:activity" class="text-primary size-5" /> Activity
-                  Log
-                </h2>
-              </div>
-              <div class="w-full overflow-hidden p-2">
+            {/* A. Hero Section */}
+            <div class="mx-auto mb-8 w-full max-w-3xl p-3 sm:mb-12 sm:p-8">
+              <div
+                class="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
+              >
                 <div
-                  class="origin-top-left scale-[0.55] sm:scale-75 xl:scale-100"
-                  style="width: calc(100% / 0.55)"
+                  class="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left"
                 >
-                  <div class="sm:!w-[calc(100%/0.75)] xl:!w-full">
-                    <ActivityGraph />
+                  <div
+                    class="border-border/50 relative h-20 w-20 shrink-0 overflow-hidden rounded-[22.5%] border shadow-md sm:h-28 sm:w-28"
+                  >
+                    <img
+                      src="/icon.webp"
+                      alt="romophic avatar"
+                      class="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div class="flex flex-col gap-1.5">
+                    <h1
+                      class="text-2xl font-extrabold tracking-tight sm:text-4xl"
+                    >
+                      romophic
+                    </h1>
+                    <p class="text-muted-foreground font-medium">
+                      Developer & Writer
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex flex-col items-center gap-4 sm:items-end">
+                  <div
+                    class="flex flex-wrap justify-center gap-2 sm:justify-end"
+                  >
+                    {
+                      SOCIAL_LINKS.map((link) => (
+                        <a
+                          href={link.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="bg-background/80 hover:bg-muted text-muted-foreground hover:text-foreground inline-flex size-10 items-center justify-center rounded-xl border shadow-sm transition-colors"
+                          aria-label={link.label}
+                        >
+                          <Icon
+                            name={
+                              (ICON_MAP as Record<string, string>)[
+                                link.label
+                              ] || ICONS.link
+                            }
+                            class="size-5"
+                          />
+                        </a>
+                      ))
+                    }
+                  </div>
+                  <a
+                    href={localizePath('/about', lang)}
+                    class={getButtonStyles({ variant: 'default', size: 'sm' }) +
+                      ' rounded-xl shadow-sm'}
+                  >
+                    <span class="font-medium">About Me</span>
+                    <Icon name={ICONS.arrowRight} class="ml-2 size-4" />
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* B. Content Grid (Activity & Posts) */}
+            <div
+              class="flex w-full flex-col gap-6 sm:gap-12 xl:flex-row xl:items-start xl:justify-between"
+            >
+              {/* Left Column: Activity Log */}
+              <div class="flex w-full shrink-0 flex-col gap-y-4 xl:w-[420px]">
+                <div class="flex items-center px-2 pt-2">
+                  <h2
+                    class="flex items-center gap-2 text-xl font-bold tracking-tight"
+                  >
+                    <Icon name="lucide:activity" class="text-primary size-5" /> Activity
+                    Log
+                  </h2>
+                </div>
+                <div class="w-full overflow-hidden p-2">
+                  <div
+                    class="origin-top-left scale-[0.55] sm:scale-75 xl:scale-100"
+                    style="width: calc(100% / 0.55)"
+                  >
+                    <div class="sm:!w-[calc(100%/0.75)] xl:!w-full">
+                      <ActivityGraph />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Right Column: Latest Posts */}
-            <div class="flex w-full grow flex-col gap-y-6 sm:p-2">
-              <div
-                class="border-border/20 flex items-center justify-between border-b pb-2"
-              >
-                <h2
-                  class="flex items-center gap-2 text-xl font-bold tracking-tight"
+              {/* Right Column: Latest Posts */}
+              <div class="flex w-full grow flex-col gap-y-6 sm:p-2">
+                <div
+                  class="border-border/20 flex items-center justify-between border-b pb-2"
                 >
-                  <Icon name="lucide:book-open" class="text-primary size-5" /> Latest
-                  Writings
-                </h2>
-                <a
-                  href={localizePath('/blog', lang)}
-                  class="text-muted-foreground hover:text-foreground text-xs font-semibold tracking-wider uppercase transition-colors"
+                  <h2
+                    class="flex items-center gap-2 text-xl font-bold tracking-tight"
+                  >
+                    <Icon name="lucide:book-open" class="text-primary size-5" /> Latest
+                    Writings
+                  </h2>
+                  <a
+                    href={localizePath('/blog', lang)}
+                    class="text-muted-foreground hover:text-foreground text-xs font-semibold tracking-wider uppercase transition-colors"
+                  >
+                    See all &rarr;
+                  </a>
+                </div>
+                <ul
+                  class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-1"
                 >
-                  See all &rarr;
-                </a>
+                  {
+                    blog.map((post) => (
+                      <li class="h-full">
+                        <BlogCard entry={post} />
+                      </li>
+                    ))
+                  }
+                </ul>
               </div>
-              <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-1">
-                {
-                  blog.map((post) => (
-                    <li class="h-full">
-                      <BlogCard entry={post} />
-                    </li>
-                  ))
-                }
-              </ul>
             </div>
+          </div>
+        </div>
+
+        {
+          /* C. Scroll Indicator (Attached below the glass pane, pushed down heavily by glass pane flex-grow) */
+        }
+        <div
+          class="relative z-0 flex w-full shrink-0 flex-col items-center justify-center py-6 sm:py-10"
+        >
+          <div class="flex flex-col items-center gap-2">
+            <span
+              class="text-muted-foreground text-xs font-bold tracking-[0.2em] uppercase"
+              >Scroll to explore</span
+            >
+            <Icon
+              name="lucide:arrow-down"
+              class="text-muted-foreground size-5 animate-bounce"
+            />
           </div>
         </div>
       </div>
 
-      {/* C. Scroll Indicator */}
-      <div
-        class="relative z-0 mt-6 mb-8 flex w-full flex-col items-center justify-center sm:mt-8 sm:mb-16"
-      >
-        <div class="flex flex-col items-center gap-2">
-          <span
-            class="text-muted-foreground text-xs font-bold tracking-[0.2em] uppercase"
-            >Scroll to explore</span
-          >
-          <Icon
-            name="lucide:arrow-down"
-            class="text-muted-foreground size-5 animate-bounce"
-          />
-        </div>
-      </div>
-
-      {/* Spacer: guarantees the page is scrollable past the glass pane */}
-      <div class="h-[100vh]" aria-hidden="true"></div>
+      {
+        /* Spacer: guarantees the page is scrollable past the glass pane to see the graph */
+      }
+      <div class="h-[100vh] shrink-0" aria-hidden="true"></div>
     </main>
 
     {/* Global Search Dialog */}
