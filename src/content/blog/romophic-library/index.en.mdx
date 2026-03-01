@@ -7,8 +7,8 @@ tags: ['c++','competitive programming']
 lang: 'en'
 ---
 
-元々は[github.com/romophic/Compro](https://github.com/romophic/Compro)にまとめていたライブラリを適当にまとめたものです. 盆栽を勧められたので始めました.  
-前提テンプレート:
+This is a somewhat loose compilation of the library I originally maintained at [github.com/romophic/Compro](https://github.com/romophic/Compro). I was recommended to treat it like a bonsai tree, so I started.  
+Prerequisite Template:
 
 ```cpp
 #pragma GCC optimize("Ofast")
@@ -26,61 +26,61 @@ template <class T>
 bool chmin(T &a, const T &b) { return a > b ? a = b, 1 : 0; }
 ```
 
-## アルゴリズム
+## Algorithms
 
-### グラフ
+### Graph
 
 - [DirectedGraph](/en/blog/romophic-library/lib/directed-graph)
   - [WarshallFloyd](/en/blog/romophic-library/lib/warshall-floyd)
   - [Dijkstra](/en/blog/romophic-library/lib/dijkstra)
   - [BellmanFord](/en/blog/romophic-library/lib/bellman-ford)
   - [TopologicalSort](/en/blog/romophic-library/lib/topological-sort)
-  - [getFarthestVertex(最遠頂点を求める)](/en/blog/romophic-library/lib/get-farthest-vertex)
-  - [getGraphDiameter(木の頂点を求める)](/en/blog/romophic-library/lib/get-graph-diameter)
+  - [getFarthestVertex](/en/blog/romophic-library/lib/get-farthest-vertex)
+  - [getGraphDiameter](/en/blog/romophic-library/lib/get-graph-diameter)
 - [UndirectedGraph](/en/blog/romophic-library/lib/undirected-graph)
   - [Kruskal](/en/blog/romophic-library/lib/kruskal)
-- [強連結成分分解(SCC)](/en/blog/romophic-library/lib/scc)
+- [Strongly Connected Components (SCC)](/en/blog/romophic-library/lib/scc)
 
-### データ構造
+### Data Structures
 
 - [UnionFind](/en/blog/romophic-library/lib/union-find)
 - [WeightedUnionFind](/en/blog/romophic-library/lib/weighted-union-find)
 - [SegmentTree](/en/blog/romophic-library/lib/segment-tree)
 - [LazySegmentTree](/en/blog/romophic-library/lib/lazy-segment-tree)
 
-### 数学
+### Mathematics
 
-- [素因数分解](/en/blog/romophic-library/lib/prime-factorization)
-- [約数列挙](/en/blog/romophic-library/lib/divisor-enumeration)
-- [繰り返し二乗法](/en/blog/romophic-library/lib/binary-exponentiation)
+- [Prime Factorization](/en/blog/romophic-library/lib/prime-factorization)
+- [Divisor Enumeration](/en/blog/romophic-library/lib/divisor-enumeration)
+- [Binary Exponentiation](/en/blog/romophic-library/lib/binary-exponentiation)
 - [ModInt](/en/blog/romophic-library/lib/modint)
-- [進数変換](/en/blog/romophic-library/lib/conv-notation)
+- [Base Conversion](/en/blog/romophic-library/lib/conv-notation)
 - ["Euler's totient function"](/en/blog/romophic-library/lib/eulers-totient-function)
-- [多倍長整数](/en/blog/romophic-library/lib/big-int)
+- [BigInt (Arbitrary-precision integer)](/en/blog/romophic-library/lib/big-int)
 
-### 文字列
+### Strings
 
-- [文字列のith以降で文字cが出現する最小のindex](/en/blog/romophic-library/lib/next-char-index)
+- [Minimum index where character c appears at or after the i-th character](/en/blog/romophic-library/lib/next-char-index)
 - [RollingHash](/en/blog/romophic-library/lib/rolling-hash)
 - [SuffixArray](/en/blog/romophic-library/lib/suffix-array)
 
-### その他
+### Miscellaneous
 
-- [二分探索](/en/blog/romophic-library/lib/binary-search)
+- [Binary Search](/en/blog/romophic-library/lib/binary-search)
 - [chmax/chmin](/en/blog/romophic-library/lib/chmaxchmin)
-- [STLデータ構造にそのままcin/coutするやつ](/en/blog/stl-data-structure-istream-ostream)
-- [入出力高速化](/en/blog/romophic-library/lib/fast-io)
+- [Making STL Data Structures cin/cout Compatible](/en/blog/stl-data-structure-istream-ostream)
+- [Fast I/O](/en/blog/romophic-library/lib/fast-io)
 - [Mo's Algorithm](/en/blog/romophic-library/lib/mo)
-- [累積和(1d,2d,3d)](/en/blog/romophic-library/lib/cumulate)
-- [インデックス変換(1d,2d,3d)](/en/blog/romophic-library/lib/conv-index)
+- [Prefix Sum (Cumulative Sum) (1D, 2D, 3D)](/en/blog/romophic-library/lib/cumulate)
+- [Index Conversion (1D, 2D, 3D)](/en/blog/romophic-library/lib/conv-index)
 
-## ヒューリスティック
+## Heuristics
 
 - [SimulatedAnnealing](/en/blog/romophic-library/lib/simulated-annealing)
 
-## お世話になったライブラリ
+## Libraries that Helped Me
 
-自由に使って良いとあるところからのみ参考にさせて頂いて実装しました.
+I implemented these by referring solely to places that explicitly permit free usage.
 
 - https://ei1333.github.io/luzhiled
 - https://github.com/tatyam-prime/kyopro_library

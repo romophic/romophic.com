@@ -1,5 +1,5 @@
 ---
-title: '[EN] STLデータ構造をistream,ostream-compatibleにする'
+title: 'Making STL Data Structures istream/ostream Compatible'
 date: 2024-06-09T22:01:37+09:00
 description: 'Guide to making STL data structures istream/ostream-compatible'
 authors: ['romophic']
@@ -7,16 +7,13 @@ tags: ['c++','competitive programming']
 lang: 'en'
 ---
 
-> **Notice:** This is an English translation version which is currently under construction.
-
-
-
 # tldr
 
-下の[Source](#source)をコピペすると C++ で vector や tuple などをそのまま cin や cout できます。
+If you copy and paste the [Source](#source) below, you can directly `cin` and `cout` `vector`s, `tuple`s, etc. in C++.
 
 ---
 
+By overloading the shift operators for:
 - `std::vector`
 - `std::deque`
 - `std::list`
@@ -31,8 +28,7 @@ lang: 'en'
 - `std::unordered_set`
 - `std::unordered_multiset`
 
-のシフト演算子をオーバーロードする
-再帰的に構造体を展開し、For example`vector<pair<int,int>>`などその要素数に合わせて入力,出力処理ができる
+It recursively expands the structs, allowing input and output processing corresponding to the number of elements, such as in `vector<pair<int,int>>`.
 
 # Examples
 
