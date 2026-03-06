@@ -35,7 +35,9 @@ const {
   backlinks,
 } = await getPostPageData(post)
 
-const ogSlug = hasChildPosts ? `${post.id}/index` : post.id
+const isEnglish = post.data.lang === 'en'
+const ogSlugRaw = hasChildPosts ? `${post.id}/index` : post.id
+const ogSlug = isEnglish ? `${ogSlugRaw}.en` : ogSlugRaw
 const ogImageUrl = `/og/${ogSlug.replaceAll('/', '-')}.png`
 ---
 
