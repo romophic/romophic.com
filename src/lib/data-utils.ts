@@ -43,6 +43,7 @@ export async function getPostPageData(
   post: CollectionEntry<'blog'>,
 ): Promise<PostPageData> {
   const currentPostId = post.id
+  const lang = post.data.lang as 'ja' | 'en'
   const isCurrentSubpost = isSubpost(currentPostId)
 
   const [
@@ -56,18 +57,18 @@ export async function getPostPageData(
     backlinks,
   ] = await Promise.all([
     parseAuthors(post.data.authors ?? []),
-    getAdjacentPosts(currentPostId),
-    isCurrentSubpost ? getParentPost(currentPostId) : null,
-    hasSubposts(currentPostId),
-    !isCurrentSubpost ? getSubpostCount(currentPostId) : 0,
-    getPostReadingTime(currentPostId),
-    getTOCSections(currentPostId),
+    getAdjacentPosts(currentPostId, lang),
+    isCurrentSubpost ? getParentPost(currentPostId, lang) : null,
+    hasSubposts(currentPostId, lang),
+    !isCurrentSubpost ? getSubpostCount(currentPostId, lang) : 0,
+    getPostReadingTime(currentPostId, lang),
+    getTOCSections(currentPostId, lang),
     getBacklinks(currentPostId),
   ])
 
   const combinedReadingTime =
     hasChildPosts && !isCurrentSubpost
-      ? await getCombinedReadingTime(currentPostId)
+      ? await getCombinedReadingTime(currentPostId, lang)
       : null
 
   return {

@@ -80,19 +80,21 @@ export function getParentId(subpostId: string): string {
 
 export async function getPostById(
   postId: string,
+  lang: 'ja' | 'en' = 'ja'
 ): Promise<CollectionEntry<'blog'> | null> {
   if (!_cache.postMap) {
     const allPostsJa = await getAllPostsAndSubposts('ja')
     const allPostsEn = await getAllPostsAndSubposts('en')
     _cache.postMap = new Map(
-      [...allPostsJa, ...allPostsEn].map((p) => [p.id, p]),
+      [...allPostsJa, ...allPostsEn].map((p) => [`${p.id}-${p.data.lang}`, p]),
     )
   }
-  return _cache.postMap.get(postId) ?? null
+  return _cache.postMap.get(`${postId}-${lang}`) ?? null
 }
 
 export async function getSubpostsForParent(
   parentId: string,
+  lang: 'ja' | 'en' = 'ja'
 ): Promise<CollectionEntry<'blog'>[]> {
   const posts = await getCachedPosts()
   return posts
@@ -100,7 +102,8 @@ export async function getSubpostsForParent(
       (post) =>
         !post.data.draft &&
         isSubpost(post.id) &&
-        getParentId(post.id) === parentId,
+        getParentId(post.id) === parentId &&
+        post.data.lang === lang
     )
     .sort((a, b) => {
       const orderA = a.data.order ?? 0
@@ -112,20 +115,23 @@ export async function getSubpostsForParent(
     })
 }
 
-export async function getAdjacentPosts(currentId: string): Promise<{
+export async function getAdjacentPosts(
+  currentId: string,
+  lang: 'ja' | 'en' = 'ja'
+): Promise<{
   newer: CollectionEntry<'blog'> | null
   older: CollectionEntry<'blog'> | null
   parent: CollectionEntry<'blog'> | null
 }> {
-  const currentPost = await getPostById(currentId)
+  const currentPost = await getPostById(currentId, lang)
   if (!currentPost) return { newer: null, older: null, parent: null }
   const currentLang = currentPost.data.lang as 'ja' | 'en'
 
   if (isSubpost(currentId)) {
     const parentId = getParentId(currentId)
-    const parent = (await getPostById(parentId)) || null
+    const parent = (await getPostById(parentId, lang)) || null
 
-    const subposts = await getSubpostsForParent(parentId)
+    const subposts = await getSubpostsForParent(parentId, lang)
 
     const currentIndex = subposts.findIndex((post) => post.id === currentId)
     if (currentIndex === -1) {
@@ -208,41 +214,42 @@ export function groupPostsByYear(
   )
 }
 
-export async function hasSubposts(postId: string): Promise<boolean> {
-  const subposts = await getSubpostsForParent(postId)
+export async function hasSubposts(postId: string, lang: 'ja' | 'en' = 'ja'): Promise<boolean> {
+  const subposts = await getSubpostsForParent(postId, lang)
   return subposts.length > 0
 }
 
 export async function getParentPost(
   subpostId: string,
+  lang: 'ja' | 'en' = 'ja'
 ): Promise<CollectionEntry<'blog'> | null> {
   if (!isSubpost(subpostId)) {
     return null
   }
   const parentId = getParentId(subpostId)
-  return await getPostById(parentId)
+  return await getPostById(parentId, lang)
 }
 
-export async function getSubpostCount(parentId: string): Promise<number> {
-  const subposts = await getSubpostsForParent(parentId)
+export async function getSubpostCount(parentId: string, lang: 'ja' | 'en' = 'ja'): Promise<number> {
+  const subposts = await getSubpostsForParent(parentId, lang)
   return subposts.length
 }
 
-export async function getPostReadingTime(postId: string): Promise<string> {
-  const post = await getPostById(postId)
+export async function getPostReadingTime(postId: string, lang: 'ja' | 'en' = 'ja'): Promise<string> {
+  const post = await getPostById(postId, lang)
   if (!post) return '0 min read'
 
   return readingTime(post.body || '').text
 }
 
-export async function getCombinedReadingTime(postId: string): Promise<string> {
-  const post = await getPostById(postId)
+export async function getCombinedReadingTime(postId: string, lang: 'ja' | 'en' = 'ja'): Promise<string> {
+  const post = await getPostById(postId, lang)
   if (!post) return '0 min read'
 
   let totalMinutes = readingTime(post.body || '').minutes
 
   if (!isSubpost(postId)) {
-    const subposts = await getSubpostsForParent(postId)
+    const subposts = await getSubpostsForParent(postId, lang)
     for (const subpost of subposts) {
       totalMinutes += readingTime(subpost.body || '').minutes
     }
