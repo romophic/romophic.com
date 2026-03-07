@@ -48,6 +48,8 @@ This document provides a comprehensive and deep technical overview of **romophic
 ### Directory Structure & Codebase Complete Map
 
 #### `src/components/` (UI Components)
+- **`ui/`**: Atomic, generic UI primitives.
+    - `button.astro`, `badge.astro`, `separator.astro`
 - **`blog/`**: Post-specific UI elements.
     - `Backlinks.astro`: Lists incoming links to the current post.
     - `BlogCard.astro`: Preview card for post lists (used in `/blog` and Home).
@@ -57,8 +59,9 @@ This document provides a comprehensive and deep technical overview of **romophic
     - `SubpostsSidebar.astro`: Navigation for series/books (desktop sidebar).
     - `TOCHeader.astro`: Table of Contents for mobile.
     - `TOCSidebar.astro`: Table of Contents for desktop.
+- **`scripts/`**: Client-side logic managers.
+    - `AppScript.astro`: **Crucial.** Central manager for theme initialization and global scripts across transitions (astro:page-load).
 - **`common/`**: Reusable blocks.
-    - `AppScript.astro`: **Crucial.** Central manager for theme and scripts across transitions (astro:page-load).
     - `AuthorCard.astro`: Profile display for authors.
     - `CopyCodeManager.astro`: Adds copy buttons to code blocks.
     - `Favicons.astro`: Favicon link tags.
@@ -69,7 +72,6 @@ This document provides a comprehensive and deep technical overview of **romophic
     - `ScrollProgress.astro`: Reading progress bar.
     - `ScrollToTop.astro`: Scroll to top button.
     - `SocialIcons.astro`: Social media icons.
-    - **Atomic UI**: `button.astro`, `badge.astro`, `separator.astro` (Formerly Shadcn, now pure Astro+Tailwind).
 - **`features/`**: Complex components encapsulating larger logic.
     - `GraphView.astro`: The Knowledge Graph implementation (Pure SSG, D3 + Canvas natively invoked).
     - `ActivityGraph.astro`: GitHub-style contribution heatmap.

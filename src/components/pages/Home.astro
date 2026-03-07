@@ -1,12 +1,12 @@
 ---
 import BlogCard from '@/components/blog/BlogCard.astro'
-import { getButtonStyles } from '@/components/common/button.astro'
 import ActivityGraph from '@/components/features/ActivityGraph.astro'
 import GraphView from '@/components/features/GraphView.astro'
 import Head from '@/components/layout/Head.astro'
 import Header from '@/components/layout/Header.astro'
 import PageHead from '@/components/layout/PageHead.astro'
 import SearchDialog from '@/components/layout/SearchDialog.astro'
+import { getButtonStyles } from '@/components/ui/button.astro'
 import { ICON_MAP, ICONS, SITE, SOCIAL_LINKS } from '@/consts'
 import { getLangFromUrl, localizePath } from '@/i18n/utils'
 import { getRecentPosts } from '@/lib/data-utils'

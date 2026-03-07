@@ -1,5 +1,6 @@
 ---
 import Favicons from '@/components/common/Favicons.astro'
+import AppScript from '@/components/scripts/AppScript.astro'
 import { SITE } from '@/consts'
 import { ClientRouter } from 'astro:transitions'
 ---
@@ -39,39 +40,7 @@ import { ClientRouter } from 'astro:transitions'
   />
 
   <Favicons />
-  <script is:inline>
-    // Immediate theme initialization to prevent FOUC
-    const getTheme = () => {
-      if (
-        typeof localStorage !== 'undefined' &&
-        localStorage.getItem('theme')
-      ) {
-        return localStorage.getItem('theme')
-      }
-      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        return 'dark'
-      }
-      return 'light'
-    }
-
-    const applyTheme = () => {
-      if (getTheme() === 'dark') {
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.classList.remove('dark')
-      }
-    }
-
-    applyTheme()
-
-    // Ensure the theme class is preserved during View Transitions
-    document.addEventListener('astro:before-swap', (ev) => {
-      const currentTheme = getTheme()
-      if (currentTheme === 'dark') {
-        ev.newDocument.documentElement.classList.add('dark')
-      }
-    })
-  </script>
+  <AppScript />
   <ClientRouter />
 
   <slot />
