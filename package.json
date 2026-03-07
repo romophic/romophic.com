@@ -34,6 +34,7 @@
     "d3-force": "^3.0.0",
     "d3-selection": "^3.0.0",
     "d3-zoom": "^3.0.0",
+    "giscus": "^1.6.0",
     "katex": "^0.16.25",
     "reading-time": "^1.5.0",
     "rehype-autolink-headings": "^7.1.0",
