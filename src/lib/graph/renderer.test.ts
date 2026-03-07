@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getNodeColor } from './graph-renderer'
+import { getNodeColor } from './renderer'
 import type { D3GraphNode } from '@/types'
 import type { GraphThemeColors } from './types'
 
