@@ -1,22 +1,14 @@
 import { getCollection, type CollectionEntry } from 'astro:content'
 import readingTime from 'reading-time'
 
-/** Internal cache store. Use resetPostsCache() to clear in tests. */
-const _cache = {
-  posts: null as CollectionEntry<'blog'>[] | null,
-  topLevelPosts: new Map<string, CollectionEntry<'blog'>[]>(),
-  allPostsAndSubposts: new Map<string, CollectionEntry<'blog'>[]>(),
-  postMap: null as Map<string, CollectionEntry<'blog'>> | null,
-}
-
 /**
- * Reset all internal caches. Useful for testing.
+ * Get all posts, normalizing IDs for bilingual routing.
+ * This is fast enough to do on-the-fly without an explicit module cache,
+ * removing statefulness and fixing HMR inconsistencies.
  */
-
-async function getCachedPosts(): Promise<CollectionEntry<'blog'>[]> {
-  if (_cache.posts) return _cache.posts
+export async function getNormalizedPosts(): Promise<CollectionEntry<'blog'>[]> {
   const rawPosts = await getCollection('blog')
-  _cache.posts = rawPosts.map((post) => {
+  return rawPosts.map((post) => {
     let newId = post.id
     if (post.data.lang === 'en') {
       newId = newId.replace(/\.?en$/, '')
@@ -24,35 +16,27 @@ async function getCachedPosts(): Promise<CollectionEntry<'blog'>[]> {
     newId = newId.replace(/\/index$/, '')
     return Object.assign({}, post, { id: newId })
   })
-  return _cache.posts
 }
 
 export async function getAllPosts(
   lang: 'ja' | 'en' = 'ja',
 ): Promise<CollectionEntry<'blog'>[]> {
-  if (_cache.topLevelPosts.has(lang)) return _cache.topLevelPosts.get(lang)!
-  const posts = await getCachedPosts()
-  const filtered = posts
+  const posts = await getNormalizedPosts()
+  return posts
     .filter(
       (post) =>
         !post.data.draft && !isSubpost(post.id) && post.data.lang === lang,
     )
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  _cache.topLevelPosts.set(lang, filtered)
-  return filtered
 }
 
 export async function getAllPostsAndSubposts(
   lang: 'ja' | 'en' = 'ja',
 ): Promise<CollectionEntry<'blog'>[]> {
-  if (_cache.allPostsAndSubposts.has(lang))
-    return _cache.allPostsAndSubposts.get(lang)!
-  const posts = await getCachedPosts()
-  const filtered = posts
+  const posts = await getNormalizedPosts()
+  return posts
     .filter((post) => !post.data.draft && post.data.lang === lang)
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  _cache.allPostsAndSubposts.set(lang, filtered)
-  return filtered
 }
 
 export async function getAllProjects(
@@ -82,21 +66,15 @@ export async function getPostById(
   postId: string,
   lang: 'ja' | 'en' = 'ja'
 ): Promise<CollectionEntry<'blog'> | null> {
-  if (!_cache.postMap) {
-    const allPostsJa = await getAllPostsAndSubposts('ja')
-    const allPostsEn = await getAllPostsAndSubposts('en')
-    _cache.postMap = new Map(
-      [...allPostsJa, ...allPostsEn].map((p) => [`${p.id}-${p.data.lang}`, p]),
-    )
-  }
-  return _cache.postMap.get(`${postId}-${lang}`) ?? null
+  const posts = await getNormalizedPosts()
+  return posts.find((p) => p.id === postId && p.data.lang === lang) ?? null
 }
 
 export async function getSubpostsForParent(
   parentId: string,
   lang: 'ja' | 'en' = 'ja'
 ): Promise<CollectionEntry<'blog'>[]> {
-  const posts = await getCachedPosts()
+  const posts = await getNormalizedPosts()
   return posts
     .filter(
       (post) =>
