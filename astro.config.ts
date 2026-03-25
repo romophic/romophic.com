@@ -12,7 +12,6 @@ import rehypeExternalLinks from 'rehype-external-links'
 import rehypeKatex from 'rehype-katex'
 import remarkEmoji from 'remark-emoji'
 import remarkMath from 'remark-math'
-import remarkReadingTime from 'remark-reading-time'
 
 import { pluginCollapsibleSections } from '@expressive-code/plugin-collapsible-sections'
 import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers'
@@ -82,6 +81,9 @@ export default defineConfig({
   devToolbar: {
     enabled: true,
   },
+  security: {
+    checkOrigin: true,
+  },
   markdown: {
     syntaxHighlight: false,
     rehypePlugins: [
@@ -116,7 +118,6 @@ export default defineConfig({
         },
       ],
     ],
-    // @ts-expect-error remark-reading-time types are not fully compatible with astro
-    remarkPlugins: [remarkMath, remarkEmoji, remarkReadingTime],
+    remarkPlugins: [remarkMath, remarkEmoji],
   },
 })

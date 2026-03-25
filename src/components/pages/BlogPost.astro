@@ -1,6 +1,6 @@
 ---
 import Backlinks from '@/components/blog/Backlinks.astro'
-import PostHead from '@/components/blog/PostHead.astro'
+import PageHead from '@/components/layout/PageHead.astro'
 import PostHeader from '@/components/blog/PostHeader.astro'
 import PostNavigation from '@/components/blog/PostNavigation.astro'
 import SubpostsHeader from '@/components/blog/SubpostsHeader.astro'
@@ -42,7 +42,7 @@ const ogImageUrl = `/og/${ogSlug.replaceAll('/', '-')}.png`
 ---
 
 <Layout>
-  <PostHead slot="head" post={post} image={ogImageUrl} />
+  <PageHead slot="head" post={post} image={ogImageUrl} />
   {
     (hasChildPosts || isCurrentSubpost) && (
       <SubpostsHeader

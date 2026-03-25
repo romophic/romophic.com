@@ -296,10 +296,9 @@ The home page (`src/components/pages/Home.astro`) implements a "Glass Dashboard 
 - [x] **Glass Dashboard → Graph Scroll Experience:** Implemented a full-width frosted glass dashboard that naturally scrolls away to reveal a fullscreen interactive Knowledge Graph. Added a custom rotational D3 force for ambient animation, scroll-driven `pointer-events` toggling, and responsive mobile layout with CSS `scale` transforms on the Activity Graph.
 - [x] **Bilingual i18n Translation:** Fully completed manual LLM-driven English translations for all 38 remaining `.en.mdx` files (including the entirety of `romophic-library`). Removed all messy temporary automated scripts to ensure authentic, grammatically natural nuance in technical code explanations.
 - [x] **SEO Audit & Excellence:** Verified that the site's metadata perfectly satisfies modern search engine requirements. Validated dynamic canonical URL assignments (`rel="canonical"`), precise international targeting (`hreflang` for `ja`, `en`, and `x-default`), correct standard `robots.txt`, and rich JSON-LD snippet generation across all articles.
+- [x] **KISS Refactoring (Astro 6):** Upgraded to Astro 6, implementing Native CSP. Removed redundant CLI tools (prompts, tsx) to enforce purely manual, simple Markdown authoring. Extracted reading-time calculations completely from the remark AST pipeline. Evaluated replacing D3.js but rejected it as "reinventing the wheel" to maintain a pragmatic KISS balance.
 
 ### Future Features
-- [ ] **Performance (Graph):** Remove D3.js dependency by implementing a custom lightweight physics engine (Verlet integration) and zoom/drag handlers.
-- [ ] **Performance (Loading):** Switch GraphView to `client:visible` to defer JS execution until scroll.
 - [ ] **Performance (Fonts):** Implement font subsetting for Japanese characters to reduce font file size.
 - [ ] Content: Complete algorithms library placeholders (`//TODO`).
 
