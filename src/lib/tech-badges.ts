@@ -39,6 +39,23 @@ export const TECH_BADGES: Record<string, { icon: string; colorClass: string }> =
         icon: 'simple-icons:tailwindcss',
         colorClass: 'text-primary bg-primary/5 dark:bg-primary/10 border-primary/10 dark:border-primary/20',
     },
+    'Ruby on Rails': {
+        icon: 'simple-icons:rubyonrails',
+        colorClass: 'text-primary bg-primary/5 dark:bg-primary/10 border-primary/10 dark:border-primary/20',
+    },
+    AWS: {
+        icon: 'simple-icons:amazonaws',
+        colorClass: 'text-primary bg-primary/5 dark:bg-primary/10 border-primary/10 dark:border-primary/20',
+    },
+    Docker: {
+        icon: 'simple-icons:docker',
+        colorClass: 'text-primary bg-primary/5 dark:bg-primary/10 border-primary/10 dark:border-primary/20',
+    },
+    'Next.js': {
+        icon: 'simple-icons:nextdotjs',
+        colorClass: 'text-primary bg-primary/5 dark:bg-primary/10 border-primary/10 dark:border-primary/20',
+    },
+
 }
 
 export function getTechBadge(name: string) {
