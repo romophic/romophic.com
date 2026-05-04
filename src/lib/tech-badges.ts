@@ -11,6 +11,10 @@ export const TECH_BADGES: Record<string, { icon: string; colorClass: string }> =
         icon: 'simple-icons:react',
         colorClass: 'text-primary bg-primary/5 dark:bg-primary/10 border-primary/10 dark:border-primary/20',
     },
+    'React Native': {
+        icon: 'simple-icons:react',
+        colorClass: 'text-primary bg-primary/5 dark:bg-primary/10 border-primary/10 dark:border-primary/20',
+    },
     Vue: {
         icon: 'simple-icons:vuedotjs',
         colorClass: 'text-primary bg-primary/5 dark:bg-primary/10 border-primary/10 dark:border-primary/20',
