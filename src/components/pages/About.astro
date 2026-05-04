@@ -32,19 +32,19 @@ const TECH_STACK = Object.keys(TECH_BADGES)
       </p>
     </div>
 
-    {/* Experience */}
+    {/* Career */}
     <div>
       <h2 class="mb-6 text-2xl font-semibold tracking-tight">
-        {t('about.experience')}
+        {t('about.career')}
       </h2>
       <div class="border-muted relative ml-2 space-y-8 border-l-2 pl-6">
         {
           [
             {
               title: 'Howtelevision Software Engineer Intern',
-              organization: '',
               period: '2026/04 - Present',
               description: '',
+              link: '/blog/joined-howtv',
               techs: [
                 'Ruby on Rails',
                 'AWS',
@@ -56,59 +56,171 @@ const TECH_STACK = Object.keys(TECH_BADGES)
             },
             {
               title: 'Goldman Sachs Engineering Workshop',
-              organization: '',
               period: '2025/09',
               description: '',
               techs: ['Python'],
             },
-            {
-              title: 'ICPC Yokohama Regional Awarded',
-              organization: '',
-              period: '2024/07',
-              description: 'https://trap.jp/post/2277/',
-              techs: ['C++'],
-            },
+          ].map((item) => (
+            <div class="relative">
+              <div class="border-foreground bg-background absolute top-1.5 -left-[31px] size-4 rounded-full border shadow-sm" />
+              <div class="flex flex-col gap-1">
+                <span class="text-muted-foreground font-mono text-xs">
+                  {item.period}
+                </span>
+                <h3 class="text-lg leading-none font-bold">{item.title}</h3>
+                {item.description && (
+                  <p class="text-muted-foreground mt-1 text-sm leading-relaxed">
+                    {item.description}
+                  </p>
+                )}
+                {item.link && (
+                  <a
+                    href={item.link}
+                    class="text-primary hover:text-primary/80 mt-1 inline-flex items-center gap-1 text-sm font-medium transition-colors"
+                    target={item.link.startsWith('http') ? '_blank' : undefined}
+                    rel={item.link.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  >
+                    <Icon
+                      name={
+                        item.link.startsWith('http')
+                          ? 'lucide:external-link'
+                          : 'lucide:arrow-right'
+                      }
+                      class="size-3.5"
+                    />
+                    詳細を見る
+                  </a>
+                )}
+                {item.techs && (
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    {item.techs.map((tech) => {
+                      const badge = getTechBadge(tech)
+                      return badge ? (
+                        <span
+                          class={`flex items-center justify-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${badge.colorClass}`}
+                        >
+                          <Icon name={badge.icon} class="size-3" />
+                          {tech}
+                        </span>
+                      ) : (
+                        <span class="bg-primary/5 dark:bg-primary/10 text-primary border-primary/10 dark:border-primary/20 flex items-center justify-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors">
+                          {tech}
+                        </span>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    {/* Education */}
+    <div>
+      <h2 class="mb-6 text-2xl font-semibold tracking-tight">
+        {t('about.education')}
+      </h2>
+      <div class="border-muted relative ml-2 space-y-8 border-l-2 pl-6">
+        {
+          [
             {
               title:
                 'Institute of Science Tokyo (Tokyo Institute of Technology) EE',
-              organization: '',
               period: '2024/04 - Present',
               description: '',
             },
             {
               title: 'UTokyoGSC 4期',
-              organization: '',
               period: '2021 - 2024',
               description:
                 '制約付き筋肉トレーニングにおける負荷効果最大化に関する数理モデル研究',
               techs: ['Python'],
             },
+          ].map((item) => (
+            <div class="relative">
+              <div class="border-foreground bg-background absolute top-1.5 -left-[31px] size-4 rounded-full border shadow-sm" />
+              <div class="flex flex-col gap-1">
+                <span class="text-muted-foreground font-mono text-xs">
+                  {item.period}
+                </span>
+                <h3 class="text-lg leading-none font-bold">{item.title}</h3>
+                {item.description && (
+                  <p class="text-muted-foreground mt-1 text-sm leading-relaxed">
+                    {item.description}
+                  </p>
+                )}
+                {item.techs && (
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    {item.techs.map((tech) => {
+                      const badge = getTechBadge(tech)
+                      return badge ? (
+                        <span
+                          class={`flex items-center justify-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${badge.colorClass}`}
+                        >
+                          <Icon name={badge.icon} class="size-3" />
+                          {tech}
+                        </span>
+                      ) : (
+                        <span class="bg-primary/5 dark:bg-primary/10 text-primary border-primary/10 dark:border-primary/20 flex items-center justify-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors">
+                          {tech}
+                        </span>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    {/* Awards */}
+    <div>
+      <h2 class="mb-6 text-2xl font-semibold tracking-tight">
+        {t('about.awards')}
+      </h2>
+      <div class="border-muted relative ml-2 space-y-8 border-l-2 pl-6">
+        {
+          [
+            {
+              title: 'ICPC Yokohama Regional Awarded',
+              period: '2024/07',
+              description: '',
+              link: 'https://trap.jp/post/2277/',
+              techs: ['C++'],
+            },
             {
               title: 'JOI本選',
-              organization: '',
               period: '2020, 2022',
               description: '',
               techs: ['C++'],
             },
           ].map((item) => (
             <div class="relative">
-              {/* Timeline Dot */}
               <div class="border-foreground bg-background absolute top-1.5 -left-[31px] size-4 rounded-full border shadow-sm" />
-
               <div class="flex flex-col gap-1">
                 <span class="text-muted-foreground font-mono text-xs">
                   {item.period}
                 </span>
                 <h3 class="text-lg leading-none font-bold">{item.title}</h3>
-                {item.organization && (
-                  <p class="text-primary text-sm font-medium">
-                    {item.organization}
-                  </p>
-                )}
                 {item.description && (
                   <p class="text-muted-foreground mt-1 text-sm leading-relaxed">
                     {item.description}
                   </p>
+                )}
+                {item.link && (
+                  <a
+                    href={item.link}
+                    class="text-primary hover:text-primary/80 mt-1 inline-flex items-center gap-1 text-sm font-medium transition-colors"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Icon name="lucide:external-link" class="size-3.5" />
+                    詳細を見る
+                  </a>
                 )}
                 {item.techs && (
                   <div class="mt-2 flex flex-wrap gap-2">

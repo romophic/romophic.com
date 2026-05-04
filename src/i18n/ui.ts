@@ -20,7 +20,9 @@ export const ui = {
     'about.title': 'About',
     'about.intro':
       '',
-    'about.experience': 'Experience',
+    'about.career': 'Career',
+    'about.education': 'Education',
+    'about.awards': 'Awards',
     'about.techStack': 'Tech Stack',
     'about.connect': 'Connect',
     'about.projects': 'Projects',
@@ -37,7 +39,9 @@ export const ui = {
     'about.title': 'About',
     'about.intro':
       '',
-    'about.experience': 'Experience',
+    'about.career': 'Career',
+    'about.education': 'Education',
+    'about.awards': 'Awards',
     'about.techStack': 'Tech Stack',
     'about.connect': 'Connect',
     'about.projects': 'Projects',
