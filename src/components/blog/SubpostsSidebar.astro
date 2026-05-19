@@ -67,7 +67,7 @@ const {
 </div>
 
 <script>
-  function updateScrollMaskClasses(scrollContainer: HTMLElement, maskTarget: HTMLElement, options: any = {}) {
+  function updateScrollMaskClasses(scrollContainer: HTMLElement, maskTarget: HTMLElement, options: { topClass?: string; bottomClass?: string; threshold?: number } = {}) {
     const { topClass = 'mask-t-from-90%', bottomClass = 'mask-b-from-90%', threshold = 5 } = options;
     const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
     const isAtTop = scrollTop <= threshold;
