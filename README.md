@@ -1,6 +1,6 @@
 # romophic.com
 
-A minimalist, high-performance technical digital garden and personal portfolio. Built with Astro v6, emphasizing extreme maintainability, zero-runtime CSS, and a completely native Astro Collections architecture.
+A minimalist, high-performance technical blog and personal portfolio. Built with Astro v6, emphasizing extreme maintainability, zero-runtime CSS, and a completely native Astro Collections architecture.
 
 ![Astro](https://img.shields.io/badge/Astro-v6-orange?style=flat-square&logo=astro)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue?style=flat-square&logo=typescript)
@@ -14,7 +14,7 @@ A minimalist, high-performance technical digital garden and personal portfolio. 
 
 - **🕸 Interactive Knowledge Graph**
   - A fully custom visualization engine built with **D3-force** and **HTML5 Canvas**.
-  - Visualizes the interconnected nature of the digital garden (tags, posts, and subposts).
+  - Visualizes the interconnected relationships between tags, posts, and subposts.
 
 - **📖 Rich Content Experience**
   - **Hierarchy & Subposts**: Supports complex, multi-page articles (parent/child relationships) seamlessly integrated with auto-generated TOCs and navigation.
