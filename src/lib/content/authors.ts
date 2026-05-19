@@ -1,4 +1,4 @@
-import { getCollection, type CollectionEntry } from 'astro:content'
+import { getCollection, getEntries, type CollectionEntry } from 'astro:content'
 import { getAllPosts } from './posts'
 import type { Author } from '@/types'
 
@@ -10,22 +10,22 @@ export async function getPostsByAuthor(
   authorId: string,
 ): Promise<CollectionEntry<'blog'>[]> {
   const posts = await getAllPosts()
-  return posts.filter((post) => post.data.authors?.includes(authorId))
+  return posts.filter((post) => post.data.authors?.some(a => a.id === authorId))
 }
 
+
 export async function parseAuthors(
-  authorIds: string[] = [],
+  authorRefs: { collection: 'authors'; id: string }[] = [],
 ): Promise<Author[]> {
-  if (!authorIds.length) return []
+  if (!authorRefs.length) return []
 
-  const allAuthors = await getAllAuthors()
-  const authorMap = new Map(allAuthors.map((author) => [author.id, author]))
+  const authors = await getEntries(authorRefs)
 
-  return authorIds.map((id) => {
-    const author = authorMap.get(id)
+  return authors.map((author, index) => {
+    const refId = authorRefs[index].id
     return {
-      id,
-      name: author?.data?.name || id,
+      id: refId,
+      name: author?.data?.name || refId,
       avatar: author?.data?.avatar || '/static/logo.png',
       isRegistered: !!author,
     }

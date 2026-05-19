@@ -24,7 +24,7 @@ const description = post?.data.description || propDescription || SITE.descriptio
 const defaultImage = new URL('/static/1200x630.png', Astro.site)
 const author =
   post?.data.authors && post.data.authors.length > 0
-    ? post.data.authors.join(', ')
+    ? post.data.authors.map(a => a.id).join(', ')
     : SITE.author
 
 const ogImage = propImage
@@ -47,9 +47,9 @@ if (post) {
     headline: title,
     description: description,
     image: ogImage.toString(),
-    author: post.data.authors?.map((name) => ({
+    author: post.data.authors?.map((authorRef) => ({
       '@type': 'Person',
-      name,
+      name: authorRef.id,
     })) || [{ '@type': 'Person', name: SITE.author }],
     datePublished: post.data.date.toISOString(),
     dateModified: post.data.date.toISOString(),
