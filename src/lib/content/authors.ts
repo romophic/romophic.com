@@ -10,9 +10,10 @@ export async function getPostsByAuthor(
   authorId: string,
 ): Promise<CollectionEntry<'blog'>[]> {
   const posts = await getAllPosts()
-  return posts.filter((post) => post.data.authors?.some(a => a.id === authorId))
+  return posts.filter((post) =>
+    post.data.authors?.some((a) => a.id === authorId),
+  )
 }
-
 
 export async function parseAuthors(
   authorRefs: { collection: 'authors'; id: string }[] = [],

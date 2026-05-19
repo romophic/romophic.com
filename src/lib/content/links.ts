@@ -7,11 +7,13 @@ import { render } from 'astro:content'
 /**
  * Extract all resolved internal link target IDs from a post's frontmatter.
  */
-export async function extractInternalLinks(post: CollectionEntry<'blog'>): Promise<string[]> {
+export async function extractInternalLinks(
+  post: CollectionEntry<'blog'>,
+): Promise<string[]> {
   const { remarkPluginFrontmatter } = await render(post)
   const rawLinks = remarkPluginFrontmatter.rawInternalLinks || []
   const targets: string[] = []
-  
+
   for (const url of rawLinks) {
     const targetId = resolveLinkToId(url, post.id)
     if (targetId) {

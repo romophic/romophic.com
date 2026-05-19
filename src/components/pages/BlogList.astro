@@ -13,7 +13,6 @@ interface Props {
 
 const { page } = Astro.props
 
-
 const postsByYear = groupPostsByYear(page.data)
 const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
 ---

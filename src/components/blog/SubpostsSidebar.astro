@@ -67,24 +67,43 @@ const {
 </div>
 
 <script>
-  function updateScrollMaskClasses(scrollContainer: HTMLElement, maskTarget: HTMLElement, options: { topClass?: string; bottomClass?: string; threshold?: number } = {}) {
-    const { topClass = 'mask-t-from-90%', bottomClass = 'mask-b-from-90%', threshold = 5 } = options;
-    const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-    const isAtTop = scrollTop <= threshold;
-    const isAtBottom = scrollTop >= scrollHeight - clientHeight - threshold;
-    maskTarget.classList.toggle(topClass, !isAtTop);
-    maskTarget.classList.toggle(bottomClass, !isAtBottom);
+  function updateScrollMaskClasses(
+    scrollContainer: HTMLElement,
+    maskTarget: HTMLElement,
+    options: {
+      topClass?: string
+      bottomClass?: string
+      threshold?: number
+    } = {},
+  ) {
+    const {
+      topClass = 'mask-t-from-90%',
+      bottomClass = 'mask-b-from-90%',
+      threshold = 5,
+    } = options
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainer
+    const isAtTop = scrollTop <= threshold
+    const isAtBottom = scrollTop >= scrollHeight - clientHeight - threshold
+    maskTarget.classList.toggle(topClass, !isAtTop)
+    maskTarget.classList.toggle(bottomClass, !isAtBottom)
   }
 
-  function scrollToCenter(scrollContainer: HTMLElement, targetElement: HTMLElement) {
-    const containerRect = scrollContainer.getBoundingClientRect();
-    const targetRect = targetElement.getBoundingClientRect();
-    const currentItemTop = targetRect.top - containerRect.top + scrollContainer.scrollTop;
-    const targetScroll = Math.max(0, Math.min(
-      currentItemTop - (containerRect.height - targetRect.height) / 2,
-      scrollContainer.scrollHeight - scrollContainer.clientHeight
-    ));
-    scrollContainer.scrollTop = targetScroll;
+  function scrollToCenter(
+    scrollContainer: HTMLElement,
+    targetElement: HTMLElement,
+  ) {
+    const containerRect = scrollContainer.getBoundingClientRect()
+    const targetRect = targetElement.getBoundingClientRect()
+    const currentItemTop =
+      targetRect.top - containerRect.top + scrollContainer.scrollTop
+    const targetScroll = Math.max(
+      0,
+      Math.min(
+        currentItemTop - (containerRect.height - targetRect.height) / 2,
+        scrollContainer.scrollHeight - scrollContainer.clientHeight,
+      ),
+    )
+    scrollContainer.scrollTop = targetScroll
   }
 
   class SidebarState {

@@ -148,7 +148,6 @@
 }
 
 @layer utilities {
-
   /* Custom Scrollbar */
   ::-webkit-scrollbar {
     width: 10px;

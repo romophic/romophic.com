@@ -1,6 +1,5 @@
 ---
 import Backlinks from '@/components/blog/Backlinks.astro'
-import PageHead from '@/components/layout/PageHead.astro'
 import PostHeader from '@/components/blog/PostHeader.astro'
 import PostNavigation from '@/components/blog/PostNavigation.astro'
 import SubpostsHeader from '@/components/blog/SubpostsHeader.astro'
@@ -9,6 +8,7 @@ import TOCSidebar from '@/components/blog/TOCSidebar.astro'
 import MdxImageCaption from '@/components/common/MdxImageCaption.astro'
 import ScrollToTop from '@/components/common/ScrollToTop.astro'
 import GiscusComments from '@/components/features/GiscusComments.astro'
+import PageHead from '@/components/layout/PageHead.astro'
 import Layout from '@/layouts/Layout.astro'
 import { getPostPageData } from '@/lib/data-utils'
 import { Image } from 'astro:assets'
@@ -35,7 +35,6 @@ const {
   backlinks,
 } = await getPostPageData(post)
 
-
 const ogSlug = hasChildPosts ? `${post.id}/index` : post.id
 const ogImageUrl = `/og/${ogSlug.replaceAll('/', '-')}.png`
 ---
@@ -46,7 +45,11 @@ const ogImageUrl = `/og/${ogSlug.replaceAll('/', '-')}.png`
     (hasChildPosts || isCurrentSubpost) && (
       <SubpostsHeader
         slot="subposts-navigation"
-        parentId={isCurrentSubpost && post.data.parent ? post.data.parent.id : currentPostId}
+        parentId={
+          isCurrentSubpost && post.data.parent
+            ? post.data.parent.id
+            : currentPostId
+        }
       />
     )
   }

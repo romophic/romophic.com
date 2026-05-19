@@ -1,13 +1,12 @@
 ---
 import ProjectCard from '@/components/common/ProjectCard.astro'
 import PageHead from '@/components/layout/PageHead.astro'
-import { ICON_MAP, ICONS, SITE, SOCIAL_LINKS } from '@/consts'
+import { ICON_MAP, ICONS, SOCIAL_LINKS } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import { getAllProjects } from '@/lib/data-utils'
 import { Icon } from 'astro-icon/components'
 
 import { getTechBadge, TECH_BADGES } from '@/lib/tech-badges'
-
 
 const projects = await getAllProjects()
 
@@ -23,18 +22,9 @@ const TECH_STACK = Object.keys(TECH_BADGES)
       <h1 class="text-3xl font-bold tracking-tight">About</h1>
     </div>
 
-    {/* Intro */}
-    <div class="prose dark:prose-invert">
-      <p>
-        {SITE.description}
-      </p>
-    </div>
-
     {/* Career */}
     <div>
-      <h2 class="mb-6 text-2xl font-semibold tracking-tight">
-        Career
-      </h2>
+      <h2 class="mb-6 text-2xl font-semibold tracking-tight">Career</h2>
       <div class="border-muted relative ml-2 space-y-8 border-l-2 pl-6">
         {
           [
@@ -76,7 +66,11 @@ const TECH_STACK = Object.keys(TECH_BADGES)
                     href={item.link}
                     class="text-primary hover:text-primary/80 mt-1 inline-flex items-center gap-1 text-sm font-medium transition-colors"
                     target={item.link.startsWith('http') ? '_blank' : undefined}
-                    rel={item.link.startsWith('http') ? 'noopener noreferrer' : undefined}
+                    rel={
+                      item.link.startsWith('http')
+                        ? 'noopener noreferrer'
+                        : undefined
+                    }
                   >
                     <Icon
                       name={
@@ -117,9 +111,7 @@ const TECH_STACK = Object.keys(TECH_BADGES)
 
     {/* Education */}
     <div>
-      <h2 class="mb-6 text-2xl font-semibold tracking-tight">
-        Education
-      </h2>
+      <h2 class="mb-6 text-2xl font-semibold tracking-tight">Education</h2>
       <div class="border-muted relative ml-2 space-y-8 border-l-2 pl-6">
         {
           [
@@ -177,9 +169,7 @@ const TECH_STACK = Object.keys(TECH_BADGES)
 
     {/* Awards */}
     <div>
-      <h2 class="mb-6 text-2xl font-semibold tracking-tight">
-        Awards
-      </h2>
+      <h2 class="mb-6 text-2xl font-semibold tracking-tight">Awards</h2>
       <div class="border-muted relative ml-2 space-y-8 border-l-2 pl-6">
         {
           [
@@ -248,9 +238,7 @@ const TECH_STACK = Object.keys(TECH_BADGES)
 
     {/* Tech Stack */}
     <div>
-      <h2 class="mb-6 text-2xl font-semibold tracking-tight">
-        Tech Stack
-      </h2>
+      <h2 class="mb-6 text-2xl font-semibold tracking-tight">Tech Stack</h2>
       <div class="flex flex-wrap gap-2">
         {
           TECH_STACK.map((tech) => {
@@ -274,9 +262,7 @@ const TECH_STACK = Object.keys(TECH_BADGES)
 
     {/* Connect */}
     <div>
-      <h2 class="mb-6 text-2xl font-semibold tracking-tight">
-        Connect
-      </h2>
+      <h2 class="mb-6 text-2xl font-semibold tracking-tight">Connect</h2>
       <div class="flex flex-wrap gap-4">
         {
           SOCIAL_LINKS.map((social) => (
@@ -302,9 +288,7 @@ const TECH_STACK = Object.keys(TECH_BADGES)
 
     {/* Projects */}
     <div>
-      <h2 class="mb-6 text-2xl font-semibold tracking-tight">
-        Projects
-      </h2>
+      <h2 class="mb-6 text-2xl font-semibold tracking-tight">Projects</h2>
       <div class="flex flex-col gap-4">
         {projects.map((project) => <ProjectCard project={project} />)}
       </div>

@@ -20,11 +20,12 @@ const {
 } = Astro.props
 
 const title = post?.data.title || propTitle || SITE.title
-const description = post?.data.description || propDescription || SITE.description
+const description =
+  post?.data.description || propDescription || SITE.description
 const defaultImage = new URL('/static/1200x630.png', Astro.site)
 const author =
   post?.data.authors && post.data.authors.length > 0
-    ? post.data.authors.map(a => a.id).join(', ')
+    ? post.data.authors.map((a) => a.id).join(', ')
     : SITE.author
 
 const ogImage = propImage
@@ -34,8 +35,6 @@ const ogImage = propImage
     : defaultImage
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site)
-
-
 
 let articleSchema: WithContext<Article> | null = null
 let breadcrumbSchema: WithContext<BreadcrumbList> | null = null
@@ -92,7 +91,7 @@ if (post) {
 <meta property="og:description" content={description} />
 <meta property="og:image" content={ogImage} />
 <meta property="og:image:alt" content={title} />
-<meta property="og:type" content={post ? "article" : "website"} />
+<meta property="og:type" content={post ? 'article' : 'website'} />
 <meta property="og:locale" content="ja_JP" />
 <meta property="og:site_name" content={SITE.title} />
 <meta property="og:url" content={Astro.url} />

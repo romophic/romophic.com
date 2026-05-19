@@ -30,16 +30,17 @@ export default defineConfig({
       themes: ['github-light', 'github-dark'],
       plugins: [pluginCollapsibleSections(), pluginLineNumbers()],
       useDarkModeMediaQuery: false,
-      themeCssSelector: (theme) => theme.name === 'github-dark' ? '.dark' : ':root',
+      themeCssSelector: (theme) =>
+        theme.name === 'github-dark' ? '.dark' : ':root',
       defaultProps: {
         wrap: true,
         collapseStyle: 'collapsible-auto',
         overridesByLang: {
           'ansi,bat,bash,batch,cmd,console,powershell,ps,ps1,psd1,psm1,sh,shell,shellscript,shellsession,text,zsh':
-          {
-            showLineNumbers: false,
-            frame: 'none',
-          },
+            {
+              showLineNumbers: false,
+              frame: 'none',
+            },
         },
       },
       styleOverrides: {
@@ -113,6 +114,11 @@ export default defineConfig({
         },
       ],
     ],
-    remarkPlugins: [remarkMath, remarkEmoji, remarkReadingTime, remarkExtractLinks],
+    remarkPlugins: [
+      remarkMath,
+      remarkEmoji,
+      remarkReadingTime,
+      remarkExtractLinks,
+    ],
   },
 })

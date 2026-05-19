@@ -35,9 +35,10 @@ export async function getSubpostsData(
   if (!post) {
     throw new Error(`Post not found: ${currentPostId}`)
   }
-  
+
   const isCurrentSubpost = isSubpost(post)
-  const rootParentId = isCurrentSubpost && post.data.parent ? post.data.parent.id : parentId
+  const rootParentId =
+    isCurrentSubpost && post.data.parent ? post.data.parent.id : parentId
 
   const currentPost = !isCurrentSubpost ? post : null
   const subposts = await getSubpostsForParent(rootParentId)

@@ -10,7 +10,7 @@ import satori, { type SatoriNode } from 'satori'
 export async function getStaticPaths() {
   const posts = await getCollection('blog')
   const parentIds = new Set(
-    posts.map((p) => p.data.parent?.id).filter(Boolean) as string[]
+    posts.map((p) => p.data.parent?.id).filter(Boolean) as string[],
   )
 
   return posts.map((post) => {
@@ -159,13 +159,13 @@ export const GET = async ({
     weight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
     style: 'normal' | 'italic'
   }[] = [
-      {
-        name: 'Inter',
-        data: fonts.inter,
-        weight: 700,
-        style: 'normal',
-      },
-    ]
+    {
+      name: 'Inter',
+      data: fonts.inter,
+      weight: 700,
+      style: 'normal',
+    },
+  ]
 
   if (fonts.notoSansJP) {
     fontConfig.push({

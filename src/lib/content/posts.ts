@@ -17,14 +17,13 @@ export async function getNormalizedPosts(): Promise<CollectionEntry<'blog'>[]> {
 export async function getAllPosts(): Promise<CollectionEntry<'blog'>[]> {
   const posts = await getNormalizedPosts()
   return posts
-    .filter(
-      (post) =>
-        !post.data.draft && post.data.parent === undefined,
-    )
+    .filter((post) => !post.data.draft && post.data.parent === undefined)
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
 }
 
-export async function getAllPostsAndSubposts(): Promise<CollectionEntry<'blog'>[]> {
+export async function getAllPostsAndSubposts(): Promise<
+  CollectionEntry<'blog'>[]
+> {
   const posts = await getNormalizedPosts()
   return posts
     .filter((post) => !post.data.draft)
@@ -33,12 +32,11 @@ export async function getAllPostsAndSubposts(): Promise<CollectionEntry<'blog'>[
 
 export async function getAllProjects(): Promise<CollectionEntry<'projects'>[]> {
   const projects = await getCollection('projects')
-  return projects
-    .sort((a, b) => {
-      const dateA = a.data.startDate?.getTime() || 0
-      const dateB = b.data.startDate?.getTime() || 0
-      return dateB - dateA
-    })
+  return projects.sort((a, b) => {
+    const dateA = a.data.startDate?.getTime() || 0
+    const dateB = b.data.startDate?.getTime() || 0
+    return dateB - dateA
+  })
 }
 
 export function isSubpost(post: CollectionEntry<'blog'>): boolean {
@@ -61,11 +59,7 @@ export async function getSubpostsForParent(
 ): Promise<CollectionEntry<'blog'>[]> {
   const posts = await getNormalizedPosts()
   return posts
-    .filter(
-      (post) =>
-        !post.data.draft &&
-        post.data.parent?.id === parentId
-    )
+    .filter((post) => !post.data.draft && post.data.parent?.id === parentId)
     .sort((a, b) => {
       const orderA = a.data.order ?? 0
       const orderB = b.data.order ?? 0
@@ -76,9 +70,7 @@ export async function getSubpostsForParent(
     })
 }
 
-export async function getAdjacentPosts(
-  currentId: string,
-): Promise<{
+export async function getAdjacentPosts(currentId: string): Promise<{
   newer: CollectionEntry<'blog'> | null
   older: CollectionEntry<'blog'> | null
   parent: CollectionEntry<'blog'> | null
@@ -144,7 +136,9 @@ export async function getRecentPosts(
   return posts.slice(0, count)
 }
 
-export async function getSortedTags(): Promise<{ tag: string; count: number }[]> {
+export async function getSortedTags(): Promise<
+  { tag: string; count: number }[]
+> {
   const tagCounts = await getAllTags()
   return [...tagCounts.entries()]
     .map(([tag, count]) => ({ tag, count }))
@@ -160,7 +154,7 @@ export function groupPostsByYear(
   return posts.reduce(
     (acc: Record<string, CollectionEntry<'blog'>[]>, post) => {
       const year = post.data.date.getFullYear().toString()
-        ; (acc[year] ??= []).push(post)
+      ;(acc[year] ??= []).push(post)
       return acc
     },
     {},

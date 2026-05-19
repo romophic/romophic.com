@@ -14,7 +14,12 @@ function createMockPost(id: string, date: Date): CollectionEntry<'blog'> {
 function createSubpost(id: string, parentId: string): CollectionEntry<'blog'> {
   return {
     id,
-    data: { title: id, description: '', tags: [], parent: { collection: 'blog', id: parentId } },
+    data: {
+      title: id,
+      description: '',
+      tags: [],
+      parent: { collection: 'blog', id: parentId },
+    },
     body: '',
   } as unknown as CollectionEntry<'blog'>
 }

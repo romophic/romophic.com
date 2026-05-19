@@ -11,7 +11,8 @@ type Props = {
 const { sections, currentPostId } = Astro.props
 const post = await getPostById(currentPostId)
 const isCurrentSubpost = post && isSubpost(post)
-const parentId = isCurrentSubpost && post.data.parent ? post.data.parent.id : currentPostId
+const parentId =
+  isCurrentSubpost && post.data.parent ? post.data.parent.id : currentPostId
 ---
 
 {
@@ -174,7 +175,9 @@ const parentId = isCurrentSubpost && post.data.parent ? post.data.parent.id : cu
 
             const linkElement = link as HTMLElement
             const top =
-              linkElement.offsetTop - scrollArea.clientHeight / 2 + linkElement.clientHeight / 2
+              linkElement.offsetTop -
+              scrollArea.clientHeight / 2 +
+              linkElement.clientHeight / 2
             scrollArea.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
           }
         })
