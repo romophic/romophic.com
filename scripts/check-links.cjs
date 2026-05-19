@@ -73,7 +73,7 @@ files.forEach((file) => {
       // ignore
     }
 
-    let targetId = null
+    let targetId
 
     if (url.startsWith('/blog/')) {
       targetId = url.replace('/blog/', '')
