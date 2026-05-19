@@ -1,40 +1,40 @@
 # romophic.com
 
-A high-performance technical digital garden designed for deep interconnectedness and "God-Tier" UX.
+A minimalist, high-performance technical digital garden and personal portfolio. Built with Astro v6, emphasizing extreme maintainability, zero-runtime CSS, and a completely native Astro Collections architecture.
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/your-site-id/deploy-status)](https://app.netlify.com/sites/your-site-name/deploys)
-![Astro](https://img.shields.io/badge/Astro-v5-orange?style=flat-square&logo=astro)
+![Astro](https://img.shields.io/badge/Astro-v6-orange?style=flat-square&logo=astro)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue?style=flat-square&logo=typescript)
 
 ## ✨ Features
 
+- **⚡️ Pure Astro v6 Architecture**
+  - **Native Content Collections**: Fully leverages Astro's `reference()` for defining robust, type-safe relationships between authors, parent posts, and subposts.
+  - **Build-Time AST Parsing**: Custom remark plugins (`unist-util-visit`) safely extract internal links and reading times at build time, eliminating fragile regex and reducing runtime overhead.
+  - **Zero-runtime CSS** via Tailwind v4.
+
 - **🕸 Interactive Knowledge Graph**
   - A fully custom visualization engine built with **D3-force** and **HTML5 Canvas**.
-  - Features particle flow animations, manual hit-testing for reliable interaction, and dynamic LOD (Level of Detail).
-  
-- **⚡️ "God-Tier" Performance**
-  - Built on **Astro v5** (Static Site Generation).
-  - **Zero-runtime CSS** via Tailwind v4.
-  - Smart image optimization with **LQIP** (Low Quality Image Placeholders) using CSS Grid stacking.
+  - Visualizes the interconnected nature of the digital garden (tags, posts, and subposts).
 
 - **📖 Rich Content Experience**
+  - **Hierarchy & Subposts**: Supports complex, multi-page articles (parent/child relationships) seamlessly integrated with auto-generated TOCs and navigation.
   - **Math**: Full LaTeX support via KaTeX.
   - **Code**: Beautiful syntax highlighting with Expressive Code.
-  - **Navigation**: Auto-generated TOC, bi-directional backlinks, and keyboard-driven command menu.
+  - **Search**: Fully static, lightning-fast search powered by Pagefind.
+  - **Dynamic OGP**: Satori-based automated Open Graph image generation.
 
 - **🛠 Robust Engineering**
-  - **Strict Typing**: Zero `any` policy across the codebase.
-  - **Centralized Logic**: `AppScript` architecture to manage state across View Transitions.
-  - **Graph Theory**: O(N) backlink indexing engine.
+  - **Strict Typing**: Zero `any` policy across the codebase enforced by strict ESLint rules.
+  - **Dependency Minimalism**: Removed all unnecessary third-party packages in favor of vanilla JS and standard Astro features.
 
 ## 🛠 Tech Stack
 
 - **Framework**: [Astro](https://astro.build/)
-- **UI Library**: [React](https://react.dev/) (Used sparingly for interactive islands)
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
 - **Visualization**: [D3.js](https://d3js.org/)
 - **Search**: [Pagefind](https://pagefind.app/)
-- **Content**: MDX, Remark, Rehype
+- **Content Parsing**: MDX, Remark, Rehype
+- **Testing**: Vitest
 
 ## 🚀 Getting Started
 
@@ -48,10 +48,6 @@ pnpm dev
 # Build for production
 pnpm build
 ```
-
-## 📂 Project Structure
-
-Please refer to [GEMINI.md](./GEMINI.md) for a comprehensive deep dive into the architecture, file structure, and design philosophy.
 
 ## 📄 License
 
