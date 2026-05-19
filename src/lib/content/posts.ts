@@ -1,5 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content'
-import readingTime from 'reading-time'
+import { render } from 'astro:content'
 
 /**
  * Get all posts, normalizing IDs.
@@ -194,19 +194,24 @@ export async function getPostReadingTime(postId: string): Promise<string> {
   const post = await getPostById(postId)
   if (!post) return '0 min read'
 
-  return readingTime(post.body || '').text
+  const { remarkPluginFrontmatter } = await render(post)
+  return remarkPluginFrontmatter.minutesRead || '0 min read'
 }
 
 export async function getCombinedReadingTime(postId: string): Promise<string> {
   const post = await getPostById(postId)
   if (!post) return '0 min read'
 
-  let totalMinutes = readingTime(post.body || '').minutes
+  const { remarkPluginFrontmatter: parentFrontmatter } = await render(post)
+  // remarkPluginFrontmatter.minutesRead typically looks like "3 min read"
+  // We need to parse the integer from it
+  let totalMinutes = parseInt(parentFrontmatter.minutesRead) || 0
 
   if (!isSubpost(postId)) {
     const subposts = await getSubpostsForParent(postId)
     for (const subpost of subposts) {
-      totalMinutes += readingTime(subpost.body || '').minutes
+      const { remarkPluginFrontmatter: subFrontmatter } = await render(subpost)
+      totalMinutes += parseInt(subFrontmatter.minutesRead) || 0
     }
   }
 

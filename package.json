@@ -11,8 +11,7 @@
     "astro": "astro",
     "lint": "eslint .",
     "prettier": "prettier --write **/*.{ts,tsx,css,astro} --ignore-path .gitignore",
-    "test": "vitest",
-    "check:links": "node scripts/check-links.cjs"
+    "test": "vitest"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.9",
@@ -35,6 +34,7 @@
     "d3-zoom": "^3.0.0",
     "giscus": "^1.6.0",
     "katex": "^0.16.47",
+    "mdast-util-to-string": "^4.0.0",
     "reading-time": "^1.5.0",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-external-links": "^3.0.0",
