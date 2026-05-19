@@ -1,7 +1,7 @@
 ---
 import BlogCard from '@/components/blog/BlogCard.astro'
 import PageHead from '@/components/layout/PageHead.astro'
-import { getLangFromUrl, useTranslations } from '@/i18n/utils'
+
 import Layout from '@/layouts/Layout.astro'
 import { groupPostsByYear } from '@/lib/data-utils'
 import type { Page } from 'astro'
@@ -12,15 +12,14 @@ interface Props {
 }
 
 const { page } = Astro.props
-const lang = getLangFromUrl(Astro.url)
-const t = useTranslations(lang)
+
 
 const postsByYear = groupPostsByYear(page.data)
 const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
 ---
 
 <Layout class="max-w-3xl">
-  <PageHead slot="head" title={t('nav.blog') || 'Blog'} />
+  <PageHead slot="head" title="Blog" />
 
   <div
     class="flex min-h-[calc(100vh-18rem)] flex-col gap-y-8"

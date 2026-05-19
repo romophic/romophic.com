@@ -1,7 +1,5 @@
 ---
 // src/components/features/GraphView.astro
-import { getLangFromUrl } from '@/i18n/utils'
-const lang = getLangFromUrl(Astro.url)
 
 interface Props {
   class?: string
@@ -17,7 +15,6 @@ const {
 
 <div
   id="graph-container"
-  data-lang={lang}
   data-full-interaction={fullInteraction.toString()}
   class={`overflow-hidden opacity-0 transition-opacity duration-100 ${className}`}
 >

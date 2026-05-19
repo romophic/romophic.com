@@ -35,16 +35,7 @@ const ogImage = propImage
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site)
 
-const isEnglish = Astro.url.pathname.startsWith('/en/')
-const jaPath = isEnglish
-  ? Astro.url.pathname.replace(/^\/en/, '')
-  : Astro.url.pathname
-const enPath = isEnglish
-  ? Astro.url.pathname
-  : `/en${Astro.url.pathname === '/' ? '' : Astro.url.pathname}`
 
-const jaUrl = new URL(jaPath, Astro.site)
-const enUrl = new URL(enPath, Astro.site)
 
 let articleSchema: WithContext<Article> | null = null
 let breadcrumbSchema: WithContext<BreadcrumbList> | null = null
@@ -95,9 +86,6 @@ if (post) {
 <meta name="title" content={`${title} | ${SITE.title}`} />
 <meta name="description" content={description} />
 <link rel="canonical" href={canonicalURL} />
-<link rel="alternate" hreflang="ja" href={jaUrl} />
-<link rel="alternate" hreflang="en" href={enUrl} />
-<link rel="alternate" hreflang="x-default" href={jaUrl} />
 {noindex && <meta name="robots" content="noindex, nofollow" />}
 
 <meta property="og:title" content={title} />
@@ -105,7 +93,7 @@ if (post) {
 <meta property="og:image" content={ogImage} />
 <meta property="og:image:alt" content={title} />
 <meta property="og:type" content={post ? "article" : "website"} />
-<meta property="og:locale" content={isEnglish ? 'en_US' : 'ja_JP'} />
+<meta property="og:locale" content="ja_JP" />
 <meta property="og:site_name" content={SITE.title} />
 <meta property="og:url" content={Astro.url} />
 {post && <meta property="og:author" content={author} />}

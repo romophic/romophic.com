@@ -1,7 +1,6 @@
 ---
 import Separator from '@/components/ui/separator.astro'
 import { ICONS } from '@/consts'
-import { getLangFromUrl, localizePath } from '@/i18n/utils'
 import {
   getCombinedReadingTime,
   getSubpostCount,
@@ -22,7 +21,7 @@ const formattedDate = formatDate(entry.data.date)
 const readTime = await getCombinedReadingTime(entry.id)
 const authors = await parseAuthors(entry.data.authors ?? [])
 const subpostCount = !isSubpost(entry.id) ? await getSubpostCount(entry.id) : 0
-const lang = getLangFromUrl(Astro.url)
+
 ---
 
 <div
@@ -33,7 +32,7 @@ const lang = getLangFromUrl(Astro.url)
   >
   </div>
   <a
-    href={localizePath(`/${entry.collection}/${entry.id}`, lang)}
+    href={`/${entry.collection}/${entry.id}`}
     class="flex flex-col gap-4 sm:flex-row"
   >
     {

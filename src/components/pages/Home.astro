@@ -8,7 +8,6 @@ import PageHead from '@/components/layout/PageHead.astro'
 import SearchDialog from '@/components/layout/SearchDialog.astro'
 import { getButtonStyles } from '@/components/ui/button.astro'
 import { ICON_MAP, ICONS, SITE, SOCIAL_LINKS } from '@/consts'
-import { getLangFromUrl, localizePath } from '@/i18n/utils'
 import { getRecentPosts } from '@/lib/data-utils'
 import { Icon } from 'astro-icon/components'
 
@@ -18,14 +17,14 @@ import '@/styles/typography.css'
 import '@fontsource-variable/noto-sans-jp'
 import 'katex/dist/katex.min.css'
 
-const lang = getLangFromUrl(Astro.url)
-const blog = await getRecentPosts(SITE.featuredPostCount, lang)
+
+const blog = await getRecentPosts(SITE.featuredPostCount)
 ---
 
 <!doctype html>
 <html
   class="bg-background text-foreground h-full w-full scheme-light-dark"
-  lang={lang}
+  lang="ja"
 >
   <Head>
     <PageHead slot="head" title={SITE.title} description={SITE.description} />
@@ -121,7 +120,7 @@ const blog = await getRecentPosts(SITE.featuredPostCount, lang)
                     }
                   </div>
                   <a
-                    href={localizePath('/about', lang)}
+                    href="/about"
                     class={getButtonStyles({ variant: 'default', size: 'sm' }) +
                       ' rounded-xl shadow-sm'}
                   >
@@ -170,7 +169,7 @@ const blog = await getRecentPosts(SITE.featuredPostCount, lang)
                     Writings
                   </h2>
                   <a
-                    href={localizePath('/blog', lang)}
+                    href="/blog"
                     class="text-muted-foreground hover:text-foreground text-xs font-semibold tracking-wider uppercase transition-colors"
                   >
                     See all &rarr;

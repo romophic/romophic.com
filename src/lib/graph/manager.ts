@@ -12,7 +12,6 @@ export class GraphViewManager {
 
     private data: { nodes: D3GraphNode[]; links: D3GraphLink[] } | null = null
     private isDark = false
-    private lang: string
     private fullInteraction = true
 
     private hoverNode: D3GraphNode | null = null
@@ -36,7 +35,7 @@ export class GraphViewManager {
         this.container = document.getElementById(containerId) as HTMLDivElement
         this.canvas = document.getElementById(canvasId) as HTMLCanvasElement
         this.ctx = this.canvas?.getContext('2d')
-        this.lang = this.container?.getAttribute('data-lang') || 'ja'
+
         this.fullInteraction = this.container?.getAttribute('data-full-interaction') !== 'false'
 
         if (!this.container || !this.canvas || !this.ctx) return
@@ -71,7 +70,7 @@ export class GraphViewManager {
 
     private async fetchData() {
         try {
-            const endpoint = this.lang === 'en' ? '/en/graph.json' : '/graph.json'
+            const endpoint = '/graph.json'
             const res = await fetch(endpoint)
             const fetchedData: { nodes: D3GraphNode[]; links: D3GraphLink[] } = await res.json()
 
@@ -281,11 +280,10 @@ export class GraphViewManager {
 
     private handleNodeClick(target: D3GraphNode | null) {
         if (!target) return
-        const prefix = this.lang === 'en' ? '/en' : ''
         if (target.group === 'post') {
-            window.location.href = `${prefix}/blog/${target.id}`
+            window.location.href = `/blog/${target.id}`
         } else if (target.group === 'tag') {
-            window.location.href = `${prefix}/blog?tag=${encodeURIComponent(target.id.replace(/^tag-/, ''))}`
+            window.location.href = `/blog?tag=${encodeURIComponent(target.id.replace(/^tag-/, ''))}`
         }
     }
 

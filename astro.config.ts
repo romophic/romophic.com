@@ -20,13 +20,6 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   site: 'https://romophic.com',
-  i18n: {
-    defaultLocale: 'ja',
-    locales: ['ja', 'en'],
-    routing: {
-      prefixDefaultLocale: false,
-    },
-  },
   prefetch: {
     defaultStrategy: 'hover',
   },

@@ -2,49 +2,38 @@ import { getCollection, type CollectionEntry } from 'astro:content'
 import readingTime from 'reading-time'
 
 /**
- * Get all posts, normalizing IDs for bilingual routing.
- * This is fast enough to do on-the-fly without an explicit module cache,
- * removing statefulness and fixing HMR inconsistencies.
+ * Get all posts, normalizing IDs.
+ * Removes /index suffixes for clean routing.
  */
 export async function getNormalizedPosts(): Promise<CollectionEntry<'blog'>[]> {
   const rawPosts = await getCollection('blog')
   return rawPosts.map((post) => {
     let newId = post.id
-    if (post.data.lang === 'en') {
-      newId = newId.replace(/\.?en$/, '')
-    }
     newId = newId.replace(/\/index$/, '')
     return Object.assign({}, post, { id: newId })
   })
 }
 
-export async function getAllPosts(
-  lang: 'ja' | 'en' = 'ja',
-): Promise<CollectionEntry<'blog'>[]> {
+export async function getAllPosts(): Promise<CollectionEntry<'blog'>[]> {
   const posts = await getNormalizedPosts()
   return posts
     .filter(
       (post) =>
-        !post.data.draft && !isSubpost(post.id) && post.data.lang === lang,
+        !post.data.draft && !isSubpost(post.id),
     )
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
 }
 
-export async function getAllPostsAndSubposts(
-  lang: 'ja' | 'en' = 'ja',
-): Promise<CollectionEntry<'blog'>[]> {
+export async function getAllPostsAndSubposts(): Promise<CollectionEntry<'blog'>[]> {
   const posts = await getNormalizedPosts()
   return posts
-    .filter((post) => !post.data.draft && post.data.lang === lang)
+    .filter((post) => !post.data.draft)
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
 }
 
-export async function getAllProjects(
-  lang: 'ja' | 'en' = 'ja',
-): Promise<CollectionEntry<'projects'>[]> {
+export async function getAllProjects(): Promise<CollectionEntry<'projects'>[]> {
   const projects = await getCollection('projects')
   return projects
-    .filter((project) => project.data.lang === lang)
     .sort((a, b) => {
       const dateA = a.data.startDate?.getTime() || 0
       const dateB = b.data.startDate?.getTime() || 0
@@ -64,15 +53,13 @@ export function getParentId(subpostId: string): string {
 
 export async function getPostById(
   postId: string,
-  lang: 'ja' | 'en' = 'ja'
 ): Promise<CollectionEntry<'blog'> | null> {
   const posts = await getNormalizedPosts()
-  return posts.find((p) => p.id === postId && p.data.lang === lang) ?? null
+  return posts.find((p) => p.id === postId) ?? null
 }
 
 export async function getSubpostsForParent(
   parentId: string,
-  lang: 'ja' | 'en' = 'ja'
 ): Promise<CollectionEntry<'blog'>[]> {
   const posts = await getNormalizedPosts()
   return posts
@@ -80,8 +67,7 @@ export async function getSubpostsForParent(
       (post) =>
         !post.data.draft &&
         isSubpost(post.id) &&
-        getParentId(post.id) === parentId &&
-        post.data.lang === lang
+        getParentId(post.id) === parentId
     )
     .sort((a, b) => {
       const orderA = a.data.order ?? 0
@@ -95,21 +81,19 @@ export async function getSubpostsForParent(
 
 export async function getAdjacentPosts(
   currentId: string,
-  lang: 'ja' | 'en' = 'ja'
 ): Promise<{
   newer: CollectionEntry<'blog'> | null
   older: CollectionEntry<'blog'> | null
   parent: CollectionEntry<'blog'> | null
 }> {
-  const currentPost = await getPostById(currentId, lang)
+  const currentPost = await getPostById(currentId)
   if (!currentPost) return { newer: null, older: null, parent: null }
-  const currentLang = currentPost.data.lang as 'ja' | 'en'
 
   if (isSubpost(currentId)) {
     const parentId = getParentId(currentId)
-    const parent = (await getPostById(parentId, lang)) || null
+    const parent = (await getPostById(parentId)) || null
 
-    const subposts = await getSubpostsForParent(parentId, lang)
+    const subposts = await getSubpostsForParent(parentId)
 
     const currentIndex = subposts.findIndex((post) => post.id === currentId)
     if (currentIndex === -1) {
@@ -124,7 +108,7 @@ export async function getAdjacentPosts(
     }
   }
 
-  const allPosts = await getAllPosts(currentLang)
+  const allPosts = await getAllPosts()
   const currentIndex = allPosts.findIndex((post) => post.id === currentId)
 
   if (currentIndex === -1) {
@@ -139,10 +123,8 @@ export async function getAdjacentPosts(
   }
 }
 
-export async function getAllTags(
-  lang: 'ja' | 'en' = 'ja',
-): Promise<Map<string, number>> {
-  const posts = await getAllPosts(lang)
+export async function getAllTags(): Promise<Map<string, number>> {
+  const posts = await getAllPosts()
   return posts.reduce((acc, post) => {
     post.data.tags?.forEach((tag) => {
       acc.set(tag, (acc.get(tag) || 0) + 1)
@@ -153,24 +135,20 @@ export async function getAllTags(
 
 export async function getPostsByTag(
   tag: string,
-  lang: 'ja' | 'en' = 'ja',
 ): Promise<CollectionEntry<'blog'>[]> {
-  const posts = await getAllPosts(lang)
+  const posts = await getAllPosts()
   return posts.filter((post) => post.data.tags?.includes(tag))
 }
 
 export async function getRecentPosts(
   count: number,
-  lang: 'ja' | 'en' = 'ja',
 ): Promise<CollectionEntry<'blog'>[]> {
-  const posts = await getAllPosts(lang)
+  const posts = await getAllPosts()
   return posts.slice(0, count)
 }
 
-export async function getSortedTags(
-  lang: 'ja' | 'en' = 'ja',
-): Promise<{ tag: string; count: number }[]> {
-  const tagCounts = await getAllTags(lang)
+export async function getSortedTags(): Promise<{ tag: string; count: number }[]> {
+  const tagCounts = await getAllTags()
   return [...tagCounts.entries()]
     .map(([tag, count]) => ({ tag, count }))
     .sort((a, b) => {
@@ -192,42 +170,41 @@ export function groupPostsByYear(
   )
 }
 
-export async function hasSubposts(postId: string, lang: 'ja' | 'en' = 'ja'): Promise<boolean> {
-  const subposts = await getSubpostsForParent(postId, lang)
+export async function hasSubposts(postId: string): Promise<boolean> {
+  const subposts = await getSubpostsForParent(postId)
   return subposts.length > 0
 }
 
 export async function getParentPost(
   subpostId: string,
-  lang: 'ja' | 'en' = 'ja'
 ): Promise<CollectionEntry<'blog'> | null> {
   if (!isSubpost(subpostId)) {
     return null
   }
   const parentId = getParentId(subpostId)
-  return await getPostById(parentId, lang)
+  return await getPostById(parentId)
 }
 
-export async function getSubpostCount(parentId: string, lang: 'ja' | 'en' = 'ja'): Promise<number> {
-  const subposts = await getSubpostsForParent(parentId, lang)
+export async function getSubpostCount(parentId: string): Promise<number> {
+  const subposts = await getSubpostsForParent(parentId)
   return subposts.length
 }
 
-export async function getPostReadingTime(postId: string, lang: 'ja' | 'en' = 'ja'): Promise<string> {
-  const post = await getPostById(postId, lang)
+export async function getPostReadingTime(postId: string): Promise<string> {
+  const post = await getPostById(postId)
   if (!post) return '0 min read'
 
   return readingTime(post.body || '').text
 }
 
-export async function getCombinedReadingTime(postId: string, lang: 'ja' | 'en' = 'ja'): Promise<string> {
-  const post = await getPostById(postId, lang)
+export async function getCombinedReadingTime(postId: string): Promise<string> {
+  const post = await getPostById(postId)
   if (!post) return '0 min read'
 
   let totalMinutes = readingTime(post.body || '').minutes
 
   if (!isSubpost(postId)) {
-    const subposts = await getSubpostsForParent(postId, lang)
+    const subposts = await getSubpostsForParent(postId)
     for (const subpost of subposts) {
       totalMinutes += readingTime(subpost.body || '').minutes
     }

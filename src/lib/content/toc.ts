@@ -7,12 +7,12 @@ import {
 } from './posts'
 import type { TOCSection } from '@/types'
 
-export async function getTOCSections(postId: string, lang: 'ja' | 'en' = 'ja'): Promise<TOCSection[]> {
-  const post = await getPostById(postId, lang)
+export async function getTOCSections(postId: string): Promise<TOCSection[]> {
+  const post = await getPostById(postId)
   if (!post) return []
 
   const parentId = isSubpost(postId) ? getParentId(postId) : postId
-  const parentPost = isSubpost(postId) ? await getPostById(parentId, lang) : post
+  const parentPost = isSubpost(postId) ? await getPostById(parentId) : post
 
   if (!parentPost) return []
 
@@ -31,7 +31,7 @@ export async function getTOCSections(postId: string, lang: 'ja' | 'en' = 'ja'): 
     })
   }
 
-  const subposts = await getSubpostsForParent(parentId, lang)
+  const subposts = await getSubpostsForParent(parentId)
   for (const subpost of subposts) {
     const { headings: subpostHeadings } = await render(subpost)
     if (subpostHeadings.length > 0) {

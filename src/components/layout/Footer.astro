@@ -1,10 +1,6 @@
 ---
 import { ICON_MAP, ICONS, SITE, SOCIAL_LINKS } from '@/consts'
-import { getLangFromUrl, localizePath, useTranslations } from '@/i18n/utils'
 import { Icon } from 'astro-icon/components'
-
-const lang = getLangFromUrl(Astro.url)
-const t = useTranslations(lang)
 ---
 
 <footer class="bg-muted/20 mt-auto border-t py-12">
@@ -12,7 +8,7 @@ const t = useTranslations(lang)
     <div class="flex flex-col justify-between gap-8 sm:flex-row">
       <!-- Brand & Copyright -->
       <div class="flex flex-col gap-4">
-        <a href={localizePath('/', lang)} class="flex items-center gap-2">
+        <a href="/" class="flex items-center gap-2">
           <span class="text-xl font-bold tracking-tight">{SITE.title}</span>
         </a>
         <p class="text-muted-foreground mt-auto text-xs">
@@ -24,7 +20,7 @@ const t = useTranslations(lang)
       <!-- Socials & RSS -->
       <div class="flex flex-col gap-4 sm:items-end">
         <h3 class="w-full text-left font-medium sm:text-right">
-          {t('footer.connect')}
+          Connect
         </h3>
         <div class="flex flex-wrap items-center gap-2">
           {

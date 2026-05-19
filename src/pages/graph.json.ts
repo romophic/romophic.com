@@ -20,8 +20,7 @@ type GraphApiLink = {
 }
 
 export const GET: APIRoute = async () => {
-    const lang = 'ja'
-    const posts = await getAllPostsAndSubposts(lang)
+    const posts = await getAllPostsAndSubposts()
 
     const nodes: GraphApiNode[] = []
     const links: GraphApiLink[] = []

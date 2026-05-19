@@ -2,40 +2,38 @@
 import ProjectCard from '@/components/common/ProjectCard.astro'
 import PageHead from '@/components/layout/PageHead.astro'
 import { ICON_MAP, ICONS, SITE, SOCIAL_LINKS } from '@/consts'
-import { getLangFromUrl, useTranslations } from '@/i18n/utils'
 import Layout from '@/layouts/Layout.astro'
 import { getAllProjects } from '@/lib/data-utils'
 import { Icon } from 'astro-icon/components'
 
 import { getTechBadge, TECH_BADGES } from '@/lib/tech-badges'
 
-const lang = getLangFromUrl(Astro.url)
-const t = useTranslations(lang)
-const projects = await getAllProjects(lang)
+
+const projects = await getAllProjects()
 
 const TECH_STACK = Object.keys(TECH_BADGES)
 ---
 
 <Layout class="max-w-3xl">
-  <PageHead slot="head" title={t('about.title')} />
+  <PageHead slot="head" title="About" />
 
   <section class="space-y-12">
     {/* Page Title */}
     <div>
-      <h1 class="text-3xl font-bold tracking-tight">{t('about.title')}</h1>
+      <h1 class="text-3xl font-bold tracking-tight">About</h1>
     </div>
 
     {/* Intro */}
     <div class="prose dark:prose-invert">
       <p>
-        {t('about.intro', { title: SITE.title })}
+        {SITE.description}
       </p>
     </div>
 
     {/* Career */}
     <div>
       <h2 class="mb-6 text-2xl font-semibold tracking-tight">
-        {t('about.career')}
+        Career
       </h2>
       <div class="border-muted relative ml-2 space-y-8 border-l-2 pl-6">
         {
@@ -120,7 +118,7 @@ const TECH_STACK = Object.keys(TECH_BADGES)
     {/* Education */}
     <div>
       <h2 class="mb-6 text-2xl font-semibold tracking-tight">
-        {t('about.education')}
+        Education
       </h2>
       <div class="border-muted relative ml-2 space-y-8 border-l-2 pl-6">
         {
@@ -180,7 +178,7 @@ const TECH_STACK = Object.keys(TECH_BADGES)
     {/* Awards */}
     <div>
       <h2 class="mb-6 text-2xl font-semibold tracking-tight">
-        {t('about.awards')}
+        Awards
       </h2>
       <div class="border-muted relative ml-2 space-y-8 border-l-2 pl-6">
         {
@@ -251,7 +249,7 @@ const TECH_STACK = Object.keys(TECH_BADGES)
     {/* Tech Stack */}
     <div>
       <h2 class="mb-6 text-2xl font-semibold tracking-tight">
-        {t('about.techStack')}
+        Tech Stack
       </h2>
       <div class="flex flex-wrap gap-2">
         {
@@ -277,7 +275,7 @@ const TECH_STACK = Object.keys(TECH_BADGES)
     {/* Connect */}
     <div>
       <h2 class="mb-6 text-2xl font-semibold tracking-tight">
-        {t('about.connect')}
+        Connect
       </h2>
       <div class="flex flex-wrap gap-4">
         {
@@ -305,7 +303,7 @@ const TECH_STACK = Object.keys(TECH_BADGES)
     {/* Projects */}
     <div>
       <h2 class="mb-6 text-2xl font-semibold tracking-tight">
-        {t('about.projects')}
+        Projects
       </h2>
       <div class="flex flex-col gap-4">
         {projects.map((project) => <ProjectCard project={project} />)}

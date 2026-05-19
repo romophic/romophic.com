@@ -9,7 +9,6 @@ const blog = defineCollection({
       title: z.string(),
       description: z.string(),
       date: z.coerce.date(),
-      lang: z.enum(['ja', 'en']).default('ja'),
       order: z.number().optional(),
       image: image().optional(),
       tags: z.array(z.string()).optional(),
@@ -40,7 +39,7 @@ const projects = defineCollection({
     z.object({
       name: z.string(),
       description: z.string(),
-      lang: z.enum(['ja', 'en']).default('ja'),
+
       tags: z.array(z.string()),
       image: image(),
       link: z.string().url(),
