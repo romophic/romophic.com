@@ -9,17 +9,9 @@ import satori, { type SatoriNode } from 'satori'
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog')
-  const postIds = new Set(posts.map((p) => p.id))
-  const parentIds = new Set<string>()
-
-  for (const id of postIds) {
-    const parts = id.split('/')
-    parts.pop()
-    while (parts.length > 0) {
-      parentIds.add(parts.join('/'))
-      parts.pop()
-    }
-  }
+  const parentIds = new Set(
+    posts.map((p) => p.data.parent?.id).filter(Boolean) as string[]
+  )
 
   return posts.map((post) => {
     const slug = post.id
