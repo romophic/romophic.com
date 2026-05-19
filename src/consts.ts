@@ -3,7 +3,7 @@ import type { SocialLink, Site } from '@/types'
 export const SITE: Site = {
   title: 'romophic',
   description:
-    'romophic.com is a technical digital garden built with Astro, React, and Tailwind CSS.',
+    'romophic.com is a technical blog built with Astro and Tailwind CSS.',
   href: 'https://romophic.com',
   author: 'romophic',
   locale: 'ja-JP',
