@@ -152,8 +152,36 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
 }
 
 <script>
-  import { TOCController } from '@/lib/toc'
+  document.addEventListener('astro:page-load', () => {
+    const scrollArea = document.querySelector('[data-toc-scroll-area]')
+    if (!scrollArea) return
 
-  document.addEventListener('astro:page-load', () => TOCController.init())
-  document.addEventListener('astro:before-swap', () => TOCController.cleanup())
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const id = entry.target.id
+          if (!id) return
+          const link = document.querySelector(`[data-heading-link="${id}"]`)
+          if (!link) return
+
+          if (entry.isIntersecting) {
+            document
+              .querySelectorAll('[data-heading-link]')
+              .forEach((el) => el.classList.remove('text-foreground'))
+            link.classList.add('text-foreground')
+
+            const linkElement = link as HTMLElement
+            const top =
+              linkElement.offsetTop - scrollArea.clientHeight / 2 + linkElement.clientHeight / 2
+            scrollArea.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+          }
+        })
+      },
+      { rootMargin: '-100px 0px -66% 0px' },
+    )
+
+    document
+      .querySelectorAll('.prose h2, .prose h3, .prose h4, .prose h5, .prose h6')
+      .forEach((el) => observer.observe(el))
+  })
 </script>
