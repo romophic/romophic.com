@@ -68,7 +68,7 @@ export const GET: APIRoute = async () => {
 
     // 3. Add Internal Links (Post to Post)
     for (const post of posts) {
-        const targetIds = extractInternalLinks(post.body || '', post.id)
+        const targetIds = await extractInternalLinks(post)
 
         for (const normTarget of targetIds) {
             const foundId = normalizedIdMap.get(normTarget)

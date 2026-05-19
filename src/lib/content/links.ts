@@ -2,18 +2,18 @@ import path from 'node:path'
 import { getAllPostsAndSubposts } from './posts'
 import type { CollectionEntry } from 'astro:content'
 
-// Global regex for capturing markdown link URLs: [label](url)
-const MARKDOWN_LINK_REGEX = /\[.*?\]\((.*?)\)/g
+import { render } from 'astro:content'
 
 /**
- * Extract all resolved internal link target IDs from a post's body.
+ * Extract all resolved internal link target IDs from a post's frontmatter.
  */
-export function extractInternalLinks(body: string, sourceId: string): string[] {
-  MARKDOWN_LINK_REGEX.lastIndex = 0
+export async function extractInternalLinks(post: CollectionEntry<'blog'>): Promise<string[]> {
+  const { remarkPluginFrontmatter } = await render(post)
+  const rawLinks = remarkPluginFrontmatter.rawInternalLinks || []
   const targets: string[] = []
-  let match
-  while ((match = MARKDOWN_LINK_REGEX.exec(body)) !== null) {
-    const targetId = resolveLinkToId(match[1], sourceId)
+  
+  for (const url of rawLinks) {
+    const targetId = resolveLinkToId(url, post.id)
     if (targetId) {
       targets.push(normalizeId(targetId))
     }
@@ -68,7 +68,7 @@ async function getBacklinksMap(): Promise<
   const allPosts = await getAllPostsAndSubposts()
 
   for (const sourcePost of allPosts) {
-    const targetIds = extractInternalLinks(sourcePost.body || '', sourcePost.id)
+    const targetIds = await extractInternalLinks(sourcePost)
 
     for (const targetId of targetIds) {
       if (!_backlinksMap.has(targetId)) {

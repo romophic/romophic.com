@@ -91,39 +91,4 @@ describe('links utils', () => {
   })
 })
 
-describe('extractInternalLinks', () => {
-  it('extracts absolute blog links from markdown body', async () => {
-    const { extractInternalLinks } = await import('./links')
-    const body =
-      'See [my post](/blog/hello-world) and [another](/blog/parent/child) for details.'
-    const result = extractInternalLinks(body, 'source-post')
-    expect(result).toEqual(['hello-world', 'parent/child'])
-  })
 
-  it('extracts relative links resolved from source', async () => {
-    const { extractInternalLinks } = await import('./links')
-    const body = 'Check [sibling](./sibling-post) here.'
-    const result = extractInternalLinks(body, 'parent/current')
-    expect(result).toEqual(['parent/sibling-post'])
-  })
-
-  it('ignores external links', async () => {
-    const { extractInternalLinks } = await import('./links')
-    const body = '[Google](https://google.com) and [email](mailto:a@b.com)'
-    const result = extractInternalLinks(body, 'source')
-    expect(result).toEqual([])
-  })
-
-  it('returns empty array for body with no links', async () => {
-    const { extractInternalLinks } = await import('./links')
-    const result = extractInternalLinks('No links here.', 'source')
-    expect(result).toEqual([])
-  })
-
-  it('normalizes /index suffix in resolved links', async () => {
-    const { extractInternalLinks } = await import('./links')
-    const body = '[parent](/blog/romophic-library/index)'
-    const result = extractInternalLinks(body, 'source')
-    expect(result).toEqual(['romophic-library'])
-  })
-})

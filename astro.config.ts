@@ -13,6 +13,7 @@ import rehypeKatex from 'rehype-katex'
 import remarkEmoji from 'remark-emoji'
 import remarkMath from 'remark-math'
 import { remarkReadingTime } from './src/plugins/remark-reading-time.mjs'
+import { remarkExtractLinks } from './src/plugins/remark-extract-links.mjs'
 
 import { pluginCollapsibleSections } from '@expressive-code/plugin-collapsible-sections'
 import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers'
@@ -112,6 +113,6 @@ export default defineConfig({
         },
       ],
     ],
-    remarkPlugins: [remarkMath, remarkEmoji, remarkReadingTime],
+    remarkPlugins: [remarkMath, remarkEmoji, remarkReadingTime, remarkExtractLinks],
   },
 })
