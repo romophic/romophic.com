@@ -1,5 +1,6 @@
 ---
-import { getParentId, isSubpost } from '@/lib/data-utils'
+import { isSubpost } from '@/lib/data-utils'
+import { getPostById } from '@/lib/content/posts'
 import type { TOCSection } from '@/types'
 
 type Props = {
@@ -8,8 +9,9 @@ type Props = {
 }
 
 const { sections, currentPostId } = Astro.props
-const isCurrentSubpost = isSubpost(currentPostId)
-const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
+const post = await getPostById(currentPostId)
+const isCurrentSubpost = post && isSubpost(post)
+const parentId = isCurrentSubpost && post.data.parent ? post.data.parent.id : currentPostId
 ---
 
 {

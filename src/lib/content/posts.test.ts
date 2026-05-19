@@ -11,38 +11,32 @@ function createMockPost(id: string, date: Date): CollectionEntry<'blog'> {
   } as unknown as CollectionEntry<'blog'>
 }
 
+function createSubpost(id: string, parentId: string): CollectionEntry<'blog'> {
+  return {
+    id,
+    data: { title: id, description: '', tags: [], parent: { collection: 'blog', id: parentId } },
+    body: '',
+  } as unknown as CollectionEntry<'blog'>
+}
+
 describe('posts utils', () => {
   describe('isSubpost', () => {
-    it('returns true for nested paths', () => {
-      expect(isSubpost('parent/child')).toBe(true)
-      expect(isSubpost('romophic-library/lib/directed-graph')).toBe(true)
+    it('returns true when parent is defined', () => {
+      expect(isSubpost(createSubpost('child', 'parent'))).toBe(true)
     })
 
-    it('returns false for root paths', () => {
-      expect(isSubpost('my-post')).toBe(false)
-      expect(isSubpost('romophic-library')).toBe(false)
-    })
-
-    it('handles edge cases', () => {
-      expect(isSubpost('')).toBe(false)
-      expect(isSubpost('a/b/c/d/e')).toBe(true)
+    it('returns false when parent is undefined', () => {
+      expect(isSubpost(createMockPost('my-post', new Date()))).toBe(false)
     })
   })
 
   describe('getParentId', () => {
-    it('extracts immediate parent id from subpost id', () => {
-      expect(getParentId('parent/child')).toBe('parent')
-      expect(getParentId('romophic-library/lib/directed-graph')).toBe(
-        'romophic-library/lib',
-      )
+    it('returns parent id when parent is defined', () => {
+      expect(getParentId(createSubpost('child', 'parent'))).toBe('parent')
     })
 
-    it('handles deep nesting', () => {
-      expect(getParentId('a/b/c/d')).toBe('a/b/c')
-    })
-
-    it('returns empty string for top-level ids', () => {
-      expect(getParentId('my-post')).toBe('')
+    it('returns empty string when parent is undefined', () => {
+      expect(getParentId(createMockPost('my-post', new Date()))).toBe('')
     })
   })
 

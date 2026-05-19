@@ -21,7 +21,6 @@ export {
   getPostsByTag,
   getRecentPosts,
   getSortedTags,
-  getParentId,
   isSubpost,
   getSubpostCount,
   getCombinedReadingTime,
@@ -43,7 +42,7 @@ export async function getPostPageData(
   post: CollectionEntry<'blog'>,
 ): Promise<PostPageData> {
   const currentPostId = post.id
-  const isCurrentSubpost = isSubpost(currentPostId)
+  const isCurrentSubpost = isSubpost(post)
 
   const [
     authors,

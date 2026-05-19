@@ -1,6 +1,5 @@
 import {
   getCombinedReadingTime,
-  getParentId,
   getParentPost,
   getPostById,
   getPostReadingTime,
@@ -32,12 +31,15 @@ export async function getSubpostsData(
   parentId: string,
   currentPostId: string,
 ): Promise<SubpostsData> {
-  const isCurrentSubpost = isSubpost(currentPostId)
-  const rootParentId = isCurrentSubpost ? getParentId(currentPostId) : parentId
+  const post = await getPostById(currentPostId)
+  if (!post) {
+    throw new Error(`Post not found: ${currentPostId}`)
+  }
+  
+  const isCurrentSubpost = isSubpost(post)
+  const rootParentId = isCurrentSubpost && post.data.parent ? post.data.parent.id : parentId
 
-  const currentPost = !isCurrentSubpost
-    ? await getPostById(currentPostId)
-    : null
+  const currentPost = !isCurrentSubpost ? post : null
   const subposts = await getSubpostsForParent(rootParentId)
   const parentPost = isCurrentSubpost
     ? await getParentPost(currentPostId)

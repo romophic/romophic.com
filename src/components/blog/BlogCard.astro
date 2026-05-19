@@ -20,7 +20,7 @@ const { entry } = Astro.props
 const formattedDate = formatDate(entry.data.date)
 const readTime = await getCombinedReadingTime(entry.id)
 const authors = await parseAuthors(entry.data.authors ?? [])
-const subpostCount = !isSubpost(entry.id) ? await getSubpostCount(entry.id) : 0
+const subpostCount = !isSubpost(entry) ? await getSubpostCount(entry.id) : 0
 
 ---
 

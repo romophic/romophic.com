@@ -10,7 +10,7 @@ import MdxImageCaption from '@/components/common/MdxImageCaption.astro'
 import ScrollToTop from '@/components/common/ScrollToTop.astro'
 import GiscusComments from '@/components/features/GiscusComments.astro'
 import Layout from '@/layouts/Layout.astro'
-import { getParentId, getPostPageData } from '@/lib/data-utils'
+import { getPostPageData } from '@/lib/data-utils'
 import { Image } from 'astro:assets'
 import type { CollectionEntry } from 'astro:content'
 import { render } from 'astro:content'
@@ -46,7 +46,7 @@ const ogImageUrl = `/og/${ogSlug.replaceAll('/', '-')}.png`
     (hasChildPosts || isCurrentSubpost) && (
       <SubpostsHeader
         slot="subposts-navigation"
-        parentId={isCurrentSubpost ? getParentId(currentPostId) : currentPostId}
+        parentId={isCurrentSubpost && post.data.parent ? post.data.parent.id : currentPostId}
       />
     )
   }

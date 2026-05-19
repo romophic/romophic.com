@@ -3,7 +3,6 @@ import {
   getPostById,
   getSubpostsForParent,
   isSubpost,
-  getParentId,
 } from './posts'
 import type { TOCSection } from '@/types'
 
@@ -11,8 +10,8 @@ export async function getTOCSections(postId: string): Promise<TOCSection[]> {
   const post = await getPostById(postId)
   if (!post) return []
 
-  const parentId = isSubpost(postId) ? getParentId(postId) : postId
-  const parentPost = isSubpost(postId) ? await getPostById(parentId) : post
+  const parentId = isSubpost(post) && post.data.parent ? post.data.parent.id : postId
+  const parentPost = isSubpost(post) ? await getPostById(parentId) : post
 
   if (!parentPost) return []
 

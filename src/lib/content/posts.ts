@@ -19,7 +19,7 @@ export async function getAllPosts(): Promise<CollectionEntry<'blog'>[]> {
   return posts
     .filter(
       (post) =>
-        !post.data.draft && !isSubpost(post.id),
+        !post.data.draft && post.data.parent === undefined,
     )
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
 }
@@ -41,14 +41,12 @@ export async function getAllProjects(): Promise<CollectionEntry<'projects'>[]> {
     })
 }
 
-export function isSubpost(postId: string): boolean {
-  return postId.includes('/')
+export function isSubpost(post: CollectionEntry<'blog'>): boolean {
+  return post.data.parent !== undefined
 }
 
-export function getParentId(subpostId: string): string {
-  const lastSlashIndex = subpostId.lastIndexOf('/')
-  if (lastSlashIndex === -1) return ''
-  return subpostId.substring(0, lastSlashIndex)
+export function getParentId(post: CollectionEntry<'blog'>): string {
+  return post.data.parent?.id || ''
 }
 
 export async function getPostById(
@@ -66,8 +64,7 @@ export async function getSubpostsForParent(
     .filter(
       (post) =>
         !post.data.draft &&
-        isSubpost(post.id) &&
-        getParentId(post.id) === parentId
+        post.data.parent?.id === parentId
     )
     .sort((a, b) => {
       const orderA = a.data.order ?? 0
@@ -89,8 +86,8 @@ export async function getAdjacentPosts(
   const currentPost = await getPostById(currentId)
   if (!currentPost) return { newer: null, older: null, parent: null }
 
-  if (isSubpost(currentId)) {
-    const parentId = getParentId(currentId)
+  if (currentPost.data.parent) {
+    const parentId = currentPost.data.parent.id
     const parent = (await getPostById(parentId)) || null
 
     const subposts = await getSubpostsForParent(parentId)
@@ -178,11 +175,9 @@ export async function hasSubposts(postId: string): Promise<boolean> {
 export async function getParentPost(
   subpostId: string,
 ): Promise<CollectionEntry<'blog'> | null> {
-  if (!isSubpost(subpostId)) {
-    return null
-  }
-  const parentId = getParentId(subpostId)
-  return await getPostById(parentId)
+  const post = await getPostById(subpostId)
+  if (!post || !post.data.parent) return null
+  return await getPostById(post.data.parent.id)
 }
 
 export async function getSubpostCount(parentId: string): Promise<number> {
@@ -207,7 +202,7 @@ export async function getCombinedReadingTime(postId: string): Promise<string> {
   // We need to parse the integer from it
   let totalMinutes = parseInt(parentFrontmatter.minutesRead) || 0
 
-  if (!isSubpost(postId)) {
+  if (!post.data.parent) {
     const subposts = await getSubpostsForParent(postId)
     for (const subpost of subposts) {
       const { remarkPluginFrontmatter: subFrontmatter } = await render(subpost)
