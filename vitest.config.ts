@@ -3,7 +3,12 @@ import { getViteConfig } from 'astro/config'
 
 export default getViteConfig({
   test: {
-    /* for example, use global to avoid globals imports (describe, test, expect): */
+    css: false,
+    server: {
+      deps: {
+        inline: [/@pagefind/, /astro-pagefind/],
+      },
+    },
     // globals: true,
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
