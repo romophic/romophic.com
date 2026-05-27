@@ -29,7 +29,7 @@ const blog = await getRecentPosts(SITE.featuredPostCount)
     <PageHead slot="head" title={SITE.title} description={SITE.description} />
   </Head>
   <body
-    class="selection:bg-primary/20 selection:text-foreground relative min-h-svh w-screen overflow-x-hidden font-sans"
+    class="selection:bg-primary/20 selection:text-foreground relative min-h-svh w-full font-sans"
   >
     {/* 1. THE GRAPH (Fixed Background) */}
     <div id="graph-wrapper" class="bg-background fixed inset-0 z-0">

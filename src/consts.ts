@@ -57,7 +57,7 @@ export const GISCUS_CONFIG = {
   categoryId: 'DIC_kwDOQil8lM4Czpc3',
   mapping: 'pathname',
   strict: '0',
-  reactionsEnabled: '0',
+  reactionsEnabled: '1',
   emitMetadata: '0',
   inputPosition: 'bottom',
   lang: 'ja',
