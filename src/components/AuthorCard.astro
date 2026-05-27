@@ -40,6 +40,10 @@ const socialLinks: SocialLink[] = [
               src={avatar}
               alt={`Avatar of ${name}`}
               class="size-full object-cover"
+              width="128"
+              height="128"
+              loading="lazy"
+              decoding="async"
             />
           ) : (
             <span class="text-muted-foreground text-4xl font-medium uppercase">

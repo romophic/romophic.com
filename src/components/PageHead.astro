@@ -81,7 +81,7 @@ if (post) {
 }
 ---
 
-<title>{`${title} | ${SITE.title}`}</title>
+<title>{title === SITE.title ? SITE.title : `${title} | ${SITE.title}`}</title>
 <meta name="title" content={`${title} | ${SITE.title}`} />
 <meta name="description" content={description} />
 <link rel="canonical" href={canonicalURL} />
