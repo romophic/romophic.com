@@ -14,8 +14,6 @@ import rehypeExternalLinks from 'rehype-external-links'
 import rehypeKatex from 'rehype-katex'
 import remarkEmoji from 'remark-emoji'
 import remarkMath from 'remark-math'
-import { remarkReadingTime } from './src/plugins/remark-reading-time.mjs'
-import { remarkExtractLinks } from './src/plugins/remark-extract-links.mjs'
 
 import tailwindcss from '@tailwindcss/vite'
 
@@ -95,8 +93,6 @@ export default defineConfig({
     remarkPlugins: [
       remarkMath,
       remarkEmoji,
-      remarkReadingTime,
-      remarkExtractLinks,
     ],
   },
 })

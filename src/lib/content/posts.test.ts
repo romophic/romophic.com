@@ -12,6 +12,7 @@ import {
   getParentPost,
   getSubpostCount,
   groupPostsByYear,
+  calculateReadingTimeFast
 } from './posts'
 import type { CollectionEntry } from 'astro:content'
 
@@ -24,7 +25,7 @@ vi.mock('astro:content', () => {
           {
             id: 'standalone',
             data: { title: 'Standalone', draft: false, date: new Date('2025-01-01') },
-            body: '',
+            body: 'A'.repeat(2000), // 5 min read
           },
           {
             id: 'draft-post',
@@ -34,17 +35,17 @@ vi.mock('astro:content', () => {
           {
             id: 'series/index',
             data: { title: 'Series Root', draft: false, date: new Date('2024-01-01') },
-            body: '',
+            body: 'A'.repeat(2000), // 5 min read
           },
           {
             id: 'series/part-1',
             data: { title: 'Part 1', draft: false, date: new Date('2024-01-02'), order: 1 },
-            body: '',
+            body: 'A'.repeat(2000), // 5 min read
           },
           {
             id: 'series/part-2',
             data: { title: 'Part 2', draft: false, date: new Date('2024-01-03'), order: 2 },
-            body: '',
+            body: 'A'.repeat(2000), // 5 min read
           },
           // Legacy support testing: explicit parent declared in frontmatter
           {
@@ -56,17 +57,11 @@ vi.mock('astro:content', () => {
               parent: { id: 'series/index', collection: 'blog' },
               order: 3,
             },
-            body: '',
+            body: 'A'.repeat(2000), // 5 min read
           },
         ]
       }
       return []
-    }),
-    render: vi.fn(async (post) => {
-      // Mock reading time plugin output, assuming each post takes 5 minutes to read
-      return {
-        remarkPluginFrontmatter: { minutesRead: '5 min read' },
-      }
     }),
   }
 })
@@ -193,8 +188,20 @@ describe('Blog Content Data Layer Specification', () => {
   })
 
   describe('Reading Time Calculation', () => {
+    describe('calculateReadingTimeFast', () => {
+      it('should calculate reading time by counting characters ignoring whitespace', () => {
+        // 400 chars = 1 min
+        expect(calculateReadingTimeFast('A'.repeat(800))).toBe('2 min read')
+        expect(calculateReadingTimeFast('A '.repeat(800))).toBe('2 min read') // spaces ignored
+      })
+      it('should return at least 1 min', () => {
+        expect(calculateReadingTimeFast('A')).toBe('1 min read')
+        expect(calculateReadingTimeFast('')).toBe('1 min read')
+      })
+    })
+
     describe('getPostReadingTime', () => {
-      it('should extract reading time directly from the remark plugin frontmatter', async () => {
+      it('should calculate reading time directly from the post body', async () => {
         const time = await getPostReadingTime('standalone')
         expect(time).toBe('5 min read')
       })

@@ -2,25 +2,33 @@ import path from 'node:path'
 import { getAllPostsAndSubposts } from './posts'
 import type { CollectionEntry } from 'astro:content'
 
-import { render } from 'astro:content'
 
 /**
- * Extract all resolved internal link target IDs from a post's frontmatter.
+ * Extract all resolved internal link target IDs from a post's raw body.
+ * Uses regex to bypass expensive Astro component rendering.
  */
 export async function extractInternalLinks(
   post: CollectionEntry<'blog'>,
 ): Promise<string[]> {
-  const { remarkPluginFrontmatter } = await render(post)
-  const rawLinks = remarkPluginFrontmatter.rawInternalLinks || []
+  const body = post.body || ''
+  
+  // Remove markdown code blocks to prevent false positive link extraction
+  const bodyWithoutCodeBlocks = body.replace(/```[\s\S]*?```/g, '')
+  
+  const linkRegex = /\[[^\]]*\]\(([^)]+)\)/g
   const targets: string[] = []
-
-  for (const url of rawLinks) {
+  
+  let match
+  while ((match = linkRegex.exec(bodyWithoutCodeBlocks)) !== null) {
+    const url = match[1]
     const targetId = resolveLinkToId(url, post.id)
     if (targetId) {
       targets.push(normalizeId(targetId))
     }
   }
-  return targets
+  
+  // Return deduplicated targets
+  return [...new Set(targets)]
 }
 
 // Cache for the O(N) backlinks map

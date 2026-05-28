@@ -1,5 +1,4 @@
 import { getCollection, type CollectionEntry } from 'astro:content'
-import { render } from 'astro:content'
 
 /**
  * Get all posts, normalizing IDs.
@@ -183,30 +182,34 @@ export async function getSubpostCount(parentId: string): Promise<number> {
   return subposts.length
 }
 
+export function calculateReadingTimeFast(body: string): string {
+  if (!body) return '1 min read'
+  // Remove spaces and line breaks for character count
+  const chars = body.replace(/\s+/g, '').length
+  // Avg Japanese/English technical reading speed is roughly 400 chars/min
+  const minutes = Math.max(1, Math.ceil(chars / 400))
+  return `${minutes} min read`
+}
+
 export async function getPostReadingTime(postId: string): Promise<string> {
   const post = await getPostById(postId)
   if (!post) return '0 min read'
 
-  const { remarkPluginFrontmatter } = await render(post)
-  return remarkPluginFrontmatter.minutesRead || '0 min read'
+  return calculateReadingTimeFast(post.body)
 }
 
 export async function getCombinedReadingTime(postId: string): Promise<string> {
   const post = await getPostById(postId)
   if (!post) return '0 min read'
 
-  const { remarkPluginFrontmatter: parentFrontmatter } = await render(post)
-  // remarkPluginFrontmatter.minutesRead typically looks like "3 min read"
-  // We need to parse the integer from it
-  let totalMinutes = parseInt(parentFrontmatter.minutesRead) || 0
+  let totalMinutes = parseInt(calculateReadingTimeFast(post.body)) || 0
 
   if (!isSubpost(post)) {
     const subposts = await getSubpostsForParent(postId)
     for (const subpost of subposts) {
-      const { remarkPluginFrontmatter: subFrontmatter } = await render(subpost)
-      totalMinutes += parseInt(subFrontmatter.minutesRead) || 0
+      totalMinutes += parseInt(calculateReadingTimeFast(subpost.body)) || 0
     }
   }
 
-  return `${Math.ceil(totalMinutes)} min read`
+  return `${Math.max(1, totalMinutes)} min read`
 }

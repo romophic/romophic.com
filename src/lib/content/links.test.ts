@@ -2,29 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { resolveLinkToId, normalizeId, extractInternalLinks, getBacklinks } from './links'
 import type { CollectionEntry } from 'astro:content'
 
-// We need to mock astro:content render and getAllPostsAndSubposts
-vi.mock('astro:content', () => ({
-  render: vi.fn(async (post: CollectionEntry<'blog'>) => {
-    // Return different mock raw links based on post ID
-    if (post.id === 'post-1') {
-      return { remarkPluginFrontmatter: { rawInternalLinks: ['/blog/target-post', './relative-post'] } }
-    }
-    if (post.id === 'post-2') {
-      return { remarkPluginFrontmatter: { rawInternalLinks: ['/blog/target-post'] } } // Also links to target-post
-    }
-    if (post.id === 'self-linker') {
-      return { remarkPluginFrontmatter: { rawInternalLinks: ['/blog/self-linker'] } }
-    }
-    return { remarkPluginFrontmatter: { rawInternalLinks: [] } }
-  })
-}))
-
 vi.mock('./posts', () => ({
   getAllPostsAndSubposts: vi.fn().mockResolvedValue([
-    { id: 'post-1', data: {} },
-    { id: 'post-2', data: {} },
-    { id: 'self-linker', data: {} },
-    { id: 'target-post', data: {} },
+    { id: 'post-1', data: {}, body: 'Here is a [link](/blog/target-post) and another [rel](./relative-post)' },
+    { id: 'post-2', data: {}, body: 'Link to [target](/blog/target-post)' },
+    { id: 'self-linker', data: {}, body: 'Link to [self](/blog/self-linker)' },
+    { id: 'target-post', data: {}, body: 'No links here' },
   ])
 }))
 
@@ -72,7 +55,10 @@ describe('Links Utils Specification', () => {
 
   describe('extractInternalLinks', () => {
     it('should extract and resolve all raw internal links from a post', async () => {
-      const mockPost = { id: 'post-1' } as CollectionEntry<'blog'>
+      const mockPost = { 
+        id: 'post-1',
+        body: 'Here is a [link](/blog/target-post) and another [rel](./relative-post)'
+      } as CollectionEntry<'blog'>
       const targets = await extractInternalLinks(mockPost)
       
       expect(targets).toHaveLength(2)

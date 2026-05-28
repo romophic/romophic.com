@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">81% </span>
+                <span class="strong">81.37% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>81/100</span>
+                <span class='fraction'>83/102</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">64.4% </span>
+                <span class="strong">66.1% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>38/59</span>
+                <span class='fraction'>39/59</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">77.77% </span>
+                <span class="strong">78.37% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>28/36</span>
+                <span class='fraction'>29/37</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">82.95% </span>
+                <span class="strong">83.14% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>73/88</span>
+                <span class='fraction'>74/89</span>
             </div>
         
             
@@ -275,8 +275,10 @@
 <a name='L210'></a><a href='#L210'>210</a>
 <a name='L211'></a><a href='#L211'>211</a>
 <a name='L212'></a><a href='#L212'>212</a>
-<a name='L213'></a><a href='#L213'>213</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L213'></a><a href='#L213'>213</a>
+<a name='L214'></a><a href='#L214'>214</a>
+<a name='L215'></a><a href='#L215'>215</a>
+<a name='L216'></a><a href='#L216'>216</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -461,10 +463,18 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -474,11 +484,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
@@ -488,7 +494,6 @@
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { getCollection, type CollectionEntry } from 'astro:content'
-import { render } from 'astro:content'
 &nbsp;
 /**
  * Get all posts, normalizing IDs.
@@ -672,32 +677,36 @@ export async function getSubpostCount(parentId: string): Promise&lt;number&gt; {
   return subposts.length
 }
 &nbsp;
+export function calculateReadingTimeFast(body: string): string {
+  if (!body) return '1 min read'
+  // Remove spaces and line breaks for character count
+  const chars = body.replace(/\s+/g, '').length
+  // Avg Japanese/English technical reading speed is roughly 400 chars/min
+  const minutes = Math.max(1, Math.ceil(chars / 400))
+  return `${minutes} min read`
+}
+&nbsp;
 export async function getPostReadingTime(postId: string): Promise&lt;string&gt; {
   const post = await getPostById(postId)
   <span class="missing-if-branch" title="if path not taken" >I</span>if (!post) <span class="cstat-no" title="statement not covered" >return '0 min read'</span>
 &nbsp;
-  const { remarkPluginFrontmatter } = await render(post)
-  return remarkPluginFrontmatter.minutesRead || <span class="branch-1 cbranch-no" title="branch not covered" >'0 min read'</span>
+  return calculateReadingTimeFast(post.body)
 }
 &nbsp;
 export async function getCombinedReadingTime(postId: string): Promise&lt;string&gt; {
   const post = await getPostById(postId)
   if (!post) return '0 min read'
 &nbsp;
-  const { remarkPluginFrontmatter: parentFrontmatter } = await render(post)
-  // remarkPluginFrontmatter.minutesRead typically looks like "3 min read"
-  // We need to parse the integer from it
-  let totalMinutes = parseInt(parentFrontmatter.minutesRead) || <span class="branch-1 cbranch-no" title="branch not covered" >0</span>
+  let totalMinutes = parseInt(calculateReadingTimeFast(post.body)) || <span class="branch-1 cbranch-no" title="branch not covered" >0</span>
 &nbsp;
   if (!isSubpost(post)) {
     const subposts = await getSubpostsForParent(postId)
     for (const subpost of subposts) {
-      const { remarkPluginFrontmatter: subFrontmatter } = await render(subpost)
-      totalMinutes += parseInt(subFrontmatter.minutesRead) || <span class="branch-1 cbranch-no" title="branch not covered" >0</span>
+      totalMinutes += parseInt(calculateReadingTimeFast(subpost.body)) || <span class="branch-1 cbranch-no" title="branch not covered" >0</span>
     }
   }
 &nbsp;
-  return `${Math.ceil(totalMinutes)} min read`
+  return `${Math.max(1, totalMinutes)} min read`
 }
 &nbsp;</pre></td></tr></table></pre>
 
@@ -706,7 +715,7 @@ export async function getCombinedReadingTime(postId: string): Promise&lt;string&
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-28T05:15:22.198Z
+                at 2026-05-28T08:28:05.067Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>
