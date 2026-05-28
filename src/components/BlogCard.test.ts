@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect } from 'vitest'
 import { experimental_AstroContainer as AstroContainer } from 'astro/container'
 import BlogCard from './BlogCard.astro'
