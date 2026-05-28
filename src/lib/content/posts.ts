@@ -44,7 +44,7 @@ export function isSubpost(post: CollectionEntry<'blog'>): boolean {
 }
 
 export function getParentId(post: CollectionEntry<'blog'>): string {
-  if (post.data.parent) return post.data.parent.id;
+  if (post.data.parent) return post.data.parent.id.replace(/\/index$/, '')
   if (post.id.includes('/')) return post.id.split('/')[0];
   return ''
 }

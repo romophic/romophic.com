@@ -1,76 +1,232 @@
-import { describe, it, expect } from 'vitest'
-import { isSubpost, getParentId, groupPostsByYear } from './posts'
+import { describe, it, expect, vi } from 'vitest'
+import {
+  isSubpost,
+  getParentId,
+  getNormalizedPosts,
+  getAllPosts,
+  getSubpostsForParent,
+  getAdjacentPosts,
+  getPostReadingTime,
+  getCombinedReadingTime,
+  hasSubposts,
+  getParentPost,
+  getSubpostCount,
+  groupPostsByYear,
+} from './posts'
 import type { CollectionEntry } from 'astro:content'
 
-// Helper to create a minimal post-like object for groupPostsByYear tests
-function createMockPost(id: string, date: Date): CollectionEntry<'blog'> {
+// Mock astro:content to simulate a file system with a mix of standalone posts and a series.
+vi.mock('astro:content', () => {
   return {
-    id,
-    data: { date, title: id, description: '', tags: [] },
-    body: '',
-  } as unknown as CollectionEntry<'blog'>
-}
+    getCollection: vi.fn(async (collection) => {
+      if (collection === 'blog') {
+        return [
+          {
+            id: 'standalone',
+            data: { title: 'Standalone', draft: false, date: new Date('2025-01-01') },
+            body: '',
+          },
+          {
+            id: 'draft-post',
+            data: { title: 'Draft', draft: true, date: new Date('2025-01-02') },
+            body: '',
+          },
+          {
+            id: 'series/index',
+            data: { title: 'Series Root', draft: false, date: new Date('2024-01-01') },
+            body: '',
+          },
+          {
+            id: 'series/part-1',
+            data: { title: 'Part 1', draft: false, date: new Date('2024-01-02'), order: 1 },
+            body: '',
+          },
+          {
+            id: 'series/part-2',
+            data: { title: 'Part 2', draft: false, date: new Date('2024-01-03'), order: 2 },
+            body: '',
+          },
+          // Legacy support testing: explicit parent declared in frontmatter
+          {
+            id: 'legacy-subpost',
+            data: {
+              title: 'Legacy',
+              draft: false,
+              date: new Date('2024-01-04'),
+              parent: { id: 'series/index', collection: 'blog' },
+              order: 3,
+            },
+            body: '',
+          },
+        ]
+      }
+      return []
+    }),
+    render: vi.fn(async (post) => {
+      // Mock reading time plugin output, assuming each post takes 5 minutes to read
+      return {
+        remarkPluginFrontmatter: { minutesRead: '5 min read' },
+      }
+    }),
+  }
+})
 
-function createSubpost(id: string, parentId: string): CollectionEntry<'blog'> {
-  return {
-    id,
-    data: {
-      title: id,
-      description: '',
-      tags: [],
-      parent: { collection: 'blog', id: parentId },
-    },
-    body: '',
-  } as unknown as CollectionEntry<'blog'>
-}
-
-describe('posts utils', () => {
-  describe('isSubpost', () => {
-    it('returns true when parent is defined', () => {
-      expect(isSubpost(createSubpost('child', 'parent'))).toBe(true)
+describe('Blog Content Data Layer Specification', () => {
+  describe('Hierarchy & Parent-Child Relationships', () => {
+    describe('isSubpost', () => {
+      it('should identify a post as a subpost if its ID contains a slash (indicating a subdirectory)', () => {
+        expect(isSubpost({ id: 'series/part-1', data: {} } as CollectionEntry<'blog'>)).toBe(true)
+      })
+      it('should identify a post as a standalone root post if its ID does not contain a slash', () => {
+        expect(isSubpost({ id: 'standalone', data: {} } as CollectionEntry<'blog'>)).toBe(false)
+      })
+      it('should identify a post as a subpost if it explicitly declares a parent in frontmatter (legacy support)', () => {
+        expect(
+          isSubpost({ id: 'legacy-root', data: { parent: { id: 'parent-id' } } } as unknown as CollectionEntry<'blog'>)
+        ).toBe(true)
+      })
     })
 
-    it('returns false when parent is undefined', () => {
-      expect(isSubpost(createMockPost('my-post', new Date()))).toBe(false)
+    describe('getParentId', () => {
+      it('should extract the parent ID from a subdirectory-based post ID', () => {
+        expect(getParentId({ id: 'series/part-1', data: {} } as CollectionEntry<'blog'>)).toBe('series')
+      })
+      it('should return the explicit parent ID if defined in the frontmatter', () => {
+        expect(
+          getParentId({
+            id: 'legacy-root',
+            data: { parent: { id: 'explicit-parent' } },
+          } as unknown as CollectionEntry<'blog'>)
+        ).toBe('explicit-parent')
+      })
+      it('should return an empty string for standalone root posts', () => {
+        expect(getParentId({ id: 'standalone', data: {} } as CollectionEntry<'blog'>)).toBe('')
+      })
+    })
+
+    describe('hasSubposts & getSubpostCount', () => {
+      it('should return true and the correct count if a post acts as a parent for subposts', async () => {
+        expect(await hasSubposts('series')).toBe(true)
+        expect(await getSubpostCount('series')).toBe(3) // part-1, part-2, legacy-subpost
+      })
+      it('should return false and zero count for standalone posts', async () => {
+        expect(await hasSubposts('standalone')).toBe(false)
+        expect(await getSubpostCount('standalone')).toBe(0)
+      })
+    })
+
+    describe('getParentPost', () => {
+      it('should fetch the parent post object for a given subpost', async () => {
+        const parent = await getParentPost('series/part-1')
+        expect(parent?.id).toBe('series')
+      })
+      it('should return null if the post is a standalone root post', async () => {
+        const parent = await getParentPost('standalone')
+        expect(parent).toBeNull()
+      })
     })
   })
 
-  describe('getParentId', () => {
-    it('returns parent id when parent is defined', () => {
-      expect(getParentId(createSubpost('child', 'parent'))).toBe('parent')
+  describe('Post Fetching & Normalization', () => {
+    describe('getNormalizedPosts', () => {
+      it('should strip the /index suffix from post IDs to create clean URLs', async () => {
+        const posts = await getNormalizedPosts()
+        const seriesRoot = posts.find((p) => p.data.title === 'Series Root')
+        expect(seriesRoot?.id).toBe('series')
+      })
     })
 
-    it('returns empty string when parent is undefined', () => {
-      expect(getParentId(createMockPost('my-post', new Date()))).toBe('')
+    describe('getAllPosts', () => {
+      it('should return all normalized posts and filter out drafts', async () => {
+        const posts = await getAllPosts()
+        expect(posts.some((p) => p.id === 'draft-post')).toBe(false)
+        expect(posts.length).toBe(5) // standalone, series, part-1, part-2, legacy
+      })
+      it('should sort the resulting posts by date in descending order', async () => {
+        const posts = await getAllPosts()
+        expect(posts[0].id).toBe('standalone') // 2025-01-01
+        expect(posts[1].id).toBe('legacy-subpost') // 2024-01-04
+        expect(posts[2].id).toBe('series/part-2') // 2024-01-03
+      })
+    })
+
+    describe('getSubpostsForParent', () => {
+      it('should return all subposts belonging to a specific parent ID', async () => {
+        const subposts = await getSubpostsForParent('series')
+        expect(subposts.length).toBe(3)
+      })
+      it('should sort subposts primarily by their explicit order field, then by date', async () => {
+        const subposts = await getSubpostsForParent('series')
+        expect(subposts[0].id).toBe('series/part-1') // order: 1
+        expect(subposts[1].id).toBe('series/part-2') // order: 2
+        expect(subposts[2].id).toBe('legacy-subpost') // order: 3
+      })
+      it('should exclude the parent post itself from the subpost list', async () => {
+        const subposts = await getSubpostsForParent('series')
+        expect(subposts.some((p) => p.id === 'series')).toBe(false)
+      })
     })
   })
 
-  describe('groupPostsByYear', () => {
-    it('groups posts by year correctly', () => {
-      const posts = [
-        createMockPost('post-a', new Date('2025-01-15')),
-        createMockPost('post-b', new Date('2025-06-20')),
-        createMockPost('post-c', new Date('2024-03-10')),
-      ]
-      const grouped = groupPostsByYear(posts)
-      expect(Object.keys(grouped)).toHaveLength(2)
-      expect(grouped['2025']).toHaveLength(2)
-      expect(grouped['2024']).toHaveLength(1)
+  describe('Navigation & Adjacency', () => {
+    describe('getAdjacentPosts', () => {
+      it('should return the next and previous post from the global pool for a standalone post', async () => {
+        // Global chronological order: standalone (2025-01-01), legacy (2024-01-04), part-2, part-1, series
+        const adjacent = await getAdjacentPosts('standalone')
+        expect(adjacent.parent).toBeNull()
+        expect(adjacent.newer).toBeNull() // Standalone is the newest post
+        expect(adjacent.older?.id).toBe('legacy-subpost')
+      })
+
+      it('should return the adjacent parts specifically from within the same series for a subpost', async () => {
+        // Series order: part-1, part-2, legacy
+        const adjacentPart1 = await getAdjacentPosts('series/part-1')
+        expect(adjacentPart1.parent?.id).toBe('series')
+        expect(adjacentPart1.newer?.id).toBe('series/part-2') // Next part in order
+        expect(adjacentPart1.older).toBeNull() // First part in the series
+
+        const adjacentPart2 = await getAdjacentPosts('series/part-2')
+        expect(adjacentPart2.newer?.id).toBe('legacy-subpost')
+        expect(adjacentPart2.older?.id).toBe('series/part-1')
+      })
+    })
+  })
+
+  describe('Reading Time Calculation', () => {
+    describe('getPostReadingTime', () => {
+      it('should extract reading time directly from the remark plugin frontmatter', async () => {
+        const time = await getPostReadingTime('standalone')
+        expect(time).toBe('5 min read')
+      })
     })
 
-    it('returns empty object for empty array', () => {
-      const grouped = groupPostsByYear([])
-      expect(Object.keys(grouped)).toHaveLength(0)
+    describe('getCombinedReadingTime', () => {
+      it('should return only the individual reading time for a subpost', async () => {
+        const time = await getCombinedReadingTime('series/part-1')
+        expect(time).toBe('5 min read')
+      })
+      it('should aggregate the reading time of the parent and all its subposts for a series root', async () => {
+        const time = await getCombinedReadingTime('series')
+        // Parent (5) + part-1 (5) + part-2 (5) + legacy (5) = 20
+        expect(time).toBe('20 min read')
+      })
     })
+  })
 
-    it('preserves original order within each year', () => {
-      const posts = [
-        createMockPost('first', new Date('2025-12-01')),
-        createMockPost('second', new Date('2025-01-01')),
-      ]
-      const grouped = groupPostsByYear(posts)
-      expect(grouped['2025'][0].id).toBe('first')
-      expect(grouped['2025'][1].id).toBe('second')
+  describe('Utility Functions', () => {
+    describe('groupPostsByYear', () => {
+      it('should correctly group a list of posts by the year of their date', () => {
+        const posts = [
+          { id: 'a', data: { date: new Date('2025-01-15') } },
+          { id: 'b', data: { date: new Date('2024-03-10') } },
+          { id: 'c', data: { date: new Date('2025-06-20') } },
+        ] as unknown as CollectionEntry<'blog'>[]
+        
+        const grouped = groupPostsByYear(posts)
+        expect(Object.keys(grouped)).toHaveLength(2)
+        expect(grouped['2025']).toHaveLength(2)
+        expect(grouped['2024']).toHaveLength(1)
+      })
     })
   })
 })
