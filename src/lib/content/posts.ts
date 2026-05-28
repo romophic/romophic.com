@@ -17,7 +17,7 @@ export async function getNormalizedPosts(): Promise<CollectionEntry<'blog'>[]> {
 export async function getAllPosts(): Promise<CollectionEntry<'blog'>[]> {
   const posts = await getNormalizedPosts()
   return posts
-    .filter((post) => !post.data.draft && post.data.parent === undefined)
+    .filter((post) => !post.data.draft)
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
 }
 
@@ -40,11 +40,13 @@ export async function getAllProjects(): Promise<CollectionEntry<'projects'>[]> {
 }
 
 export function isSubpost(post: CollectionEntry<'blog'>): boolean {
-  return post.data.parent !== undefined
+  return post.data.parent !== undefined || post.id.includes('/')
 }
 
 export function getParentId(post: CollectionEntry<'blog'>): string {
-  return post.data.parent?.id || ''
+  if (post.data.parent) return post.data.parent.id;
+  if (post.id.includes('/')) return post.id.split('/')[0];
+  return ''
 }
 
 export async function getPostById(
@@ -59,7 +61,7 @@ export async function getSubpostsForParent(
 ): Promise<CollectionEntry<'blog'>[]> {
   const posts = await getNormalizedPosts()
   return posts
-    .filter((post) => !post.data.draft && post.data.parent?.id === parentId)
+    .filter((post) => !post.data.draft && getParentId(post) === parentId && post.id !== parentId)
     .sort((a, b) => {
       const orderA = a.data.order ?? 0
       const orderB = b.data.order ?? 0
@@ -170,8 +172,10 @@ export async function getParentPost(
   subpostId: string,
 ): Promise<CollectionEntry<'blog'> | null> {
   const post = await getPostById(subpostId)
-  if (!post || !post.data.parent) return null
-  return await getPostById(post.data.parent.id)
+  if (!post) return null
+  const parentId = getParentId(post)
+  if (!parentId) return null
+  return await getPostById(parentId)
 }
 
 export async function getSubpostCount(parentId: string): Promise<number> {

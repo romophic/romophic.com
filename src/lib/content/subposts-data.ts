@@ -37,8 +37,9 @@ export async function getSubpostsData(
   }
 
   const isCurrentSubpost = isSubpost(post)
+  const inferredParentId = getParentId(post)
   const rootParentId =
-    isCurrentSubpost && post.data.parent ? post.data.parent.id : parentId
+    isCurrentSubpost && inferredParentId ? inferredParentId : parentId
 
   const currentPost = !isCurrentSubpost ? post : null
   const subposts = await getSubpostsForParent(rootParentId)

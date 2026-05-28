@@ -10,7 +10,7 @@ import SubpostsHeader from '@/components/SubpostsHeader.astro'
 import TOCHeader from '@/components/TOCHeader.astro'
 import TOCSidebar from '@/components/TOCSidebar.astro'
 import Layout from '@/layouts/Layout.astro'
-import { getPostPageData } from '@/lib/data-utils'
+import { getPostPageData, getParentId } from '@/lib/data-utils'
 import { Image } from 'astro:assets'
 import type { CollectionEntry } from 'astro:content'
 import { render } from 'astro:content'
@@ -21,6 +21,7 @@ interface Props {
 
 const { post } = Astro.props
 const currentPostId = post.id
+const inferredParentId = getParentId(post)
 const { Content, headings } = await render(post)
 
 const {
@@ -46,8 +47,8 @@ const ogImageUrl = `/og/${ogSlug.replaceAll('/', '-')}.png`
       <SubpostsHeader
         slot="subposts-navigation"
         parentId={
-          isCurrentSubpost && post.data.parent
-            ? post.data.parent.id
+          isCurrentSubpost && inferredParentId
+            ? inferredParentId
             : currentPostId
         }
       />

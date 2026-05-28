@@ -22,6 +22,7 @@ export {
   getRecentPosts,
   getSortedTags,
   isSubpost,
+  getParentId,
   getSubpostCount,
   getCombinedReadingTime,
   groupPostsByYear,
