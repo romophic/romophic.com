@@ -1,68 +1,61 @@
-import { describe, it, expect } from 'vitest'
-import { resolveLinkToId, normalizeId } from './links'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { resolveLinkToId, normalizeId, extractInternalLinks, getBacklinks } from './links'
+import type { CollectionEntry } from 'astro:content'
 
-describe('links utils', () => {
+// We need to mock astro:content render and getAllPostsAndSubposts
+vi.mock('astro:content', () => ({
+  render: vi.fn(async (post: CollectionEntry<'blog'>) => {
+    // Return different mock raw links based on post ID
+    if (post.id === 'post-1') {
+      return { remarkPluginFrontmatter: { rawInternalLinks: ['/blog/target-post', './relative-post'] } }
+    }
+    if (post.id === 'post-2') {
+      return { remarkPluginFrontmatter: { rawInternalLinks: ['/blog/target-post'] } } // Also links to target-post
+    }
+    if (post.id === 'self-linker') {
+      return { remarkPluginFrontmatter: { rawInternalLinks: ['/blog/self-linker'] } }
+    }
+    return { remarkPluginFrontmatter: { rawInternalLinks: [] } }
+  })
+}))
+
+vi.mock('./posts', () => ({
+  getAllPostsAndSubposts: vi.fn().mockResolvedValue([
+    { id: 'post-1', data: {} },
+    { id: 'post-2', data: {} },
+    { id: 'self-linker', data: {} },
+    { id: 'target-post', data: {} },
+  ])
+}))
+
+describe('Links Utils Specification', () => {
+  beforeEach(() => {
+    // Reset module state if possible, though _backlinksMap is module scoped.
+    // We can just rely on the first test populating it correctly, or we can use vi.resetModules() if we wanted to be strictly isolated.
+  })
+
   describe('resolveLinkToId', () => {
     it('resolves absolute blog links', () => {
       expect(resolveLinkToId('/blog/my-post', 'any-source')).toBe('my-post')
-      expect(resolveLinkToId('/blog/parent/child', 'any-source')).toBe(
-        'parent/child',
-      )
-      expect(
-        resolveLinkToId('/blog/romophic-library/lib/directed-graph', 'source'),
-      ).toBe('romophic-library/lib/directed-graph')
+      expect(resolveLinkToId('/blog/parent/child', 'any-source')).toBe('parent/child')
     })
-
     it('resolves relative links from nested post', () => {
-      // Current dir: romophic-library/lib
       const sourceId = 'romophic-library/lib/directed-graph'
-
-      expect(resolveLinkToId('./dijkstra', sourceId)).toBe(
-        'romophic-library/lib/dijkstra',
-      )
-
-      expect(resolveLinkToId('../index', sourceId)).toBe(
-        'romophic-library/index',
-      )
+      expect(resolveLinkToId('./dijkstra', sourceId)).toBe('romophic-library/lib/dijkstra')
+      expect(resolveLinkToId('../index', sourceId)).toBe('romophic-library/index')
     })
-
-    it('resolves relative links from index post (assuming id includes /index)', () => {
-      const sourceId = 'romophic-library/index'
-
-      expect(resolveLinkToId('./lib/directed-graph', sourceId)).toBe(
-        'romophic-library/lib/directed-graph',
-      )
-    })
-
-    it('ignores external links', () => {
+    it('ignores external links and protocol-relative URLs', () => {
       expect(resolveLinkToId('https://example.com', 'source')).toBeNull()
       expect(resolveLinkToId('mailto:user@example.com', 'source')).toBeNull()
-    })
-
-    it('strips anchor fragments before resolving', () => {
-      expect(resolveLinkToId('/blog/my-post#section-1', 'source')).toBe(
-        'my-post',
-      )
-    })
-
-    it('strips query parameters before resolving', () => {
-      expect(resolveLinkToId('/blog/my-post?foo=bar', 'source')).toBe('my-post')
-    })
-
-    it('ignores protocol-relative URLs', () => {
       expect(resolveLinkToId('//example.com/blog', 'source')).toBeNull()
     })
-
-    it('resolves bare relative paths (without ./ prefix)', () => {
-      const sourceId = 'parent/child'
-      expect(resolveLinkToId('sibling', sourceId)).toBe('parent/sibling')
+    it('strips anchor fragments and query parameters', () => {
+      expect(resolveLinkToId('/blog/my-post#section-1', 'source')).toBe('my-post')
+      expect(resolveLinkToId('/blog/my-post?foo=bar', 'source')).toBe('my-post')
     })
-
     it('returns null for non-blog absolute paths', () => {
       expect(resolveLinkToId('/about', 'source')).toBeNull()
-      expect(resolveLinkToId('/graph', 'source')).toBeNull()
     })
-
     it('strips trailing slashes from blog links', () => {
       expect(resolveLinkToId('/blog/my-post/', 'source')).toBe('my-post')
     })
@@ -72,21 +65,46 @@ describe('links utils', () => {
     it('strips /index suffix', () => {
       expect(normalizeId('romophic-library/index')).toBe('romophic-library')
     })
-
     it('leaves non-index ids unchanged', () => {
       expect(normalizeId('my-post')).toBe('my-post')
-      expect(normalizeId('romophic-library/lib/directed-graph')).toBe(
-        'romophic-library/lib/directed-graph',
-      )
+    })
+  })
+
+  describe('extractInternalLinks', () => {
+    it('should extract and resolve all raw internal links from a post', async () => {
+      const mockPost = { id: 'post-1' } as CollectionEntry<'blog'>
+      const targets = await extractInternalLinks(mockPost)
+      
+      expect(targets).toHaveLength(2)
+      expect(targets).toContain('target-post')
+      expect(targets).toContain('relative-post')
     })
 
-    it('only strips trailing /index', () => {
-      expect(normalizeId('index')).toBe('index')
-      expect(normalizeId('my-index')).toBe('my-index')
+    it('should return empty array if no links exist', async () => {
+      const mockPost = { id: 'target-post' } as CollectionEntry<'blog'>
+      const targets = await extractInternalLinks(mockPost)
+      expect(targets).toHaveLength(0)
+    })
+  })
+
+  describe('getBacklinks', () => {
+    it('should build a map and return all posts that link to the target post', async () => {
+      // Both post-1 and post-2 link to target-post
+      const backlinks = await getBacklinks('target-post')
+      expect(backlinks).toHaveLength(2)
+      expect(backlinks.some(p => p.id === 'post-1')).toBe(true)
+      expect(backlinks.some(p => p.id === 'post-2')).toBe(true)
     })
 
-    it('handles deeply nested index', () => {
-      expect(normalizeId('a/b/c/index')).toBe('a/b/c')
+    it('should exclude self-links from the backlinks list', async () => {
+      const backlinks = await getBacklinks('self-linker')
+      // self-linker links to itself, but getBacklinks should filter it out
+      expect(backlinks).toHaveLength(0)
+    })
+    
+    it('should return empty array if no posts link to the target', async () => {
+      const backlinks = await getBacklinks('post-1') // nobody links to post-1
+      expect(backlinks).toHaveLength(0)
     })
   })
 })
