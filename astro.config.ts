@@ -4,6 +4,9 @@ import mdx from '@astrojs/mdx'
 import sitemap from '@astrojs/sitemap'
 import icon from 'astro-icon'
 import pagefind from 'astro-pagefind'
+import astroExpressiveCode from 'astro-expressive-code'
+import { pluginCollapsibleSections } from '@expressive-code/plugin-collapsible-sections'
+import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers'
 
 import { rehypeHeadingIds } from '@astrojs/markdown-remark'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
@@ -21,7 +24,23 @@ export default defineConfig({
   prefetch: {
     defaultStrategy: 'hover',
   },
-  integrations: [mdx(), sitemap(), icon(), pagefind()],
+  integrations: [
+    astroExpressiveCode({
+      themes: ['github-light', 'github-dark'],
+      plugins: [pluginCollapsibleSections(), pluginLineNumbers()],
+      useDarkModeMediaQuery: false,
+      themeCssSelector: (theme) => `.${theme.type}`,
+      styleOverrides: {
+        borderRadius: '0.5rem',
+        codeFontFamily: 'var(--font-mono)',
+        uiFontFamily: 'var(--font-sans)',
+      },
+    }),
+    mdx(),
+    sitemap(),
+    icon(),
+    pagefind(),
+  ],
   vite: {
     plugins: [tailwindcss()],
     build: {
@@ -41,14 +60,6 @@ export default defineConfig({
     checkOrigin: true,
   },
   markdown: {
-    shikiConfig: {
-      themes: {
-        light: 'github-light',
-        dark: 'github-dark',
-      },
-      wrap: true,
-    },
-    syntaxHighlight: 'shiki',
     rehypePlugins: [
       [
         rehypeExternalLinks,

@@ -91,7 +91,6 @@
 
     :where(code):not(:where(.not-prose, .not-prose *)) {
       @apply bg-muted/50 text-foreground relative rounded-sm px-[0.3rem] py-[0.2rem] text-sm font-medium break-words;
-      @apply [&>span[data-line='']>*]:text-(--shiki-light) dark:[&>span[data-line='']>*]:text-(--shiki-dark);
     }
 
     :where(blockquote):not(:where(.not-prose, .not-prose *)) {
@@ -138,7 +137,7 @@
     }
 
     :where(pre):not(:where(.not-prose, .not-prose *)) {
-      @apply max-h-[min(68vh,1000px)] overflow-y-auto [&::-webkit-scrollbar-corner]:hidden;
+      @apply [&::-webkit-scrollbar-corner]:hidden;
     }
 
     :where(summary):not(:where(.not-prose, .not-prose *)) {
