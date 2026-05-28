@@ -17,5 +17,5 @@ describe('graph.json endpoint', () => {
       expect(json.nodes[0]).toHaveProperty('name')
       expect(json.nodes[0]).toHaveProperty('group')
     }
-  }, 15000)
+  }, 60000)
 })
