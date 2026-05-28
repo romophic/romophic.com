@@ -5,6 +5,7 @@ import {
   getPostReadingTime,
   getSubpostsForParent,
   isSubpost,
+  getParentId,
 } from './posts'
 
 type SubpostWithReadingTime = Awaited<
