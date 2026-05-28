@@ -80,8 +80,8 @@ export async function getAdjacentPosts(currentId: string): Promise<{
   const currentPost = await getPostById(currentId)
   if (!currentPost) return { newer: null, older: null, parent: null }
 
-  if (currentPost.data.parent) {
-    const parentId = currentPost.data.parent.id
+  if (isSubpost(currentPost)) {
+    const parentId = getParentId(currentPost)
     const parent = (await getPostById(parentId)) || null
 
     const subposts = await getSubpostsForParent(parentId)
@@ -200,7 +200,7 @@ export async function getCombinedReadingTime(postId: string): Promise<string> {
   // We need to parse the integer from it
   let totalMinutes = parseInt(parentFrontmatter.minutesRead) || 0
 
-  if (!post.data.parent) {
+  if (!isSubpost(post)) {
     const subposts = await getSubpostsForParent(postId)
     for (const subpost of subposts) {
       const { remarkPluginFrontmatter: subFrontmatter } = await render(subpost)
