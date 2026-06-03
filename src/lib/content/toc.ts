@@ -1,13 +1,12 @@
 import { render } from 'astro:content'
-import { getPostById, getSubpostsForParent, isSubpost } from './posts'
+import { getParentId, getPostById, getSubpostsForParent, isSubpost } from './posts'
 import type { TOCSection } from '@/types'
 
 export async function getTOCSections(postId: string): Promise<TOCSection[]> {
   const post = await getPostById(postId)
   if (!post) return []
 
-  const parentId =
-    isSubpost(post) && post.data.parent ? post.data.parent.id : postId
+  const parentId = isSubpost(post) ? getParentId(post) : postId
   const parentPost = isSubpost(post) ? await getPostById(parentId) : post
 
   if (!parentPost) return []

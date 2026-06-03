@@ -135,13 +135,12 @@ describe('Blog Content Data Layer Specification', () => {
       it('should return all normalized posts and filter out drafts', async () => {
         const posts = await getAllPosts()
         expect(posts.some((p) => p.id === 'draft-post')).toBe(false)
-        expect(posts.length).toBe(5) // standalone, series, part-1, part-2, legacy
+        expect(posts.length).toBe(2) // standalone, series
       })
       it('should sort the resulting posts by date in descending order', async () => {
         const posts = await getAllPosts()
         expect(posts[0].id).toBe('standalone') // 2025-01-01
-        expect(posts[1].id).toBe('legacy-subpost') // 2024-01-04
-        expect(posts[2].id).toBe('series/part-2') // 2024-01-03
+        expect(posts[1].id).toBe('series') // 2024-01-01
       })
     })
 
@@ -166,11 +165,11 @@ describe('Blog Content Data Layer Specification', () => {
   describe('Navigation & Adjacency', () => {
     describe('getAdjacentPosts', () => {
       it('should return the next and previous post from the global pool for a standalone post', async () => {
-        // Global chronological order: standalone (2025-01-01), legacy (2024-01-04), part-2, part-1, series
+        // Global chronological order: standalone (2025-01-01), series (2024-01-01)
         const adjacent = await getAdjacentPosts('standalone')
         expect(adjacent.parent).toBeNull()
         expect(adjacent.newer).toBeNull() // Standalone is the newest post
-        expect(adjacent.older?.id).toBe('legacy-subpost')
+        expect(adjacent.older?.id).toBe('series')
       })
 
       it('should return the adjacent parts specifically from within the same series for a subpost', async () => {

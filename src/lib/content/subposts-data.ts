@@ -1,8 +1,8 @@
 import {
+  calculateReadingTimeFast,
   getCombinedReadingTime,
   getParentPost,
   getPostById,
-  getPostReadingTime,
   getSubpostsForParent,
   isSubpost,
   getParentId,
@@ -52,19 +52,17 @@ export async function getSubpostsData(
   const isActivePost = activePost?.id === currentPostId
 
   const activePostReadingTime = activePost
-    ? await getPostReadingTime(activePost.id)
+    ? calculateReadingTimeFast(activePost.body)
     : null
   const activePostCombinedReadingTime =
     activePost && subposts.length > 0
       ? await getCombinedReadingTime(activePost.id)
       : null
 
-  const subpostsWithReadingTime = await Promise.all(
-    subposts.map(async (subpost) => ({
-      ...subpost,
-      readingTime: await getPostReadingTime(subpost.id),
-    })),
-  )
+  const subpostsWithReadingTime = subposts.map((subpost) => ({
+    ...subpost,
+    readingTime: calculateReadingTimeFast(subpost.body),
+  }))
 
   const currentSubpostDetails = isCurrentSubpost
     ? (subpostsWithReadingTime.find(

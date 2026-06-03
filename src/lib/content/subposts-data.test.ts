@@ -1,20 +1,20 @@
 import { describe, it, expect, vi } from 'vitest'
 import { getSubpostsData } from './subposts-data'
-import type { CollectionEntry } from 'astro:content'
+
 
 // Mock the posts utilities that getSubpostsData relies on
 vi.mock('./posts', () => {
   return {
     getPostById: vi.fn(async (id: string) => {
-      const posts: Record<string, any> = {
+      const posts: Record<string, { id: string, data: object }> = {
         'standalone': { id: 'standalone', data: {} },
         'series': { id: 'series', data: {} },
         'series/part-1': { id: 'series/part-1', data: {} },
       }
       return posts[id] || null
     }),
-    isSubpost: vi.fn((post: any) => post.id.includes('/')),
-    getParentId: vi.fn((post: any) => (post.id.includes('/') ? post.id.split('/')[0] : '')),
+    isSubpost: vi.fn((post: { id: string }) => post.id.includes('/')),
+    getParentId: vi.fn((post: { id: string }) => (post.id.includes('/') ? post.id.split('/')[0] : '')),
     getParentPost: vi.fn(async (id: string) => {
       if (id.includes('/')) return { id: id.split('/')[0], data: {} }
       return null

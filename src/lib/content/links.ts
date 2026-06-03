@@ -34,6 +34,11 @@ export async function extractInternalLinks(
 // Cache for the O(N) backlinks map
 let _backlinksMap: Map<string, CollectionEntry<'blog'>[]> | null = null
 
+/** Reset the cache (for testing). */
+export function _resetBacklinksCache(): void {
+  _backlinksMap = null
+}
+
 export function resolveLinkToId(url: string, sourceId: string): string | null {
   const cleanUrl = url.split('#')[0].split('?')[0]
 

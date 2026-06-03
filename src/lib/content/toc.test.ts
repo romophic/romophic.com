@@ -28,7 +28,7 @@ vi.mock('./posts', () => ({
     if (id === 'missing-parent') return { id: 'missing-parent', data: { parent: { id: 'non-existent' } } }
     return null
   }),
-  isSubpost: vi.fn((post: any) => post.id.includes('/') || post.data.parent),
+  isSubpost: vi.fn((post: { id: string, data: { parent?: unknown } }) => post.id.includes('/') || post.data.parent),
   getSubpostsForParent: vi.fn(async (parentId: string) => {
     if (parentId === 'parent') {
       return [{ id: 'parent/child-1', data: { title: 'Child 1' } }]
