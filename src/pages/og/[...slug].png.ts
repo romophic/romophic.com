@@ -137,7 +137,7 @@ export const GET = async ({
     title: post.data.title,
     date: post.data.date.toISOString(),
     siteTitle: SITE.title,
-    version: 'v7', // Increment version
+    version: SITE.version ?? '1', // Cache buster: update via SITE config
   })
 
   // Try cache

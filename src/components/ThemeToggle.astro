@@ -6,9 +6,8 @@ import { Icon } from 'astro-icon/components'
 
 <button
   type="button"
-  class={getButtonStyles({ variant: 'ghost', size: 'icon' })}
+  class={`${getButtonStyles({ variant: 'ghost', size: 'icon' })} -my-2 -me-2 size-8`}
   title="Toggle theme"
-  class="-my-2 -me-2 size-8"
   data-theme-toggle
 >
   <div class="relative flex items-center justify-center">

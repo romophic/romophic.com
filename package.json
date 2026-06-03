@@ -5,7 +5,6 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "start": "astro dev",
     "build": "astro check && astro build && pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
@@ -14,7 +13,6 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.9",
     "@astrojs/markdown-remark": "^7.1.2",
     "@astrojs/mdx": "^5.0.6",
     "@astrojs/rss": "^4.0.18",
@@ -31,7 +29,6 @@
     "d3-zoom": "^3.0.0",
     "giscus": "^1.6.0",
     "katex": "^0.16.47",
-    "mdast-util-to-string": "^4.0.0",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-external-links": "^3.0.0",
     "rehype-katex": "^7.0.1",
@@ -40,10 +37,10 @@
     "satori": "^0.26.0",
     "sharp": "^0.34.5",
     "tailwindcss": "^4.3.0",
-    "typescript": "^6.0.3",
-    "unist-util-visit": "^5.1.0"
+    "typescript": "^6.0.3"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.9",
     "@eslint/js": "^10.0.1",
     "@expressive-code/plugin-collapsible-sections": "^0.42.0",
     "@expressive-code/plugin-line-numbers": "^0.42.0",

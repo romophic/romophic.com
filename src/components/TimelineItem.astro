@@ -1,0 +1,51 @@
+---
+import { Icon } from 'astro-icon/components'
+import TechBadge from './TechBadge.astro'
+
+interface Props {
+  title: string
+  period: string
+  description?: string
+  link?: string
+  techs?: string[]
+}
+
+const { title, period, description, link, techs } = Astro.props
+const isExternal = link?.startsWith('http')
+---
+
+<div class="relative">
+  <div class="border-foreground bg-background absolute top-1.5 -left-[31px] size-4 rounded-full border shadow-sm" />
+  <div class="flex flex-col gap-1">
+    <span class="text-muted-foreground font-mono text-xs">
+      {period}
+    </span>
+    <h3 class="text-lg leading-none font-bold">{title}</h3>
+    {description && (
+      <p class="text-muted-foreground mt-1 text-sm leading-relaxed">
+        {description}
+      </p>
+    )}
+    {link && (
+      <a
+        href={link}
+        class="text-primary hover:text-primary/80 mt-1 inline-flex items-center gap-1 text-sm font-medium transition-colors"
+        target={isExternal ? '_blank' : undefined}
+        rel={isExternal ? 'noopener noreferrer' : undefined}
+      >
+        <Icon
+          name={isExternal ? 'lucide:external-link' : 'lucide:arrow-right'}
+          class="size-3.5"
+        />
+        詳細を見る
+      </a>
+    )}
+    {techs && techs.length > 0 && (
+      <div class="mt-2 flex flex-wrap gap-2">
+        {techs.map((tech) => (
+          <TechBadge tech={tech} />
+        ))}
+      </div>
+    )}
+  </div>
+</div>

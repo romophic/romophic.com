@@ -9,6 +9,7 @@ export type Site = {
   locale: string
   featuredPostCount: number
   postsPerPage: number
+  version?: string
 }
 
 export type SocialLink = {
@@ -44,7 +45,6 @@ export interface D3GraphNode extends SimulationNodeDatum {
   val: number
   degree?: number
   category?: number
-  color?: string
 }
 
 export interface D3GraphLink extends SimulationLinkDatum<D3GraphNode> {

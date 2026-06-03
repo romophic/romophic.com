@@ -30,10 +30,10 @@ const subpostCount = !isSubpost(entry) ? await getSubpostCount(entry.id) : 0
     class="from-primary/0 via-primary/0 to-primary/0 group-hover:from-primary/5 absolute inset-0 -z-10 bg-gradient-to-br opacity-0 transition-opacity duration-500 group-hover:to-purple-500/5 group-hover:opacity-100"
   >
   </div>
-  <a
-    href={`/${entry.collection}/${entry.id}`}
-    class="flex flex-col gap-4 sm:flex-row"
-  >
+  <div class="flex flex-col gap-4 sm:flex-row">
+    <a href={`/${entry.collection}/${entry.id}`} class="absolute inset-0 z-10">
+      <span class="sr-only">Read {entry.data.title}</span>
+    </a>
     {
       entry.data.image && (
         <div class="aspect-[1200/630] w-full overflow-hidden rounded-lg sm:max-w-3xs sm:shrink-0 sm:self-start">
@@ -104,5 +104,5 @@ const subpostCount = !isSubpost(entry) ? await getSubpostCount(entry.id) : 0
         )
       }
     </div>
-  </a>
+  </div>
 </div>

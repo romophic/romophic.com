@@ -2,6 +2,8 @@
 import ThemeToggle from '@/components/ThemeToggle.astro'
 import { ICONS, NAV_LINKS, SITE } from '@/consts'
 import { Icon } from 'astro-icon/components'
+
+const currentPath = Astro.url.pathname
 ---
 
 <div>
@@ -21,6 +23,7 @@ import { Icon } from 'astro-icon/components'
             <a
               href={item.href}
               class="text-foreground/60 hover:text-foreground capitalize transition-colors"
+              aria-current={currentPath.startsWith(item.href) ? 'page' : undefined}
             >
               {item.label.toLowerCase()}
             </a>

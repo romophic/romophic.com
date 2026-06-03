@@ -3,7 +3,7 @@ import { defineCollection, reference } from 'astro:content'
 import { z } from 'astro/zod'
 
 const blog = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/blog' }),
+  loader: glob({ pattern: ['**/*.{md,mdx}', '!**/_*'], base: './src/content/blog' }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
@@ -14,7 +14,7 @@ const blog = defineCollection({
       image: image().optional(),
       tags: z.array(z.string()).optional(),
       authors: z.array(reference('authors')).optional(),
-      draft: z.boolean().optional(),
+      draft: z.boolean().default(false),
     }),
 })
 
