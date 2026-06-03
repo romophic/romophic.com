@@ -192,19 +192,19 @@ export function calculateReadingTimeFast(body: string): string {
 export async function getPostReadingTime(postId: string): Promise<string> {
   const post = await getPostById(postId)
   if (!post) return '0 min read'
-  return calculateReadingTimeFast(post.body)
+  return calculateReadingTimeFast(post.body || '')
 }
 
 export async function getCombinedReadingTime(postId: string): Promise<string> {
   const post = await getPostById(postId)
   if (!post) return '0 min read'
 
-  let totalMinutes = calculateReadingTimeMinutes(post.body)
+  let totalMinutes = calculateReadingTimeMinutes(post.body || '')
 
   if (!isSubpost(post)) {
     const subposts = await getSubpostsForParent(postId)
     for (const subpost of subposts) {
-      totalMinutes += calculateReadingTimeMinutes(subpost.body)
+      totalMinutes += calculateReadingTimeMinutes(subpost.body || '')
     }
   }
 

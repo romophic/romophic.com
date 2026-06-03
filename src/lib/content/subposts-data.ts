@@ -52,7 +52,7 @@ export async function getSubpostsData(
   const isActivePost = activePost?.id === currentPostId
 
   const activePostReadingTime = activePost
-    ? calculateReadingTimeFast(activePost.body)
+    ? calculateReadingTimeFast(activePost.body || '')
     : null
   const activePostCombinedReadingTime =
     activePost && subposts.length > 0
@@ -61,7 +61,7 @@ export async function getSubpostsData(
 
   const subpostsWithReadingTime = subposts.map((subpost) => ({
     ...subpost,
-    readingTime: calculateReadingTimeFast(subpost.body),
+    readingTime: calculateReadingTimeFast(subpost.body || ''),
   }))
 
   const currentSubpostDetails = isCurrentSubpost

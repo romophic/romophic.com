@@ -76,7 +76,7 @@ describe('renderGraph (Mocked)', () => {
     } as unknown as CanvasRenderingContext2D
 
     const nodes = [makeNode({ id: '1' }), makeNode({ id: '2', group: 'tag' })]
-    const links = [{ source: nodes[0], target: nodes[1] } as unknown as { source: string, target: string }]
+    const links = [{ source: nodes[0], target: nodes[1], value: 1 } as unknown as { source: string, target: string, value: number }]
     
     // Call the function
     renderGraph(

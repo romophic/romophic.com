@@ -40,7 +40,7 @@ describe('Subposts Data Aggregation Specification', () => {
       
       expect(data.isActivePost).toBe(true)
       expect(data.isCurrentSubpost).toBe(false)
-      expect(data.activePost.id).toBe('standalone')
+      expect(data.activePost!.id).toBe('standalone')
       expect(data.activePostReadingTime).toBe('5 min read')
       
       // Standalone has no subposts, so combined reading time is null
@@ -54,7 +54,7 @@ describe('Subposts Data Aggregation Specification', () => {
       
       expect(data.isActivePost).toBe(true)
       expect(data.isCurrentSubpost).toBe(false)
-      expect(data.activePost.id).toBe('series')
+      expect(data.activePost!.id).toBe('series')
       expect(data.activePostReadingTime).toBe('5 min read')
       
       // Parent with subposts should have combined reading time
@@ -75,7 +75,7 @@ describe('Subposts Data Aggregation Specification', () => {
       
       expect(data.isActivePost).toBe(false) // The activePost refers to the parent in this context
       expect(data.isCurrentSubpost).toBe(true)
-      expect(data.activePost.id).toBe('series') // The parent is resolved correctly
+      expect(data.activePost!.id).toBe('series') // The parent is resolved correctly
       
       // Subpost details should be extracted correctly from the list
       expect(data.currentSubpostDetails).not.toBeNull()
