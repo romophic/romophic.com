@@ -4,9 +4,7 @@ import type { D3GraphNode } from '@/types'
 import type { GraphThemeColors } from './types'
 
 const mockTheme: GraphThemeColors = {
-  background: '#000',
   nodeDefault: '#aaa',
-  nodeTag: '#a855f7',
   link: '#333',
   linkHighlight: '#fff',
   grid: '#111',
@@ -48,8 +46,8 @@ describe('getNodeColor', () => {
 
   it('returns different colors for dark vs light mode when category is set', () => {
     const node = makeNode({ category: 1 })
-    const darkColor = getNodeColor(node, true, mockTheme)
-    const lightColor = getNodeColor(node, false, mockTheme)
+    getNodeColor(node, true, mockTheme)
+    getNodeColor(node, false, mockTheme)
     // They use different palette arrays so colors should differ
   })
 })
@@ -78,7 +76,7 @@ describe('renderGraph (Mocked)', () => {
     } as unknown as CanvasRenderingContext2D
 
     const nodes = [makeNode({ id: '1' }), makeNode({ id: '2', group: 'tag' })]
-    const links = [{ source: nodes[0], target: nodes[1] } as any]
+    const links = [{ source: nodes[0], target: nodes[1] } as unknown as { source: string, target: string }]
     
     // Call the function
     renderGraph(

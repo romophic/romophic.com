@@ -110,7 +110,7 @@ export function setupInteraction(
       onHover(hovered, neighborIds)
     }
 
-    document.body.style.cursor = hovered ? 'pointer' : 'default'
+    canvas.style.cursor = hovered ? 'pointer' : 'default'
   }
 
   const handleClickEvent = () => {

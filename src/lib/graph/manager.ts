@@ -1,6 +1,7 @@
 import { GRAPH_CONFIG } from '@/consts'
 import type { D3GraphLink, D3GraphNode } from '@/types'
 import { zoomIdentity, type ZoomTransform } from 'd3-zoom'
+import type { Simulation } from 'd3-force'
 import { renderGraph } from './renderer'
 import { setupPhysics } from './physics'
 import { setupInteraction, EMPTY_SET } from './interaction'
@@ -20,10 +21,12 @@ export class GraphViewManager {
 
   private size = { width: 0, height: 0 }
   private animationFrameId: number | null = null
+  private fadeInTimeoutId: ReturnType<typeof setTimeout> | null = null
   private needsRedraw = true
   private lastDrawTime = 0
   private isInteractive = false
 
+  private simulation: Simulation<D3GraphNode, D3GraphLink> | null = null
   private resizeObserver: ResizeObserver | null = null
   private styleObserver: MutationObserver | null = null
   private themeObserver: MutationObserver | null = null
@@ -48,9 +51,9 @@ export class GraphViewManager {
     this.handleNodeClick = this.handleNodeClick.bind(this)
 
     this.initThemeDetection()
-    this.fetchData().then(() => {
-      this.initVisualization()
-    })
+    this.fetchData()
+      .then(() => this.initVisualization())
+      .catch((err) => console.error('Graph initialization failed:', err))
   }
 
   private initThemeDetection() {
@@ -70,90 +73,84 @@ export class GraphViewManager {
   }
 
   private async fetchData() {
-    try {
-      const endpoint = '/graph.json'
-      const res = await fetch(endpoint)
-      const fetchedData: { nodes: D3GraphNode[]; links: D3GraphLink[] } =
-        await res.json()
+    const endpoint = '/graph.json'
+    const res = await fetch(endpoint)
+    if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch ${endpoint}`)
+    const fetchedData: { nodes: D3GraphNode[]; links: D3GraphLink[] } =
+      await res.json()
 
-      const seenIds = new Set<string>()
-      const nodes: D3GraphNode[] = []
+    const seenIds = new Set<string>()
+    const nodes: D3GraphNode[] = []
 
-      fetchedData.nodes.forEach((n) => {
-        if (!n.id || seenIds.has(n.id)) return
-        seenIds.add(n.id)
-        nodes.push({ ...n, val: 5, degree: 0 })
-      })
+    fetchedData.nodes.forEach((n) => {
+      if (!n.id || seenIds.has(n.id)) return
+      seenIds.add(n.id)
+      nodes.push({ ...n, val: 5, degree: 0 })
+    })
 
-      const nodeMap = new Map<string, D3GraphNode>(nodes.map((n) => [n.id, n]))
-      const links: D3GraphLink[] = []
+    const nodeMap = new Map<string, D3GraphNode>(nodes.map((n) => [n.id, n]))
+    const links: D3GraphLink[] = []
 
-      let categoryIdx = 0
-      const tagToCategory = new Map<string, number>()
+    let categoryIdx = 0
+    const tagToCategory = new Map<string, number>()
 
-      fetchedData.links.forEach((l) => {
-        const sourceId = typeof l.source === 'object' ? l.source.id : l.source
-        const targetId = typeof l.target === 'object' ? l.target.id : l.target
+    fetchedData.links.forEach((l) => {
+      const sourceId = typeof l.source === 'object' ? l.source.id : l.source
+      const targetId = typeof l.target === 'object' ? l.target.id : l.target
 
-        if (nodeMap.has(sourceId) && nodeMap.has(targetId)) {
-          links.push(l)
-          const s = nodeMap.get(sourceId)!
-          const t = nodeMap.get(targetId)!
-          s.degree = (s.degree || 0) + 1
-          t.degree = (t.degree || 0) + 1
-        }
-      })
+      if (nodeMap.has(sourceId) && nodeMap.has(targetId)) {
+        links.push(l)
+        const s = nodeMap.get(sourceId)!
+        const t = nodeMap.get(targetId)!
+        s.degree = (s.degree || 0) + 1
+        t.degree = (t.degree || 0) + 1
+      }
+    })
 
-      nodes.forEach((n) => {
-        if (n.group === 'tag') {
-          tagToCategory.set(
-            n.id,
-            categoryIdx % GRAPH_CONFIG.theme.palettes.dark.length,
-          )
-          n.category = categoryIdx % GRAPH_CONFIG.theme.palettes.dark.length
-          categoryIdx++
-        }
-      })
+    nodes.forEach((n) => {
+      if (n.group === 'tag') {
+        tagToCategory.set(
+          n.id,
+          categoryIdx % GRAPH_CONFIG.theme.palettes.dark.length,
+        )
+        n.category = categoryIdx % GRAPH_CONFIG.theme.palettes.dark.length
+        categoryIdx++
+      }
+    })
 
-      const nodeToTag = new Map<string, string>()
-      links.forEach((l) => {
-        const sId =
-          typeof l.source === 'object' ? l.source.id : String(l.source)
-        const tId =
-          typeof l.target === 'object' ? l.target.id : String(l.target)
-        if (nodeMap.get(tId)?.group === 'tag' && !nodeToTag.has(sId)) {
-          nodeToTag.set(sId, tId)
-        } else if (nodeMap.get(sId)?.group === 'tag' && !nodeToTag.has(tId)) {
-          nodeToTag.set(tId, sId)
-        }
-      })
+    const nodeToTag = new Map<string, string>()
+    links.forEach((l) => {
+      const sId = typeof l.source === 'object' ? l.source.id : String(l.source)
+      const tId = typeof l.target === 'object' ? l.target.id : String(l.target)
+      if (nodeMap.get(tId)?.group === 'tag' && !nodeToTag.has(sId)) {
+        nodeToTag.set(sId, tId)
+      } else if (nodeMap.get(sId)?.group === 'tag' && !nodeToTag.has(tId)) {
+        nodeToTag.set(tId, sId)
+      }
+    })
 
-      nodes.forEach((n) => {
-        if (n.group === 'post') {
-          const tagId = nodeToTag.get(n.id)
-          if (tagId) {
-            n.category = tagToCategory.get(tagId)
-          }
-        }
-      })
+    nodes.forEach((n) => {
+      if (n.group === 'post') {
+        const tagId = nodeToTag.get(n.id)
+        if (tagId) n.category = tagToCategory.get(tagId)
+      }
+    })
 
-      const initialX = this.container.clientWidth / 2 || window.innerWidth / 2
-      const initialY = this.container.clientHeight / 2 || window.innerHeight / 2
-      const { initialRadius } = GRAPH_CONFIG.physics
-      nodes.forEach((n) => {
-        n.x = initialX + (Math.random() - 0.5) * initialRadius
-        n.y = initialY + (Math.random() - 0.5) * initialRadius
-      })
+    const initialX = this.container.clientWidth / 2 || window.innerWidth / 2
+    const initialY = this.container.clientHeight / 2 || window.innerHeight / 2
+    const { initialRadius } = GRAPH_CONFIG.physics
+    nodes.forEach((n) => {
+      n.x = initialX + (Math.random() - 0.5) * initialRadius
+      n.y = initialY + (Math.random() - 0.5) * initialRadius
+    })
 
-      this.data = { nodes, links }
+    this.data = { nodes, links }
 
-      setTimeout(() => {
-        this.container.classList.remove('opacity-0')
-        this.container.classList.add('opacity-100')
-      }, 100)
-    } catch (err) {
-      console.error('Failed to load graph data:', err)
-    }
+    this.fadeInTimeoutId = setTimeout(() => {
+      this.fadeInTimeoutId = null
+      this.container.classList.remove('opacity-0')
+      this.container.classList.add('opacity-100')
+    }, 100)
   }
 
   private updateCanvasSize() {
@@ -182,6 +179,7 @@ export class GraphViewManager {
       height,
       this.scheduleRender,
     )
+    this.simulation = simulation
     this.setPhysicsInteractive = setInteractive
 
     // Resize Observer
@@ -216,19 +214,15 @@ export class GraphViewManager {
 
     // Watch for interactive mode toggle via pointer-events on wrapper
     const wrapper =
-      this.container.closest('#graph-wrapper') || this.container.parentElement
+      this.container.closest('[data-graph-wrapper]') || this.container.parentElement
     if (wrapper) {
       this.isInteractive =
         (wrapper as HTMLElement).style.pointerEvents === 'auto'
       this.styleObserver = new MutationObserver(() => {
         this.isInteractive =
           (wrapper as HTMLElement).style.pointerEvents === 'auto'
-        if (this.setPhysicsInteractive) {
-          this.setPhysicsInteractive(this.isInteractive)
-        }
-        if (this.isInteractive) {
-          this.scheduleRender() // Force render when fully visible
-        }
+        this.setPhysicsInteractive?.(this.isInteractive)
+        if (this.isInteractive) this.scheduleRender()
       })
       this.styleObserver.observe(wrapper, {
         attributes: true,
@@ -236,11 +230,7 @@ export class GraphViewManager {
       })
     }
 
-    // Initial sync
-    if (this.setPhysicsInteractive) {
-      this.setPhysicsInteractive(this.isInteractive)
-    }
-
+    this.setPhysicsInteractive?.(this.isInteractive)
     this.scheduleRender()
   }
 
@@ -302,9 +292,9 @@ export class GraphViewManager {
     this.styleObserver?.disconnect()
     this.themeObserver?.disconnect()
     if (this.interactionCleanup) this.interactionCleanup()
-    if (this.animationFrameId !== null)
-      cancelAnimationFrame(this.animationFrameId)
-    // Clear simulation?
-    // d3-force doesn't strictly have a destroy, but alphaTarget(0).stop() would be used.
+    if (this.animationFrameId !== null) cancelAnimationFrame(this.animationFrameId)
+    if (this.fadeInTimeoutId !== null) clearTimeout(this.fadeInTimeoutId)
+    this.simulation?.alphaTarget(0).stop()
+    this.simulation?.on('tick', null)
   }
 }
