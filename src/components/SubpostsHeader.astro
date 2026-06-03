@@ -4,6 +4,10 @@ import { getSubpostsData } from '@/lib/data-utils'
 import { Icon } from 'astro-icon/components'
 import SubpostItem from './SubpostItem.astro'
 
+interface Props {
+  parentId: string
+}
+
 const { parentId } = Astro.props
 const currentPostId = Astro.params.id as string
 
@@ -102,49 +106,14 @@ const {
 }
 
 <script>
-  function updateScrollMaskClasses(
-    scrollContainer: HTMLElement,
-    maskTarget: HTMLElement,
-    options: {
-      topClass?: string
-      bottomClass?: string
-      threshold?: number
-    } = {},
-  ) {
-    const {
-      topClass = 'mask-t-from-90%',
-      bottomClass = 'mask-b-from-90%',
-      threshold = 5,
-    } = options
-    const { scrollTop, scrollHeight, clientHeight } = scrollContainer
-    const isAtTop = scrollTop <= threshold
-    const isAtBottom = scrollTop >= scrollHeight - clientHeight - threshold
-    maskTarget.classList.toggle(topClass, !isAtTop)
-    maskTarget.classList.toggle(bottomClass, !isAtBottom)
-  }
-
-  function scrollToCenter(
-    scrollContainer: HTMLElement,
-    targetElement: HTMLElement,
-  ) {
-    const containerRect = scrollContainer.getBoundingClientRect()
-    const targetRect = targetElement.getBoundingClientRect()
-    const currentItemTop =
-      targetRect.top - containerRect.top + scrollContainer.scrollTop
-    const targetScroll = Math.max(
-      0,
-      Math.min(
-        currentItemTop - (containerRect.height - targetRect.height) / 2,
-        scrollContainer.scrollHeight - scrollContainer.clientHeight,
-      ),
-    )
-    scrollContainer.scrollTop = targetScroll
-  }
+  import {
+    updateScrollMaskClasses,
+    scrollToCenter,
+  } from '@/lib/scroll-utils'
 
   class MobileSubposts extends HTMLElement {
     private scrollArea: HTMLElement | null = null
     private detailsElement: HTMLDetailsElement | null = null
-    private headerScrollArea: HTMLElement | null = null
 
     constructor() {
       super()
@@ -156,24 +125,18 @@ const {
     }
 
     disconnectedCallback() {
-      if (this.scrollArea) {
-        this.scrollArea.removeEventListener('scroll', this.updateScrollMask)
-      }
+      this.scrollArea?.removeEventListener('scroll', this.updateScrollMask)
     }
 
     init() {
       this.scrollArea = this.querySelector('[data-subposts-header-scroll]')
       this.detailsElement = this.querySelector('details')
-      this.headerScrollArea = this.querySelector(
-        '[data-subposts-header-scroll]',
-      )
-
       this.setupInteraction()
     }
 
     updateScrollMask() {
-      if (!this.scrollArea || !this.headerScrollArea) return
-      updateScrollMaskClasses(this.scrollArea, this.headerScrollArea, {
+      if (!this.scrollArea) return
+      updateScrollMaskClasses(this.scrollArea, this.scrollArea, {
         topClass: 'mask-t-from-80%',
         bottomClass: 'mask-b-from-80%',
       })
@@ -181,9 +144,7 @@ const {
 
     scrollToActive() {
       if (!this.scrollArea) return
-      const activeItem = this.scrollArea.querySelector(
-        '.mobile-subposts-active-item',
-      )
+      const activeItem = this.scrollArea.querySelector('.mobile-subposts-active-item')
       if (!activeItem) return
       scrollToCenter(this.scrollArea, activeItem as HTMLElement)
     }
@@ -206,8 +167,7 @@ const {
         })
       }
 
-      const links = this.querySelectorAll('.mobile-subposts-link')
-      links.forEach((link) => {
+      this.querySelectorAll('.mobile-subposts-link').forEach((link) => {
         link.addEventListener('click', () => {
           if (this.detailsElement) this.detailsElement.open = false
         })
@@ -217,3 +177,4 @@ const {
 
   customElements.define('mobile-subposts', MobileSubposts)
 </script>
+

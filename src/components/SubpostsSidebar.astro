@@ -3,6 +3,10 @@ import { ICONS } from '@/consts'
 import { getSubpostsData } from '@/lib/data-utils'
 import SubpostItem from './SubpostItem.astro'
 
+interface Props {
+  parentId: string
+}
+
 const { parentId } = Astro.props
 const currentPostId = Astro.params.id as string
 
@@ -67,119 +71,44 @@ const {
 </div>
 
 <script>
-  function updateScrollMaskClasses(
-    scrollContainer: HTMLElement,
-    maskTarget: HTMLElement,
-    options: {
-      topClass?: string
-      bottomClass?: string
-      threshold?: number
-    } = {},
-  ) {
-    const {
-      topClass = 'mask-t-from-90%',
-      bottomClass = 'mask-b-from-90%',
-      threshold = 5,
-    } = options
-    const { scrollTop, scrollHeight, clientHeight } = scrollContainer
-    const isAtTop = scrollTop <= threshold
-    const isAtBottom = scrollTop >= scrollHeight - clientHeight - threshold
-    maskTarget.classList.toggle(topClass, !isAtTop)
-    maskTarget.classList.toggle(bottomClass, !isAtBottom)
-  }
+  import { updateScrollMaskClasses, scrollToCenter } from '@/lib/scroll-utils'
 
-  function scrollToCenter(
-    scrollContainer: HTMLElement,
-    targetElement: HTMLElement,
-  ) {
-    const containerRect = scrollContainer.getBoundingClientRect()
-    const targetRect = targetElement.getBoundingClientRect()
-    const currentItemTop =
-      targetRect.top - containerRect.top + scrollContainer.scrollTop
-    const targetScroll = Math.max(
-      0,
-      Math.min(
-        currentItemTop - (containerRect.height - targetRect.height) / 2,
-        scrollContainer.scrollHeight - scrollContainer.clientHeight,
-      ),
-    )
-    scrollContainer.scrollTop = targetScroll
-  }
+  let scrollArea: HTMLElement | null = null
 
-  class SidebarState {
-    scrollArea: HTMLElement | null = null
-    sidebarScrollArea: HTMLElement | null = null
+  function init() {
+    const sidebarContainer = document.getElementById('subposts-sidebar-container')
+    if (!sidebarContainer) return
 
-    reset() {
-      this.scrollArea = null
-      this.sidebarScrollArea = null
-    }
-  }
-
-  const state = new SidebarState()
-
-  class SidebarScrollMask {
-    static update() {
-      if (!state.scrollArea || !state.sidebarScrollArea) return
-      updateScrollMaskClasses(state.scrollArea, state.sidebarScrollArea)
-    }
-  }
-
-  class SidebarScroll {
-    static toActive() {
-      if (!state.scrollArea) return
-      const activeItem = state.scrollArea.querySelector(
-        '.subposts-sidebar-active-item',
-      )
-      if (!activeItem) return
-      scrollToCenter(state.scrollArea, activeItem as HTMLElement)
-    }
-  }
-
-  class SidebarController {
-    static init() {
-      state.reset()
-
-      const sidebarContainer = document.getElementById(
-        'subposts-sidebar-container',
-      )
-      if (sidebarContainer) {
-        state.scrollArea = sidebarContainer.querySelector(
-          '[data-subposts-sidebar-scroll]',
-        )
-        state.sidebarScrollArea = sidebarContainer.querySelector(
-          '[data-subposts-sidebar-scroll]',
-        )
-
-        if (state.scrollArea) {
-          state.scrollArea.addEventListener(
-            'scroll',
-            SidebarScrollMask.update,
-            { passive: true },
-          )
-        }
-
-        requestAnimationFrame(() => {
-          SidebarScroll.toActive()
-          setTimeout(SidebarScrollMask.update, 100)
-        })
-      }
+    scrollArea = sidebarContainer.querySelector('[data-subposts-sidebar-scroll]')
+    if (scrollArea) {
+      scrollArea.addEventListener('scroll', updateMask, { passive: true })
     }
 
-    static cleanup() {
-      if (state.scrollArea) {
-        state.scrollArea.removeEventListener('scroll', SidebarScrollMask.update)
-      }
-      state.reset()
-    }
+    requestAnimationFrame(() => {
+      toActive()
+      setTimeout(updateMask, 100)
+    })
   }
 
-  document.addEventListener('astro:page-load', () => SidebarController.init())
-  document.addEventListener('astro:after-swap', () => {
-    SidebarController.cleanup()
-    SidebarController.init()
-  })
-  document.addEventListener('astro:before-swap', () =>
-    SidebarController.cleanup(),
-  )
+  function cleanup() {
+    scrollArea?.removeEventListener('scroll', updateMask)
+    scrollArea = null
+  }
+
+  function updateMask() {
+    if (!scrollArea) return
+    updateScrollMaskClasses(scrollArea, scrollArea)
+  }
+
+  function toActive() {
+    if (!scrollArea) return
+    const activeItem = scrollArea.querySelector('.subposts-sidebar-active-item')
+    if (!activeItem) return
+    scrollToCenter(scrollArea, activeItem as HTMLElement)
+  }
+
+  document.addEventListener('astro:page-load', init)
+  document.addEventListener('astro:before-swap', cleanup)
+  document.addEventListener('astro:after-swap', init)
 </script>
+

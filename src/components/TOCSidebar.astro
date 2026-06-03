@@ -188,5 +188,11 @@ const parentId =
     document
       .querySelectorAll('.prose h2, .prose h3, .prose h4, .prose h5, .prose h6')
       .forEach((el) => observer.observe(el))
+
+    document.addEventListener(
+      'astro:before-swap',
+      () => observer.disconnect(),
+      { once: true },
+    )
   })
 </script>

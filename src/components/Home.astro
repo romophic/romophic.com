@@ -32,7 +32,7 @@ const blog = await getRecentPosts(SITE.featuredPostCount)
     class="selection:bg-primary/20 selection:text-foreground relative min-h-svh w-full font-sans"
   >
     {/* 1. THE GRAPH (Fixed Background) */}
-    <div id="graph-wrapper" class="bg-background fixed inset-0 z-0">
+    <div id="graph-wrapper" data-graph-wrapper class="bg-background fixed inset-0 z-0">
       <GraphView class="h-full w-full" fullInteraction={true} />
     </div>
 
@@ -92,7 +92,7 @@ const blog = await getRecentPosts(SITE.featuredPostCount)
                     >
                       romophic
                     </h1>
-                    <p class="text-muted-foreground font-medium">👋</p>
+                    <p class="text-muted-foreground font-medium" aria-hidden="true">👋</p>
                   </div>
                 </div>
 
@@ -263,6 +263,12 @@ const blog = await getRecentPosts(SITE.featuredPostCount)
 
         window.addEventListener('scroll', onScroll, { passive: true })
         onScroll()
+
+        document.addEventListener(
+          'astro:before-swap',
+          () => window.removeEventListener('scroll', onScroll),
+          { once: true },
+        )
       })
     </script>
   </body>
