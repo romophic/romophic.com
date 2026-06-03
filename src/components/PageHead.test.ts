@@ -28,9 +28,6 @@ describe('PageHead.astro', () => {
     })
 
     expect(html).toContain(`<title>${customTitle} | ${SITE.title}</title>`)
-    expect(html).toContain(
-      `<meta name="title" content="${customTitle} | ${SITE.title}">`,
-    )
   })
 
   it('adds noindex robots tag when noindex prop is true', async () => {

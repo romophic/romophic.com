@@ -29,6 +29,7 @@ vi.mock('./posts', () => {
     }),
     getPostReadingTime: vi.fn(async () => '5 min read'),
     getCombinedReadingTime: vi.fn(async () => '10 min read'),
+    calculateReadingTimeFast: vi.fn(() => '5 min read'),
   }
 })
 

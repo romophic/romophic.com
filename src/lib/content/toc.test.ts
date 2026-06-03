@@ -29,6 +29,7 @@ vi.mock('./posts', () => ({
     return null
   }),
   isSubpost: vi.fn((post: { id: string, data: { parent?: unknown } }) => post.id.includes('/') || post.data.parent),
+  getParentId: vi.fn((post: { id: string }) => (post.id.includes('/') ? post.id.split('/')[0] : '')),
   getSubpostsForParent: vi.fn(async (parentId: string) => {
     if (parentId === 'parent') {
       return [{ id: 'parent/child-1', data: { title: 'Child 1' } }]
