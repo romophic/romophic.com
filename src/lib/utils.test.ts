@@ -15,6 +15,4 @@ describe('utils', () => {
       expect(formatted).toBe('2024/12/01')
     })
   })
-
-
 })

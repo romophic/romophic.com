@@ -11,7 +11,7 @@ describe('404.astro', () => {
     // Check for 404 header
     expect(html).toContain('404')
     expect(html).toContain('Page not found')
-    
+
     // Check for buttons
     expect(html).toContain('Go Home')
     expect(html).toContain('href="/"')

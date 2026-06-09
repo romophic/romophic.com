@@ -1,14 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { resolveLinkToId, normalizeId, extractInternalLinks, getBacklinks } from './links'
+import {
+  resolveLinkToId,
+  normalizeId,
+  extractInternalLinks,
+  getBacklinks,
+} from './links'
 import type { CollectionEntry } from 'astro:content'
 
 vi.mock('./posts', () => ({
   getAllPostsAndSubposts: vi.fn().mockResolvedValue([
-    { id: 'post-1', data: {}, body: 'Here is a [link](/blog/target-post) and another [rel](./relative-post)' },
+    {
+      id: 'post-1',
+      data: {},
+      body: 'Here is a [link](/blog/target-post) and another [rel](./relative-post)',
+    },
     { id: 'post-2', data: {}, body: 'Link to [target](/blog/target-post)' },
     { id: 'self-linker', data: {}, body: 'Link to [self](/blog/self-linker)' },
     { id: 'target-post', data: {}, body: 'No links here' },
-  ])
+  ]),
 }))
 
 describe('Links Utils Specification', () => {
@@ -20,12 +29,18 @@ describe('Links Utils Specification', () => {
   describe('resolveLinkToId', () => {
     it('resolves absolute blog links', () => {
       expect(resolveLinkToId('/blog/my-post', 'any-source')).toBe('my-post')
-      expect(resolveLinkToId('/blog/parent/child', 'any-source')).toBe('parent/child')
+      expect(resolveLinkToId('/blog/parent/child', 'any-source')).toBe(
+        'parent/child',
+      )
     })
     it('resolves relative links from nested post', () => {
       const sourceId = 'romophic-library/lib/directed-graph'
-      expect(resolveLinkToId('./dijkstra', sourceId)).toBe('romophic-library/lib/dijkstra')
-      expect(resolveLinkToId('../index', sourceId)).toBe('romophic-library/index')
+      expect(resolveLinkToId('./dijkstra', sourceId)).toBe(
+        'romophic-library/lib/dijkstra',
+      )
+      expect(resolveLinkToId('../index', sourceId)).toBe(
+        'romophic-library/index',
+      )
     })
     it('ignores external links and protocol-relative URLs', () => {
       expect(resolveLinkToId('https://example.com', 'source')).toBeNull()
@@ -33,7 +48,9 @@ describe('Links Utils Specification', () => {
       expect(resolveLinkToId('//example.com/blog', 'source')).toBeNull()
     })
     it('strips anchor fragments and query parameters', () => {
-      expect(resolveLinkToId('/blog/my-post#section-1', 'source')).toBe('my-post')
+      expect(resolveLinkToId('/blog/my-post#section-1', 'source')).toBe(
+        'my-post',
+      )
       expect(resolveLinkToId('/blog/my-post?foo=bar', 'source')).toBe('my-post')
     })
     it('returns null for non-blog absolute paths', () => {
@@ -55,12 +72,12 @@ describe('Links Utils Specification', () => {
 
   describe('extractInternalLinks', () => {
     it('should extract and resolve all raw internal links from a post', async () => {
-      const mockPost = { 
+      const mockPost = {
         id: 'post-1',
-        body: 'Here is a [link](/blog/target-post) and another [rel](./relative-post)'
+        body: 'Here is a [link](/blog/target-post) and another [rel](./relative-post)',
       } as CollectionEntry<'blog'>
       const targets = await extractInternalLinks(mockPost)
-      
+
       expect(targets).toHaveLength(2)
       expect(targets).toContain('target-post')
       expect(targets).toContain('relative-post')
@@ -78,8 +95,8 @@ describe('Links Utils Specification', () => {
       // Both post-1 and post-2 link to target-post
       const backlinks = await getBacklinks('target-post')
       expect(backlinks).toHaveLength(2)
-      expect(backlinks.some(p => p.id === 'post-1')).toBe(true)
-      expect(backlinks.some(p => p.id === 'post-2')).toBe(true)
+      expect(backlinks.some((p) => p.id === 'post-1')).toBe(true)
+      expect(backlinks.some((p) => p.id === 'post-2')).toBe(true)
     })
 
     it('should exclude self-links from the backlinks list', async () => {
@@ -87,7 +104,7 @@ describe('Links Utils Specification', () => {
       // self-linker links to itself, but getBacklinks should filter it out
       expect(backlinks).toHaveLength(0)
     })
-    
+
     it('should return empty array if no posts link to the target', async () => {
       const backlinks = await getBacklinks('post-1') // nobody links to post-1
       expect(backlinks).toHaveLength(0)

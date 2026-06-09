@@ -76,9 +76,16 @@ describe('renderGraph (Mocked)', () => {
     } as unknown as CanvasRenderingContext2D
 
     const nodes = [makeNode({ id: '1' }), makeNode({ id: '2', group: 'tag' })]
-    const links = [{ source: nodes[0], target: nodes[1], value: 1 } as unknown as { source: string, target: string, value: number }]
-    
-    // Call the function
+    // Make this tag -> post to cover the else branch in drawArrow
+    const links = [
+      { source: nodes[1], target: nodes[0], value: 1 } as unknown as {
+        source: string
+        target: string
+        value: number
+      },
+    ]
+
+    // Call the function in dark mode
     renderGraph(
       ctx,
       800,
@@ -90,9 +97,35 @@ describe('renderGraph (Mocked)', () => {
       mockTheme,
       nodes[0],
       new Set(['2']),
-      true
+      true,
     )
-    
+
+    // Call the function in light mode and test post -> tag
+    const lightNodes = [
+      makeNode({ id: '1' }),
+      makeNode({ id: '2', group: 'tag' }),
+    ]
+    const lightLinks = [
+      { source: lightNodes[0], target: lightNodes[1], value: 1 } as unknown as {
+        source: string
+        target: string
+        value: number
+      },
+    ]
+    renderGraph(
+      ctx,
+      800,
+      600,
+      lightNodes,
+      lightLinks,
+      { x: 0, y: 0, k: 1 },
+      false, // isDark = false
+      mockTheme,
+      lightNodes[0],
+      new Set(['2']),
+      true, // isInteractive = true
+    )
+
     // Check that ctx methods were called
     expect(ctx.clearRect).toHaveBeenCalled()
     expect(ctx.fill).toHaveBeenCalled()

@@ -6,7 +6,7 @@ describe('tech-badges', () => {
     const badge = getTechBadge('React')
     expect(badge).toEqual({
       icon: TECH_BADGES['React'].icon,
-      colorClass: expect.any(String)
+      colorClass: expect.any(String),
     })
   })
 
