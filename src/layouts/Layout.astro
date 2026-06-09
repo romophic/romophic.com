@@ -1,14 +1,8 @@
 ---
-import '@/styles/global.css'
-import '@/styles/typography.css'
-import '@fontsource-variable/noto-sans-jp'
-import 'katex/dist/katex.min.css'
-
-import ScrollProgress from '@/components/ScrollProgress.astro'
 import Footer from '@/components/Footer.astro'
-import Head from '@/components/Head.astro'
 import Header from '@/components/Header.astro'
-import SearchDialog from '@/components/SearchDialog.astro'
+import ScrollProgress from '@/components/ScrollProgress.astro'
+import BaseLayout from '@/layouts/BaseLayout.astro'
 
 interface Props {
   class?: string
@@ -17,26 +11,21 @@ interface Props {
 const { class: className } = Astro.props
 ---
 
-<!doctype html>
-<html class="bg-background text-foreground scheme-light-dark" lang="ja">
-  <Head>
-    <slot name="head" />
-  </Head>
-  <body class="flex h-fit min-h-screen flex-col gap-y-6 font-sans">
-    <ScrollProgress />
-    <header
-      class="bg-background/50 sticky top-0 z-50 divide-y backdrop-blur-sm xl:divide-none"
-    >
-      <Header />
-      <slot name="subposts-navigation" />
-      <slot name="table-of-contents" />
-    </header>
-    <main class="mx-auto flex w-full grow flex-col" data-pagefind-body>
-      <div class={`flex flex-col gap-y-6 w-full mx-auto px-4 ${className}`}>
-        <slot />
-      </div>
-    </main>
-    <Footer />
-    <SearchDialog />
-  </body>
-</html>
+<BaseLayout bodyClass="flex h-fit min-h-screen flex-col gap-y-6 font-sans">
+  <slot name="head" slot="head" />
+
+  <ScrollProgress />
+  <header
+    class="bg-background/50 sticky top-0 z-50 divide-y backdrop-blur-sm xl:divide-none"
+  >
+    <Header />
+    <slot name="subposts-navigation" />
+    <slot name="table-of-contents" />
+  </header>
+  <main class="mx-auto flex w-full grow flex-col" data-pagefind-body>
+    <div class={`flex flex-col gap-y-6 w-full mx-auto px-4 ${className || ''}`}>
+      <slot />
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

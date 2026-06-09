@@ -25,7 +25,9 @@ export async function getAllPosts(): Promise<CollectionEntry<'blog'>[]> {
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
 }
 
-export async function getAllPostsAndSubposts(): Promise<CollectionEntry<'blog'>[]> {
+export async function getAllPostsAndSubposts(): Promise<
+  CollectionEntry<'blog'>[]
+> {
   const posts = await getNormalizedPosts()
   return posts
     .filter((post) => !post.data.draft)
@@ -91,7 +93,8 @@ export async function getAdjacentPosts(currentId: string): Promise<{
     if (currentIndex === -1) return { newer: null, older: null, parent }
 
     return {
-      newer: currentIndex < subposts.length - 1 ? subposts[currentIndex + 1] : null,
+      newer:
+        currentIndex < subposts.length - 1 ? subposts[currentIndex + 1] : null,
       older: currentIndex > 0 ? subposts[currentIndex - 1] : null,
       parent,
     }
@@ -104,7 +107,8 @@ export async function getAdjacentPosts(currentId: string): Promise<{
 
   return {
     newer: currentIndex > 0 ? allPosts[currentIndex - 1] : null,
-    older: currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null,
+    older:
+      currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null,
     parent: null,
   }
 }
@@ -133,7 +137,9 @@ export async function getRecentPosts(
   return posts.slice(0, count)
 }
 
-export async function getSortedTags(): Promise<{ tag: string; count: number }[]> {
+export async function getSortedTags(): Promise<
+  { tag: string; count: number }[]
+> {
   const tagCounts = await getAllTags()
   return [...tagCounts.entries()]
     .map(([tag, count]) => ({ tag, count }))

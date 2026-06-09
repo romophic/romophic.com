@@ -10,20 +10,21 @@ interface Props {
 const { tech, class: className = '' } = Astro.props
 const badge = getTechBadge(tech)
 
-const baseClass = "flex items-center justify-center gap-1.5 rounded-full border text-xs font-medium transition-colors"
+const baseClass =
+  'flex items-center justify-center gap-1.5 rounded-full border text-xs font-medium transition-colors'
 ---
 
-{badge ? (
-  <span
-    class={`${baseClass} px-2.5 py-0.5 ${badge.colorClass} ${className}`}
-  >
-    <Icon name={badge.icon} class="size-3" />
-    {tech}
-  </span>
-) : (
-  <span 
-    class={`${baseClass} px-2.5 py-0.5 bg-primary/5 dark:bg-primary/10 text-primary border-primary/10 dark:border-primary/20 ${className}`}
-  >
-    {tech}
-  </span>
-)}
+{
+  badge ? (
+    <span class={`${baseClass} px-2.5 py-0.5 ${badge.colorClass} ${className}`}>
+      <Icon name={badge.icon} class="size-3" />
+      {tech}
+    </span>
+  ) : (
+    <span
+      class={`${baseClass} bg-primary/5 dark:bg-primary/10 text-primary border-primary/10 dark:border-primary/20 px-2.5 py-0.5 ${className}`}
+    >
+      {tech}
+    </span>
+  )
+}

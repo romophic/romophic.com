@@ -2,274 +2,260 @@
 import BlogCard from '@/components/BlogCard.astro'
 import ActivityGraph from '@/components/ActivityGraph.astro'
 import GraphView from '@/components/GraphView.astro'
-import Head from '@/components/Head.astro'
 import Header from '@/components/Header.astro'
 import PageHead from '@/components/PageHead.astro'
-import SearchDialog from '@/components/SearchDialog.astro'
 import { getButtonStyles } from '@/components/button.astro'
 import { ICON_MAP, ICONS, SITE, SOCIAL_LINKS } from '@/consts'
 import { getRecentPosts } from '@/lib/data-utils'
 import { Icon } from 'astro-icon/components'
-
-// Global styling necessary when omitting Layout.astro
-import '@/styles/global.css'
-import '@/styles/typography.css'
-import '@fontsource-variable/noto-sans-jp'
-import 'katex/dist/katex.min.css'
+import BaseLayout from '@/layouts/BaseLayout.astro'
 
 const blog = await getRecentPosts(SITE.featuredPostCount)
 ---
 
-<!doctype html>
-<html
-  class="bg-background text-foreground h-full w-full scheme-light-dark"
-  lang="ja"
+<BaseLayout
+  htmlClass="bg-background text-foreground h-full w-full scheme-light-dark"
+  bodyClass="selection:bg-primary/20 selection:text-foreground relative min-h-svh w-full font-sans"
 >
-  <Head>
-    <PageHead slot="head" title={SITE.title} description={SITE.description} />
-  </Head>
-  <body
-    class="selection:bg-primary/20 selection:text-foreground relative min-h-svh w-full font-sans"
+  <PageHead slot="head" title={SITE.title} description={SITE.description} />
+
+  {/* 1. THE GRAPH (Fixed Background) */}
+  <div
+    id="graph-wrapper"
+    data-graph-wrapper
+    class="bg-background fixed inset-0 z-0"
   >
-    {/* 1. THE GRAPH (Fixed Background) */}
-    <div id="graph-wrapper" data-graph-wrapper class="bg-background fixed inset-0 z-0">
-      <GraphView class="h-full w-full" fullInteraction={true} />
-    </div>
+    <GraphView class="h-full w-full" fullInteraction={true} />
+  </div>
 
-    {/* 2. EXIT BUTTON (Hidden by default, shown when graph is interactive) */}
-    <button
-      id="exit-graph-btn"
-      class="bg-background/80 border-border/40 hover:bg-background pointer-events-none fixed top-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border px-6 py-2.5 text-sm font-semibold tracking-wide opacity-0 shadow-lg backdrop-blur-xl transition-all duration-1000 data-[visible=true]:pointer-events-auto data-[visible=true]:opacity-100"
-    >
-      <Icon name="lucide:arrow-up" class="size-4" />
-      Back to Content
-    </button>
+  {/* 2. EXIT BUTTON (Hidden by default, shown when graph is interactive) */}
+  <button
+    id="exit-graph-btn"
+    class="bg-background/80 border-border/40 hover:bg-background pointer-events-none fixed top-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border px-6 py-2.5 text-sm font-semibold tracking-wide opacity-0 shadow-lg backdrop-blur-xl transition-all duration-1000 data-[visible=true]:pointer-events-auto data-[visible=true]:opacity-100"
+  >
+    <Icon name="lucide:arrow-up" class="size-4" />
+    Back to Content
+  </button>
 
-    {/* 3. THE GLASS DASHBOARD (Scrollable Foreground) */}
-    <main
-      id="dashboard-content"
-      class="pointer-events-none relative z-10 flex min-h-[100.1vh] flex-col"
-    >
-      {/* Content Container ensures pointer events */}
-      <div class="pointer-events-auto flex min-h-[100svh] w-full flex-col">
-        {/* Giant Full-Width Glass Pane */}
+  {/* 3. THE GLASS DASHBOARD (Scrollable Foreground) */}
+  <main
+    id="dashboard-content"
+    class="pointer-events-none relative z-10 flex min-h-[100.1vh] flex-col"
+  >
+    {/* Content Container ensures pointer events */}
+    <div class="pointer-events-auto flex min-h-[100svh] w-full flex-col">
+      {/* Giant Full-Width Glass Pane */}
+      <div
+        class="border-border/40 bg-background/60 dark:bg-background/50 relative z-10 flex w-full grow transform-gpu flex-col rounded-b-2xl border-b pb-10 shadow-[0_20px_50px_rgba(0,0,0,0.08)] backdrop-blur-md will-change-transform sm:rounded-b-[3rem] sm:pb-16 dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]"
+      >
+        {/* Global Header */}
         <div
-          class="border-border/40 bg-background/60 dark:bg-background/50 relative z-10 flex w-full grow transform-gpu flex-col rounded-b-2xl border-b pb-10 shadow-[0_20px_50px_rgba(0,0,0,0.08)] backdrop-blur-md will-change-transform sm:rounded-b-[3rem] sm:pb-16 dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]"
+          class="border-border/20 bg-background/40 sticky top-0 z-50 border-b backdrop-blur-sm"
         >
-          {/* Global Header */}
-          <div
-            class="border-border/20 bg-background/40 sticky top-0 z-50 border-b backdrop-blur-sm"
-          >
-            <Header />
-          </div>
-
-          <div
-            class="mx-auto flex w-full max-w-5xl grow flex-col px-3 pt-8 sm:px-8 sm:pt-12"
-          >
-            {/* A. Hero Section */}
-            <div class="mx-auto mb-8 w-full max-w-3xl p-3 sm:mb-12 sm:p-8">
-              <div
-                class="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
-              >
-                <div
-                  class="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left"
-                >
-                  <div
-                    class="border-border/50 relative h-20 w-20 shrink-0 overflow-hidden rounded-[22.5%] border shadow-md sm:h-28 sm:w-28"
-                  >
-                    <img
-                      src="/icon.webp"
-                      alt="romophic avatar"
-                      class="h-full w-full object-cover"
-                      width="112"
-                      height="112"
-                      fetchpriority="high"
-                    />
-                  </div>
-                  <div class="flex flex-col gap-1.5">
-                    <h1
-                      class="text-2xl font-extrabold tracking-tight sm:text-4xl"
-                    >
-                      romophic
-                    </h1>
-                    <p class="text-muted-foreground font-medium" aria-hidden="true">👋</p>
-                  </div>
-                </div>
-
-                <div class="flex flex-col items-center gap-4 sm:items-end">
-                  <div
-                    class="flex flex-wrap justify-center gap-2 sm:justify-end"
-                  >
-                    {
-                      SOCIAL_LINKS.map((link) => (
-                        <a
-                          href={link.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          class="bg-background/80 hover:bg-muted text-muted-foreground hover:text-foreground inline-flex size-10 items-center justify-center rounded-xl border shadow-sm transition-colors"
-                          aria-label={link.label}
-                        >
-                          <Icon
-                            name={
-                              (ICON_MAP as Record<string, string>)[
-                                link.label
-                              ] || ICONS.link
-                            }
-                            class="size-5"
-                          />
-                        </a>
-                      ))
-                    }
-                  </div>
-                  <a
-                    href="/about"
-                    class={getButtonStyles({ variant: 'default', size: 'sm' }) +
-                      ' rounded-xl shadow-sm'}
-                  >
-                    <span class="font-medium">About Me</span>
-                    <Icon name={ICONS.arrowRight} class="ml-2 size-4" />
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* B. Content Grid (Activity & Posts) */}
-            <div
-              class="flex w-full flex-col gap-6 sm:gap-12 xl:flex-row xl:items-start xl:justify-between"
-            >
-              {/* Left Column: Activity Log */}
-              <div class="flex w-full shrink-0 flex-col gap-y-4 xl:w-[420px]">
-                <div class="flex items-center px-2 pt-2">
-                  <h2
-                    class="flex items-center gap-2 text-xl font-bold tracking-tight"
-                  >
-                    <Icon name="lucide:activity" class="text-primary size-5" /> Activity
-                    Log
-                  </h2>
-                </div>
-                <div class="w-full overflow-hidden p-2">
-                  <div
-                    class="origin-top-left scale-[0.55] sm:scale-75 xl:scale-100"
-                    style="width: calc(100% / 0.55)"
-                  >
-                    <div class="sm:!w-[calc(100%/0.75)] xl:!w-full">
-                      <ActivityGraph />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column: Latest Posts */}
-              <div class="flex w-full grow flex-col gap-y-6 sm:p-2">
-                <div
-                  class="border-border/20 flex items-center justify-between border-b pb-2"
-                >
-                  <h2
-                    class="flex items-center gap-2 text-xl font-bold tracking-tight"
-                  >
-                    <Icon name="lucide:book-open" class="text-primary size-5" /> Latest
-                    Writings
-                  </h2>
-                  <a
-                    href="/blog"
-                    class="text-muted-foreground hover:text-foreground text-xs font-semibold tracking-wider uppercase transition-colors"
-                  >
-                    See all &rarr;
-                  </a>
-                </div>
-                <ul
-                  class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-1"
-                >
-                  {
-                    blog.map((post) => (
-                      <li class="h-full">
-                        <BlogCard entry={post} />
-                      </li>
-                    ))
-                  }
-                </ul>
-              </div>
-            </div>
-          </div>
+          <Header />
         </div>
 
-        {
-          /* C. Scroll Indicator (Attached below the glass pane, pushed down heavily by glass pane flex-grow) */
-        }
         <div
-          class="relative z-0 flex w-full shrink-0 flex-col items-center justify-center py-6 sm:py-10"
+          class="mx-auto flex w-full max-w-5xl grow flex-col px-3 pt-8 sm:px-8 sm:pt-12"
         >
-          <div class="flex flex-col items-center gap-2">
-            <span
-              class="text-muted-foreground text-xs font-bold tracking-[0.2em] uppercase"
-              >Scroll to explore</span
+          {/* A. Hero Section */}
+          <div class="mx-auto mb-8 w-full max-w-3xl p-3 sm:mb-12 sm:p-8">
+            <div
+              class="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
             >
-            <Icon
-              name="lucide:arrow-down"
-              class="text-muted-foreground size-5 animate-bounce"
-            />
+              <div
+                class="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left"
+              >
+                <div
+                  class="border-border/50 relative h-20 w-20 shrink-0 overflow-hidden rounded-[22.5%] border shadow-md sm:h-28 sm:w-28"
+                >
+                  <img
+                    src="/icon.webp"
+                    alt="romophic avatar"
+                    class="h-full w-full object-cover"
+                    width="112"
+                    height="112"
+                    fetchpriority="high"
+                  />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <h1
+                    class="text-2xl font-extrabold tracking-tight sm:text-4xl"
+                  >
+                    romophic
+                  </h1>
+                  <p
+                    class="text-muted-foreground font-medium"
+                    aria-hidden="true"
+                  >
+                    👋
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex flex-col items-center gap-4 sm:items-end">
+                <div class="flex flex-wrap justify-center gap-2 sm:justify-end">
+                  {
+                    SOCIAL_LINKS.map((link) => (
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="bg-background/80 hover:bg-muted text-muted-foreground hover:text-foreground inline-flex size-10 items-center justify-center rounded-xl border shadow-sm transition-colors"
+                        aria-label={link.label}
+                      >
+                        <Icon
+                          name={
+                            (ICON_MAP as Record<string, string>)[link.label] ||
+                            ICONS.link
+                          }
+                          class="size-5"
+                        />
+                      </a>
+                    ))
+                  }
+                </div>
+                <a
+                  href="/about"
+                  class={getButtonStyles({ variant: 'default', size: 'sm' }) +
+                    ' rounded-xl shadow-sm'}
+                >
+                  <span class="font-medium">About Me</span>
+                  <Icon name={ICONS.arrowRight} class="ml-2 size-4" />
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* B. Content Grid (Activity & Posts) */}
+          <div
+            class="flex w-full flex-col gap-6 sm:gap-12 xl:flex-row xl:items-start xl:justify-between"
+          >
+            {/* Left Column: Activity Log */}
+            <div class="flex w-full shrink-0 flex-col gap-y-4 xl:w-[420px]">
+              <div class="flex items-center px-2 pt-2">
+                <h2
+                  class="flex items-center gap-2 text-xl font-bold tracking-tight"
+                >
+                  <Icon name="lucide:activity" class="text-primary size-5" /> Activity
+                  Log
+                </h2>
+              </div>
+              <div class="w-full overflow-hidden p-2">
+                <div
+                  class="origin-top-left scale-[0.55] sm:scale-75 xl:scale-100"
+                  style="width: calc(100% / 0.55)"
+                >
+                  <div class="sm:!w-[calc(100%/0.75)] xl:!w-full">
+                    <ActivityGraph />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Latest Posts */}
+            <div class="flex w-full grow flex-col gap-y-6 sm:p-2">
+              <div
+                class="border-border/20 flex items-center justify-between border-b pb-2"
+              >
+                <h2
+                  class="flex items-center gap-2 text-xl font-bold tracking-tight"
+                >
+                  <Icon name="lucide:book-open" class="text-primary size-5" /> Latest
+                  Writings
+                </h2>
+                <a
+                  href="/blog"
+                  class="text-muted-foreground hover:text-foreground text-xs font-semibold tracking-wider uppercase transition-colors"
+                >
+                  See all &rarr;
+                </a>
+              </div>
+              <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-1">
+                {
+                  blog.map((post) => (
+                    <li class="h-full">
+                      <BlogCard entry={post} />
+                    </li>
+                  ))
+                }
+              </ul>
+            </div>
           </div>
         </div>
       </div>
 
       {
-        /* Spacer: guarantees the page is scrollable past the glass pane to see the graph */
+        /* C. Scroll Indicator (Attached below the glass pane, pushed down heavily by glass pane flex-grow) */
       }
-      <div class="h-[100vh] shrink-0" aria-hidden="true"></div>
-    </main>
-
-    {/* Global Search Dialog */}
-    <div class="pointer-events-auto">
-      <SearchDialog />
+      <div
+        class="relative z-0 flex w-full shrink-0 flex-col items-center justify-center py-6 sm:py-10"
+      >
+        <div class="flex flex-col items-center gap-2">
+          <span
+            class="text-muted-foreground text-xs font-bold tracking-[0.2em] uppercase"
+            >Scroll to explore</span
+          >
+          <Icon
+            name="lucide:arrow-down"
+            class="text-muted-foreground size-5 animate-bounce"
+          />
+        </div>
+      </div>
     </div>
 
-    {/* Interaction Logic */}
-    <script>
-      document.addEventListener('astro:page-load', () => {
-        const dashboard = document.getElementById('dashboard-content')
-        const graphWrapper = document.getElementById('graph-wrapper')
-        const exitBtn = document.getElementById('exit-graph-btn')
+    {
+      /* Spacer: guarantees the page is scrollable past the glass pane to see the graph */
+    }
+    <div class="h-[100vh] shrink-0" aria-hidden="true"></div>
+  </main>
 
-        if (!dashboard || !graphWrapper || !exitBtn) return
+  {/* Interaction Logic */}
+  <script>
+    document.addEventListener('astro:page-load', () => {
+      const dashboard = document.getElementById('dashboard-content')
+      const graphWrapper = document.getElementById('graph-wrapper')
+      const exitBtn = document.getElementById('exit-graph-btn')
 
-        if (history.scrollRestoration) {
-          history.scrollRestoration = 'manual'
+      if (!dashboard || !graphWrapper || !exitBtn) return
+
+      if (history.scrollRestoration) {
+        history.scrollRestoration = 'manual'
+      }
+
+      // Disable graph interaction initially (dashboard is on top)
+      graphWrapper.style.pointerEvents = 'none'
+
+      const onScroll = () => {
+        const scrollY = window.scrollY
+        const maxScroll =
+          document.documentElement.scrollHeight - window.innerHeight
+        // When user scrolled near the bottom, the dashboard is off-screen
+        const pastContent = scrollY > maxScroll - 100
+
+        if (pastContent) {
+          dashboard.style.pointerEvents = 'none'
+          graphWrapper.style.pointerEvents = 'auto'
+          exitBtn.dataset.visible = 'true'
+        } else {
+          dashboard.style.pointerEvents = 'auto'
+          graphWrapper.style.pointerEvents = 'none'
+          exitBtn.dataset.visible = 'false'
         }
+      }
 
-        // Disable graph interaction initially (dashboard is on top)
-        graphWrapper.style.pointerEvents = 'none'
-
-        const onScroll = () => {
-          const scrollY = window.scrollY
-          const maxScroll =
-            document.documentElement.scrollHeight - window.innerHeight
-          // When user scrolled near the bottom, the dashboard is off-screen
-          const pastContent = scrollY > maxScroll - 100
-
-          if (pastContent) {
-            dashboard.style.pointerEvents = 'none'
-            graphWrapper.style.pointerEvents = 'auto'
-            exitBtn.dataset.visible = 'true'
-          } else {
-            dashboard.style.pointerEvents = 'auto'
-            graphWrapper.style.pointerEvents = 'none'
-            exitBtn.dataset.visible = 'false'
-          }
-        }
-
-        exitBtn.addEventListener('click', () => {
-          window.scrollTo({ top: 0, behavior: 'smooth' })
-        })
-
-        window.addEventListener('scroll', onScroll, { passive: true })
-        onScroll()
-
-        document.addEventListener(
-          'astro:before-swap',
-          () => window.removeEventListener('scroll', onScroll),
-          { once: true },
-        )
+      exitBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
       })
-    </script>
-  </body>
-</html>
+
+      window.addEventListener('scroll', onScroll, { passive: true })
+      onScroll()
+
+      document.addEventListener(
+        'astro:before-swap',
+        () => window.removeEventListener('scroll', onScroll),
+        { once: true },
+      )
+    })
+  </script>
+</BaseLayout>

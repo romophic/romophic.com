@@ -27,9 +27,9 @@ const socialLinks: SocialLink[] = [
 >
   <div class="flex flex-wrap gap-4">
     <a
-    href={isAuthorPage ? undefined : `/authors/${author.id}`}
-    class={`block ${isAuthorPage ? 'pointer-events-none' : ''}`}
-  >
+      href={isAuthorPage ? undefined : `/authors/${author.id}`}
+      class={`block ${isAuthorPage ? 'pointer-events-none' : ''}`}
+    >
       <div
         class={`size-32 rounded-md bg-muted flex items-center justify-center overflow-hidden border ${
           !isAuthorPage

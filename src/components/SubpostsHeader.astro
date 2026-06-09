@@ -106,10 +106,7 @@ const {
 }
 
 <script>
-  import {
-    updateScrollMaskClasses,
-    scrollToCenter,
-  } from '@/lib/scroll-utils'
+  import { scrollToCenter, updateScrollMaskClasses } from '@/lib/scroll-utils'
 
   class MobileSubposts extends HTMLElement {
     private scrollArea: HTMLElement | null = null
@@ -144,7 +141,9 @@ const {
 
     scrollToActive() {
       if (!this.scrollArea) return
-      const activeItem = this.scrollArea.querySelector('.mobile-subposts-active-item')
+      const activeItem = this.scrollArea.querySelector(
+        '.mobile-subposts-active-item',
+      )
       if (!activeItem) return
       scrollToCenter(this.scrollArea, activeItem as HTMLElement)
     }
@@ -177,4 +176,3 @@ const {
 
   customElements.define('mobile-subposts', MobileSubposts)
 </script>
-

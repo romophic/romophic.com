@@ -71,15 +71,19 @@ const {
 </div>
 
 <script>
-  import { updateScrollMaskClasses, scrollToCenter } from '@/lib/scroll-utils'
+  import { scrollToCenter, updateScrollMaskClasses } from '@/lib/scroll-utils'
 
   let scrollArea: HTMLElement | null = null
 
   function init() {
-    const sidebarContainer = document.getElementById('subposts-sidebar-container')
+    const sidebarContainer = document.getElementById(
+      'subposts-sidebar-container',
+    )
     if (!sidebarContainer) return
 
-    scrollArea = sidebarContainer.querySelector('[data-subposts-sidebar-scroll]')
+    scrollArea = sidebarContainer.querySelector(
+      '[data-subposts-sidebar-scroll]',
+    )
     if (scrollArea) {
       scrollArea.addEventListener('scroll', updateMask, { passive: true })
     }
@@ -111,4 +115,3 @@ const {
   document.addEventListener('astro:before-swap', cleanup)
   document.addEventListener('astro:after-swap', init)
 </script>
-

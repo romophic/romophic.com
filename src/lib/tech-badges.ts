@@ -1,6 +1,10 @@
-const DEFAULT_BADGE_COLOR = 'text-primary bg-primary/5 dark:bg-primary/10 border-primary/10 dark:border-primary/20'
+const DEFAULT_BADGE_COLOR =
+  'text-primary bg-primary/5 dark:bg-primary/10 border-primary/10 dark:border-primary/20'
 
-export const TECH_BADGES: Record<string, { icon: string; colorClass?: string }> = {
+export const TECH_BADGES: Record<
+  string,
+  { icon: string; colorClass?: string }
+> = {
   'C++': { icon: 'simple-icons:cplusplus' },
   Python: { icon: 'simple-icons:python' },
   React: { icon: 'simple-icons:react' },
@@ -18,7 +22,9 @@ export const TECH_BADGES: Record<string, { icon: string; colorClass?: string }> 
   'Next.js': { icon: 'simple-icons:nextdotjs' },
 }
 
-export function getTechBadge(name: string): { icon: string; colorClass: string } | null {
+export function getTechBadge(
+  name: string,
+): { icon: string; colorClass: string } | null {
   const badge = TECH_BADGES[name]
   if (!badge) return null
   return {

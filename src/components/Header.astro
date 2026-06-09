@@ -23,7 +23,9 @@ const currentPath = Astro.url.pathname
             <a
               href={item.href}
               class="text-foreground/60 hover:text-foreground capitalize transition-colors"
-              aria-current={currentPath.startsWith(item.href) ? 'page' : undefined}
+              aria-current={
+                currentPath.startsWith(item.href) ? 'page' : undefined
+              }
             >
               {item.label.toLowerCase()}
             </a>

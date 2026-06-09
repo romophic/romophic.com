@@ -1,0 +1,30 @@
+---
+import '@/styles/global.css'
+import '@/styles/typography.css'
+import '@fontsource-variable/noto-sans-jp'
+import 'katex/dist/katex.min.css'
+
+import Head from '@/components/Head.astro'
+import SearchDialog from '@/components/SearchDialog.astro'
+
+interface Props {
+  htmlClass?: string
+  bodyClass?: string
+}
+
+const {
+  htmlClass = 'bg-background text-foreground scheme-light-dark',
+  bodyClass = 'font-sans',
+} = Astro.props
+---
+
+<!doctype html>
+<html class={htmlClass} lang="ja">
+  <Head>
+    <slot name="head" />
+  </Head>
+  <body class={bodyClass}>
+    <slot />
+    <SearchDialog />
+  </body>
+</html>

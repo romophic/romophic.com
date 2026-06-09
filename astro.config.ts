@@ -90,9 +90,6 @@ export default defineConfig({
         },
       ],
     ],
-    remarkPlugins: [
-      remarkMath,
-      remarkEmoji,
-    ],
+    remarkPlugins: [remarkMath, remarkEmoji],
   },
 })

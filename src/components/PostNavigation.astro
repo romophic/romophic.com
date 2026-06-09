@@ -17,26 +17,41 @@ const isSubpost = !!parentPost
 <nav
   class={`col-start-2 grid grid-cols-1 gap-4 ${isSubpost ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}
 >
-  {olderPost ? (
-    <a
-      href={`/blog/${olderPost.id}#post-title`}
-      class={`${getButtonStyles({ variant: 'outline' })} h-full py-4 rounded-lg group flex items-center justify-start size-full`}
-    >
-      <Icon name={ICONS.arrowLeft} class="mr-2 size-4 transition-transform group-hover:-translate-x-1" />
-      <div class="flex flex-col items-start overflow-hidden text-wrap">
-        <span class="text-muted-foreground text-left text-xs">{isSubpost ? 'Previous Subpost' : 'Previous Post'}</span>
-        <span class="w-full text-left text-sm text-balance text-ellipsis">{olderPost.data.title}</span>
-      </div>
-    </a>
-  ) : (
-    <span class={`${getButtonStyles({ variant: 'outline' })} h-full py-4 rounded-lg flex items-center justify-start size-full opacity-50 cursor-not-allowed`}>
-      <Icon name={ICONS.arrowLeft} class="mr-2 size-4" />
-      <div class="flex flex-col items-start overflow-hidden text-wrap">
-        <span class="text-muted-foreground text-left text-xs">{isSubpost ? 'Previous Subpost' : 'Previous Post'}</span>
-        <span class="w-full text-left text-sm text-balance text-ellipsis">{isSubpost ? 'No older subpost' : "You're at the oldest post!"}</span>
-      </div>
-    </span>
-  )}
+  {
+    olderPost ? (
+      <a
+        href={`/blog/${olderPost.id}#post-title`}
+        class={`${getButtonStyles({ variant: 'outline' })} group flex size-full h-full items-center justify-start rounded-lg py-4`}
+      >
+        <Icon
+          name={ICONS.arrowLeft}
+          class="mr-2 size-4 transition-transform group-hover:-translate-x-1"
+        />
+        <div class="flex flex-col items-start overflow-hidden text-wrap">
+          <span class="text-muted-foreground text-left text-xs">
+            {isSubpost ? 'Previous Subpost' : 'Previous Post'}
+          </span>
+          <span class="w-full text-left text-sm text-balance text-ellipsis">
+            {olderPost.data.title}
+          </span>
+        </div>
+      </a>
+    ) : (
+      <span
+        class={`${getButtonStyles({ variant: 'outline' })} flex size-full h-full cursor-not-allowed items-center justify-start rounded-lg py-4 opacity-50`}
+      >
+        <Icon name={ICONS.arrowLeft} class="mr-2 size-4" />
+        <div class="flex flex-col items-start overflow-hidden text-wrap">
+          <span class="text-muted-foreground text-left text-xs">
+            {isSubpost ? 'Previous Subpost' : 'Previous Post'}
+          </span>
+          <span class="w-full text-left text-sm text-balance text-ellipsis">
+            {isSubpost ? 'No older subpost' : "You're at the oldest post!"}
+          </span>
+        </div>
+      </span>
+    )
+  }
 
   {
     isSubpost && (
@@ -60,24 +75,39 @@ const isSubpost = !!parentPost
     )
   }
 
-  {newerPost ? (
-    <a
-      href={`/blog/${newerPost.id}#post-title`}
-      class={`${getButtonStyles({ variant: 'outline' })} h-full py-4 rounded-lg group flex items-center justify-end size-full`}
-    >
-      <div class="flex flex-col items-end overflow-hidden text-wrap">
-        <span class="text-muted-foreground text-right text-xs">{isSubpost ? 'Next Subpost' : 'Next Post'}</span>
-        <span class="w-full text-right text-sm text-balance text-ellipsis">{newerPost.data.title}</span>
-      </div>
-      <Icon name={ICONS.arrowRight} class="ml-2 size-4 transition-transform group-hover:translate-x-1" />
-    </a>
-  ) : (
-    <span class={`${getButtonStyles({ variant: 'outline' })} h-full py-4 rounded-lg flex items-center justify-end size-full opacity-50 cursor-not-allowed`}>
-      <div class="flex flex-col items-end overflow-hidden text-wrap">
-        <span class="text-muted-foreground text-right text-xs">{isSubpost ? 'Next Subpost' : 'Next Post'}</span>
-        <span class="w-full text-right text-sm text-balance text-ellipsis">{isSubpost ? 'No newer subpost' : "You're at the newest post!"}</span>
-      </div>
-      <Icon name={ICONS.arrowRight} class="ml-2 size-4" />
-    </span>
-  )}
+  {
+    newerPost ? (
+      <a
+        href={`/blog/${newerPost.id}#post-title`}
+        class={`${getButtonStyles({ variant: 'outline' })} group flex size-full h-full items-center justify-end rounded-lg py-4`}
+      >
+        <div class="flex flex-col items-end overflow-hidden text-wrap">
+          <span class="text-muted-foreground text-right text-xs">
+            {isSubpost ? 'Next Subpost' : 'Next Post'}
+          </span>
+          <span class="w-full text-right text-sm text-balance text-ellipsis">
+            {newerPost.data.title}
+          </span>
+        </div>
+        <Icon
+          name={ICONS.arrowRight}
+          class="ml-2 size-4 transition-transform group-hover:translate-x-1"
+        />
+      </a>
+    ) : (
+      <span
+        class={`${getButtonStyles({ variant: 'outline' })} flex size-full h-full cursor-not-allowed items-center justify-end rounded-lg py-4 opacity-50`}
+      >
+        <div class="flex flex-col items-end overflow-hidden text-wrap">
+          <span class="text-muted-foreground text-right text-xs">
+            {isSubpost ? 'Next Subpost' : 'Next Post'}
+          </span>
+          <span class="w-full text-right text-sm text-balance text-ellipsis">
+            {isSubpost ? 'No newer subpost' : "You're at the newest post!"}
+          </span>
+        </div>
+        <Icon name={ICONS.arrowRight} class="ml-2 size-4" />
+      </span>
+    )
+  }
 </nav>

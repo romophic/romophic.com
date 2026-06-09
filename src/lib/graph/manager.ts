@@ -75,7 +75,8 @@ export class GraphViewManager {
   private async fetchData() {
     const endpoint = '/graph.json'
     const res = await fetch(endpoint)
-    if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch ${endpoint}`)
+    if (!res.ok)
+      throw new Error(`HTTP ${res.status}: Failed to fetch ${endpoint}`)
     const fetchedData: { nodes: D3GraphNode[]; links: D3GraphLink[] } =
       await res.json()
 
@@ -214,7 +215,8 @@ export class GraphViewManager {
 
     // Watch for interactive mode toggle via pointer-events on wrapper
     const wrapper =
-      this.container.closest('[data-graph-wrapper]') || this.container.parentElement
+      this.container.closest('[data-graph-wrapper]') ||
+      this.container.parentElement
     if (wrapper) {
       this.isInteractive =
         (wrapper as HTMLElement).style.pointerEvents === 'auto'
@@ -292,7 +294,8 @@ export class GraphViewManager {
     this.styleObserver?.disconnect()
     this.themeObserver?.disconnect()
     if (this.interactionCleanup) this.interactionCleanup()
-    if (this.animationFrameId !== null) cancelAnimationFrame(this.animationFrameId)
+    if (this.animationFrameId !== null)
+      cancelAnimationFrame(this.animationFrameId)
     if (this.fadeInTimeoutId !== null) clearTimeout(this.fadeInTimeoutId)
     this.simulation?.alphaTarget(0).stop()
     this.simulation?.on('tick', null)

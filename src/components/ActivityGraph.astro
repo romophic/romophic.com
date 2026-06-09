@@ -79,12 +79,16 @@ const getLevel = (count: number) => {
     </div>
   </div>
 
-  <div class="text-muted-foreground mt-4 flex items-center justify-end gap-2 text-xs">
+  <div
+    class="text-muted-foreground mt-4 flex items-center justify-end gap-2 text-xs"
+  >
     <span>Less</span>
     <div class="flex gap-1">
-      {INTENSITY_COLORS.map((color) => (
-        <div class={`${color} size-3 rounded-sm`} />
-      ))}
+      {
+        INTENSITY_COLORS.map((color) => (
+          <div class={`${color} size-3 rounded-sm`} />
+        ))
+      }
     </div>
     <span>More</span>
   </div>

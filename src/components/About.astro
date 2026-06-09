@@ -6,9 +6,9 @@ import Layout from '@/layouts/Layout.astro'
 import { getAllProjects } from '@/lib/data-utils'
 import { Icon } from 'astro-icon/components'
 
-import { TECH_BADGES } from '@/lib/tech-badges'
 import TechBadge from '@/components/TechBadge.astro'
 import TimelineItem from '@/components/TimelineItem.astro'
+import { TECH_BADGES } from '@/lib/tech-badges'
 const projects = await getAllProjects()
 
 const TECH_STACK = Object.keys(TECH_BADGES)
@@ -107,7 +107,10 @@ const TECH_STACK = Object.keys(TECH_BADGES)
       <div class="flex flex-wrap gap-2">
         {
           TECH_STACK.map((tech) => (
-            <TechBadge tech={tech} class="px-3 py-1 text-sm hover:bg-opacity-80" />
+            <TechBadge
+              tech={tech}
+              class="hover:bg-opacity-80 px-3 py-1 text-sm"
+            />
           ))
         }
       </div>
