@@ -1,6 +1,6 @@
 import { experimental_AstroContainer as AstroContainer } from 'astro/container'
 import { describe, it, expect } from 'vitest'
-import Separator from './separator.astro'
+import Separator from './Separator.astro'
 
 describe('separator.astro', () => {
   it('renders default horizontal decorative separator', async () => {

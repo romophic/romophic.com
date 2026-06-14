@@ -1,5 +1,5 @@
 ---
-import Separator from '@/components/separator.astro'
+import Separator from '@/components/Separator.astro'
 import { ICONS } from '@/consts'
 import {
   getCombinedReadingTime,
@@ -40,6 +40,8 @@ const subpostCount = !isSubpost(entry) ? await getSubpostCount(entry.id) : 0
           <Image
             src={entry.data.image}
             alt={entry.data.title}
+            widths={[400, 800, 1200]}
+            sizes="(max-width: 640px) 400px, (max-width: 1024px) 800px, 1200px"
             width={1200}
             height={630}
             class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"

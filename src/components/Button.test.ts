@@ -1,7 +1,7 @@
 import { experimental_AstroContainer as AstroContainer } from 'astro/container'
 import { describe, it, expect } from 'vitest'
-import Button from './button.astro'
-import { getButtonStyles } from './button.astro'
+import Button from './Button.astro'
+import { getButtonStyles } from './Button.astro'
 
 describe('button.astro', () => {
   it('renders default button', async () => {

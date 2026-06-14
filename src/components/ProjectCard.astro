@@ -28,6 +28,8 @@ const { project } = Astro.props
           <Image
             src={project.data.image}
             alt={project.data.name}
+            widths={[80, 128, 400]}
+            sizes="(max-width: 640px) 80px, 128px"
             width={400}
             height={400}
             class="aspect-square w-full rounded-md object-cover"

@@ -73,6 +73,8 @@ const ogImageUrl = `/og/${ogSlug.replaceAll('/', '-')}.png`
         <Image
           src={post.data.image}
           alt={post.data.title}
+          widths={[400, 800, 1200]}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 800px, 1200px"
           width={1200}
           height={630}
           class="col-span-full mx-auto w-full max-w-5xl object-cover"
@@ -102,7 +104,12 @@ const ogImageUrl = `/og/${ogSlug.replaceAll('/', '-')}.png`
     }
 
     <article class="prose col-start-2 max-w-none">
-      <Content components={{ img: MdxImageCaption }} />
+      <Content components={{
+        img: MdxImageCaption,
+        // Add more standard markdown mappings here in the future:
+        // a: CustomLink,
+        // blockquote: CustomQuote,
+      }} />
     </article>
 
     <div class="col-start-2 max-w-none">
