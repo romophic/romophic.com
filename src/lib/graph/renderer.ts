@@ -5,8 +5,7 @@ import type { GraphThemeColors } from './types'
 /** Rendering constants for the graph canvas. */
 const RENDER = {
   grid: { size: 50, multiplier: 2 },
-  link: { widthDefault: 0.6, widthHighlight: 1.5 },
-  arrow: { length: 5, angle: Math.PI / 7, targetOffset: 8 },
+  link: { widthDefault: 0.6, widthHighlight: 0.9 },
   node: {
     radiusTag: 4,
     radiusPost: 6,
@@ -50,33 +49,7 @@ export function getNodeColor(
   return activeTheme.nodeDefault
 }
 
-/**
- * Draw a small directional arrow at the end of a link.
- */
-function drawArrow(
-  ctx: CanvasRenderingContext2D,
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
-  radius: number,
-) {
-  const angle = Math.atan2(y2 - y1, x2 - x1)
-  const tx = x2 - radius * Math.cos(angle)
-  const ty = y2 - radius * Math.sin(angle)
-  ctx.beginPath()
-  ctx.moveTo(tx, ty)
-  ctx.lineTo(
-    tx - RENDER.arrow.length * Math.cos(angle - RENDER.arrow.angle),
-    ty - RENDER.arrow.length * Math.sin(angle - RENDER.arrow.angle),
-  )
-  ctx.lineTo(
-    tx - RENDER.arrow.length * Math.cos(angle + RENDER.arrow.angle),
-    ty - RENDER.arrow.length * Math.sin(angle + RENDER.arrow.angle),
-  )
-  ctx.closePath()
-  ctx.fill()
-}
+
 
 /**
  * Render the full graph scene onto a 2D canvas context.
@@ -124,47 +97,41 @@ export function renderGraph(
   links.forEach((link) => {
     const source = link.source as D3GraphNode,
       target = link.target as D3GraphNode
+
+    if ((link as any).isReverse) return
+
     const isRelated =
       hoverNode && (source.id === hoverNode.id || target.id === hoverNode.id)
+    
+    const sx = source.x!
+    const sy = source.y!
+    const tx = target.x!
+    const ty = target.y!
 
-    ctx.beginPath()
-    ctx.moveTo(source.x!, source.y!)
-    ctx.lineTo(target.x!, target.y!)
-    ctx.strokeStyle = isRelated ? activeTheme.linkHighlight : activeTheme.link
-    ctx.lineWidth = isRelated
-      ? RENDER.link.widthHighlight
-      : RENDER.link.widthDefault
-    ctx.stroke()
+    const getRadius = (node: D3GraphNode) => {
+      const isHover = hoverNode?.id === node.id
+      const baseRadius = node.group === 'tag' ? RENDER.node.radiusTag : RENDER.node.radiusPost
+      return isHover ? baseRadius * RENDER.node.hoverScale : baseRadius
+    }
 
-    // Fixed directional arrows: tag -> post
-    const isTagToPost = source.group === 'tag' && target.group === 'post'
-    const isPostToTag = source.group === 'post' && target.group === 'tag'
+    const rSource = getRadius(source)
+    const rTarget = getRadius(target)
 
-    // Draw arrow natively for hover/related, or permanently for tag->post relationships
-    if (isRelated || isTagToPost || isPostToTag) {
-      ctx.fillStyle = isRelated ? activeTheme.linkHighlight : activeTheme.link
+    const dx = tx - sx
+    const dy = ty - sy
+    const len = Math.hypot(dx, dy)
 
-      // If the link is explicitly post->tag, we reverse the arrow to point to the post (since posts belong to tags)
-      // Otherwise (tag->post or normal related link), point to target.
-      if (isPostToTag) {
-        drawArrow(
-          ctx,
-          target.x!,
-          target.y!,
-          source.x!,
-          source.y!,
-          RENDER.arrow.targetOffset,
-        )
-      } else {
-        drawArrow(
-          ctx,
-          source.x!,
-          source.y!,
-          target.x!,
-          target.y!,
-          RENDER.arrow.targetOffset,
-        )
-      }
+    if (len > rSource + rTarget) {
+      const nx = dx / len
+      const ny = dy / len
+
+      // Draw line only if nodes aren't completely overlapping
+      ctx.beginPath()
+      ctx.moveTo(sx + nx * rSource, sy + ny * rSource)
+      ctx.lineTo(tx - nx * rTarget, ty - ny * rTarget)
+      ctx.strokeStyle = isRelated ? activeTheme.linkHighlight : activeTheme.link
+      ctx.lineWidth = isRelated ? RENDER.link.widthHighlight : RENDER.link.widthDefault
+      ctx.stroke()
     }
   })
 

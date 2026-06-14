@@ -3,7 +3,7 @@ import type { D3GraphLink, D3GraphNode } from '@/types'
 import { drag } from 'd3-drag'
 import { select } from 'd3-selection'
 import { zoom, zoomIdentity, type ZoomTransform } from 'd3-zoom'
-import type { Simulation } from 'd3-force'
+import type { PhysicsController } from './physics'
 
 export const EMPTY_SET: ReadonlySet<string> = new Set()
 
@@ -25,7 +25,7 @@ export function setupInteraction(
   canvas: HTMLCanvasElement,
   nodes: D3GraphNode[],
   links: D3GraphLink[],
-  simulation: Simulation<D3GraphNode, D3GraphLink>,
+  physicsController: PhysicsController | null,
   width: number,
   height: number,
   onTransform: (t: ZoomTransform) => void,
@@ -67,19 +67,25 @@ export function setupInteraction(
         return nodes.find((n) => Math.hypot(n.x! - x, n.y! - y) < 20)
       })
       .on('start', (event) => {
-        if (!event.active && simulation)
-          simulation.alphaTarget(GRAPH_CONFIG.physics.alphaTarget).restart()
+        if (!event.active && physicsController) {
+          physicsController.controlSimulation(GRAPH_CONFIG.physics.alphaTarget, true)
+        }
         event.subject.fx = event.subject.x
         event.subject.fy = event.subject.y
+        physicsController?.updateNode(event.subject.id, event.subject.fx, event.subject.fy)
       })
       .on('drag', (event) => {
         event.subject.fx = currentTransform.invertX(event.sourceEvent.offsetX)
         event.subject.fy = currentTransform.invertY(event.sourceEvent.offsetY)
+        physicsController?.updateNode(event.subject.id, event.subject.fx, event.subject.fy)
       })
       .on('end', (event) => {
-        if (!event.active && simulation) simulation.alphaTarget(0)
+        if (!event.active && physicsController) {
+          physicsController.controlSimulation(0)
+        }
         event.subject.fx = null
         event.subject.fy = null
+        physicsController?.updateNode(event.subject.id, null, null)
       })
 
     select(canvas).call(dragHandler)

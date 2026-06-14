@@ -1,7 +1,7 @@
 import { GRAPH_CONFIG } from '@/consts'
 import type { D3GraphLink, D3GraphNode } from '@/types'
 import { zoomIdentity, type ZoomTransform } from 'd3-zoom'
-import type { Simulation } from 'd3-force'
+import type { PhysicsController } from './physics'
 import { renderGraph } from './renderer'
 import { setupPhysics } from './physics'
 import { setupInteraction, EMPTY_SET } from './interaction'
@@ -26,12 +26,11 @@ export class GraphViewManager {
   private lastDrawTime = 0
   private isInteractive = false
 
-  private simulation: Simulation<D3GraphNode, D3GraphLink> | null = null
+  private physicsController: PhysicsController | null = null
   private resizeObserver: ResizeObserver | null = null
   private styleObserver: MutationObserver | null = null
   private themeObserver: MutationObserver | null = null
 
-  private setPhysicsInteractive: ((val: boolean) => void) | null = null
   private interactionCleanup: (() => void) | null = null
 
   constructor(containerId: string, canvasId: string) {
@@ -94,15 +93,28 @@ export class GraphViewManager {
 
     let categoryIdx = 0
     const tagToCategory = new Map<string, number>()
+    const linkMap = new Map<string, D3GraphLink>()
 
     fetchedData.links.forEach((l) => {
       const sourceId = typeof l.source === 'object' ? l.source.id : l.source
       const targetId = typeof l.target === 'object' ? l.target.id : l.target
 
       if (nodeMap.has(sourceId) && nodeMap.has(targetId)) {
-        links.push(l)
         const s = nodeMap.get(sourceId)!
         const t = nodeMap.get(targetId)!
+        
+        const reverseKey = `${targetId}->${sourceId}`
+        const reverseLink = linkMap.get(reverseKey)
+        
+        if (reverseLink) {
+          (reverseLink as any).isBidirectional = true
+          links.push({ ...l, source: s, target: t, isReverse: true } as any)
+        } else {
+          const newLink = { ...l, source: s, target: t, isBidirectional: false }
+          linkMap.set(`${sourceId}->${targetId}`, newLink as any)
+          links.push(newLink as any)
+        }
+        
         s.degree = (s.degree || 0) + 1
         t.degree = (t.degree || 0) + 1
       }
@@ -173,15 +185,26 @@ export class GraphViewManager {
     const { width, height } = this.size
 
     // Physics
-    const { simulation, setInteractive } = setupPhysics(
+    this.physicsController = setupPhysics(
       this.data.nodes,
       this.data.links,
       width,
       height,
-      this.scheduleRender,
+      (updatedNodes) => {
+        if (!this.data) return
+        const nodeMap = new Map(this.data.nodes.map(n => [n.id, n]))
+        for (const un of updatedNodes) {
+          const n = nodeMap.get(un.id)
+          if (n) {
+            n.x = un.x
+            n.y = un.y
+            n.vx = un.vx
+            n.vy = un.vy
+          }
+        }
+        this.scheduleRender()
+      }
     )
-    this.simulation = simulation
-    this.setPhysicsInteractive = setInteractive
 
     // Resize Observer
     this.resizeObserver = new ResizeObserver(() => {
@@ -195,7 +218,7 @@ export class GraphViewManager {
       this.canvas,
       this.data.nodes,
       this.data.links,
-      simulation,
+      this.physicsController,
       width,
       height,
       (t) => {
@@ -223,7 +246,7 @@ export class GraphViewManager {
       this.styleObserver = new MutationObserver(() => {
         this.isInteractive =
           (wrapper as HTMLElement).style.pointerEvents === 'auto'
-        this.setPhysicsInteractive?.(this.isInteractive)
+        this.physicsController?.setInteractive(this.isInteractive)
         if (this.isInteractive) this.scheduleRender()
       })
       this.styleObserver.observe(wrapper, {
@@ -232,7 +255,7 @@ export class GraphViewManager {
       })
     }
 
-    this.setPhysicsInteractive?.(this.isInteractive)
+    this.physicsController?.setInteractive(this.isInteractive)
     this.scheduleRender()
   }
 
@@ -297,7 +320,6 @@ export class GraphViewManager {
     if (this.animationFrameId !== null)
       cancelAnimationFrame(this.animationFrameId)
     if (this.fadeInTimeoutId !== null) clearTimeout(this.fadeInTimeoutId)
-    this.simulation?.alphaTarget(0).stop()
-    this.simulation?.on('tick', null)
+    this.physicsController?.destroy()
   }
 }
