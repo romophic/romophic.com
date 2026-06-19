@@ -1,0 +1,39 @@
+---
+import PageHead from '@/components/PageHead.astro'
+import Layout from '@/layouts/Layout.astro'
+import { getSortedTags } from '@/lib/data-utils'
+import { Icon } from 'astro-icon/components'
+import { ICONS } from '@/consts'
+
+const tags = await getSortedTags()
+---
+
+<Layout class="max-w-3xl">
+  <PageHead slot="head" title="Tags" description="Browse all tags" />
+
+  <div class="flex flex-col gap-y-8 min-h-[calc(100vh-18rem)]">
+    <header class="flex flex-col gap-4">
+      <h1 class="text-3xl font-bold tracking-tight">Tags</h1>
+      <p class="text-muted-foreground">All tags used in the blog posts.</p>
+    </header>
+
+    <div class="flex flex-wrap gap-3">
+      {
+        tags.map(({ tag, count }) => (
+          <a
+            href={`/tags/${tag}/`}
+            class="border-primary/20 bg-primary/5 hover:bg-primary/10 flex items-center gap-x-2 rounded-full border px-4 py-2 transition-colors"
+          >
+            <div class="text-primary flex items-center gap-x-1 font-semibold">
+              <Icon name={ICONS.hash} class="size-4" />
+              <span>{tag}</span>
+            </div>
+            <span class="bg-primary/10 text-primary flex size-6 items-center justify-center rounded-full text-xs font-bold">
+              {count}
+            </span>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</Layout>

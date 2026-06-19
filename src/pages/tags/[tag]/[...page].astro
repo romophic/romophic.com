@@ -1,0 +1,30 @@
+---
+import BlogList from '@/components/BlogList.astro'
+import { SITE } from '@/consts'
+import { getSortedTags, getPostsByTag } from '@/lib/data-utils'
+import type { Page, PaginateFunction } from 'astro'
+import type { CollectionEntry } from 'astro:content'
+
+export async function getStaticPaths({
+  paginate,
+}: {
+  paginate: PaginateFunction
+}) {
+  const allTags = await getSortedTags()
+
+  return Promise.all(
+    allTags.map(async ({ tag }) => {
+      const postsForTag = await getPostsByTag(tag)
+      return paginate(postsForTag, {
+        params: { tag },
+        pageSize: SITE.postsPerPage,
+      })
+    }),
+  ).then((results) => results.flat())
+}
+
+const { page } = Astro.props
+const { tag } = Astro.params
+---
+
+<BlogList page={page as Page<CollectionEntry<'blog'>>} currentTag={tag} />

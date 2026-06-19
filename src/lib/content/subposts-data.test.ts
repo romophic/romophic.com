@@ -9,6 +9,8 @@ vi.mock('./posts', () => {
         standalone: { id: 'standalone', data: {} },
         series: { id: 'series', data: {} },
         'series/part-1': { id: 'series/part-1', data: {} },
+        'series/orphan': { id: 'series/orphan', data: {} },
+        'series/unlisted': { id: 'series/unlisted', data: {} },
       }
       return posts[id] || null
     }),
@@ -17,6 +19,7 @@ vi.mock('./posts', () => {
       post.id.includes('/') ? post.id.split('/')[0] : '',
     ),
     getParentPost: vi.fn(async (id: string) => {
+      if (id === 'series/orphan') return null
       if (id.includes('/')) return { id: id.split('/')[0], data: {} }
       return null
     }),
@@ -86,6 +89,20 @@ describe('Subposts Data Aggregation Specification', () => {
       await expect(
         getSubpostsData('standalone', 'non-existent'),
       ).rejects.toThrow('Post not found: non-existent')
+    })
+
+    it('should handle subposts that have no parent post (orphaned)', async () => {
+      const data = await getSubpostsData('series', 'series/orphan')
+      expect(data.isCurrentSubpost).toBe(true)
+      expect(data.activePost).toBeNull()
+      expect(data.activePostReadingTime).toBeNull()
+      expect(data.activePostCombinedReadingTime).toBeNull()
+    })
+
+    it('should return currentSubpostDetails as null if current post is not found in parent subposts', async () => {
+      const data = await getSubpostsData('series', 'series/unlisted')
+      expect(data.isCurrentSubpost).toBe(true)
+      expect(data.currentSubpostDetails).toBeNull()
     })
   })
 })

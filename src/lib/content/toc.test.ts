@@ -42,7 +42,10 @@ vi.mock('./posts', () => ({
   ),
   getSubpostsForParent: vi.fn(async (parentId: string) => {
     if (parentId === 'parent') {
-      return [{ id: 'parent/child-1', data: { title: 'Child 1' } }]
+      return [
+        { id: 'parent/child-1', data: { title: 'Child 1' } },
+        { id: 'parent/child-empty', data: { title: 'Child Empty' } }
+      ]
     }
     return []
   }),
@@ -80,6 +83,13 @@ describe('TOC Generation Specification', () => {
       expect(sections).toHaveLength(2)
       expect(sections[0].type).toBe('parent')
       expect(sections[1].subpostId).toBe('parent/child-1')
+    })
+
+    it('should skip subposts that have no headings', async () => {
+      const sections = await getTOCSections('parent')
+      // 'parent/child-empty' returns empty headings in the mock, so it should not be added to sections
+      const emptyChildSection = sections.find(s => 'subpostId' in s && s.subpostId === 'parent/child-empty')
+      expect(emptyChildSection).toBeUndefined()
     })
 
     it('should return an empty array if the requested post does not exist', async () => {
