@@ -85,6 +85,10 @@ describe('renderGraph (Mocked)', () => {
       },
     ]
 
+    // Assign coordinates to ensure length > radii and trigger stroke
+    nodes[0].x = 0; nodes[0].y = 0;
+    nodes[1].x = 100; nodes[1].y = 100;
+
     // Call the function in dark mode
     renderGraph(
       ctx,
@@ -102,8 +106,9 @@ describe('renderGraph (Mocked)', () => {
 
     // Call the function in light mode and test post -> tag
     const lightNodes = [
-      makeNode({ id: '1' }),
-      makeNode({ id: '2', group: 'tag' }),
+      makeNode({ id: '1', degree: 5 }), // isImportant true
+      makeNode({ id: '2', group: 'tag', degree: 0 }), // isImportant false
+      makeNode({ id: '3', degree: 5 }), // Unrelated node to test isHover/isNeighbor false but isImportant true
     ]
     const lightLinks = [
       { source: lightNodes[0], target: lightNodes[1], value: 1 } as unknown as {
@@ -111,7 +116,25 @@ describe('renderGraph (Mocked)', () => {
         target: string
         value: number
       },
+      // Reverse link
+      { source: lightNodes[1], target: lightNodes[0], value: 1, isReverse: true } as unknown as {
+        source: string
+        target: string
+        value: number
+      },
+      // Overlapping link
+      { source: lightNodes[0], target: lightNodes[0], value: 1 } as unknown as {
+        source: string
+        target: string
+        value: number
+      },
     ]
+
+    lightNodes[0].x = 0; lightNodes[0].y = 0;
+    lightNodes[1].x = 100; lightNodes[1].y = 100; 
+    lightNodes[2].x = 50; lightNodes[2].y = 50; 
+
+    // Call the function in light mode
     renderGraph(
       ctx,
       800,
@@ -121,9 +144,24 @@ describe('renderGraph (Mocked)', () => {
       { x: 0, y: 0, k: 1 },
       false, // isDark = false
       mockTheme,
-      lightNodes[0],
-      new Set(['2']),
+      lightNodes[0], // hoverNode
+      new Set(['2']), // neighborIds
       true, // isInteractive = true
+    )
+
+    // Call with isInteractive = false to hit early return for labels
+    renderGraph(
+      ctx,
+      800,
+      600,
+      lightNodes,
+      lightLinks,
+      { x: 0, y: 0, k: 1 },
+      false,
+      mockTheme,
+      null,
+      new Set(),
+      false,
     )
 
     // Check that ctx methods were called

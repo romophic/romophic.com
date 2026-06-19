@@ -4,6 +4,7 @@ import {
   normalizeId,
   extractInternalLinks,
   getBacklinks,
+  _resetBacklinksCache,
 } from './links'
 import type { CollectionEntry } from 'astro:content'
 
@@ -12,7 +13,7 @@ vi.mock('./posts', () => ({
     {
       id: 'post-1',
       data: {},
-      body: 'Here is a [link](/blog/target-post) and another [rel](./relative-post)',
+      body: 'Here is a [link](/blog/target-post) and another [rel](./relative-post) and a [dup](/blog/target-post)',
     },
     { id: 'post-2', data: {}, body: 'Link to [target](/blog/target-post)' },
     { id: 'self-linker', data: {}, body: 'Link to [self](/blog/self-linker)' },
@@ -74,7 +75,7 @@ describe('Links Utils Specification', () => {
     it('should extract and resolve all raw internal links from a post', async () => {
       const mockPost = {
         id: 'post-1',
-        body: 'Here is a [link](/blog/target-post) and another [rel](./relative-post)',
+        body: 'Here is a [link](/blog/target-post) and another [rel](./relative-post) and [ext](https://example.com)',
       } as CollectionEntry<'blog'>
       const targets = await extractInternalLinks(mockPost)
 
@@ -108,6 +109,11 @@ describe('Links Utils Specification', () => {
     it('should return empty array if no posts link to the target', async () => {
       const backlinks = await getBacklinks('post-1') // nobody links to post-1
       expect(backlinks).toHaveLength(0)
+    })
+
+    it('should be able to reset cache', async () => {
+      _resetBacklinksCache()
+      expect(typeof _resetBacklinksCache).toBe('function')
     })
   })
 })

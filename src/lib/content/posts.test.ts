@@ -27,6 +27,7 @@ vi.mock('astro:content', () => {
           { id: 'proj-1', data: { startDate: new Date('2024-01-01') } },
           { id: 'proj-2', data: { startDate: new Date('2025-01-01') } },
           { id: 'proj-3', data: {} }, // missing startDate
+          { id: 'proj-4', data: {} }, // another missing startDate to test both sides of sort
         ]
       }
       if (collection === 'blog') {
@@ -37,7 +38,7 @@ vi.mock('astro:content', () => {
               title: 'Standalone',
               draft: false,
               date: new Date('2025-01-01'),
-              tags: ['Tech', 'Astro'],
+              tags: ['Tech', 'Astro', 'ZZZ'], // ZZZ added to test sorting tie-breaker with Tech
             },
             body: 'A'.repeat(2000), // 5 min read
           },
@@ -72,6 +73,16 @@ vi.mock('astro:content', () => {
             body: 'A'.repeat(2000), // 5 min read
           },
           {
+            id: 'series/part-1-bis',
+            data: {
+              title: 'Part 1 Bis',
+              draft: false,
+              date: new Date('2024-01-02'),
+              order: 1, // Same order to test date fallback
+            },
+            body: 'A'.repeat(2000), // 5 min read
+          },
+          {
             id: 'series/part-2',
             data: {
               title: 'Part 2',
@@ -102,6 +113,34 @@ vi.mock('astro:content', () => {
               order: 3,
             },
             body: 'A'.repeat(2000), // 5 min read
+          },
+          {
+            id: 'series/part-no-order',
+            data: {
+              title: 'No Order',
+              draft: false,
+              date: new Date('2024-01-05'),
+            },
+            body: 'A'.repeat(2000), // 5 min read
+          },
+          {
+            id: 'series/part-empty-body',
+            data: {
+              title: 'Empty Body',
+              draft: false,
+              date: new Date('2024-01-06'),
+            },
+            body: '', // Empty body to test combined reading time subpost fallback
+          },
+          {
+            id: 'orphan-subpost',
+            data: {
+              title: 'Orphan',
+              draft: false,
+              date: new Date('2024-01-06'),
+              parent: { id: 'non-existent-parent', collection: 'blog' },
+            },
+            body: 'A',
           },
           {
             id: 'series/draft-subpost',
@@ -175,7 +214,7 @@ describe('Blog Content Data Layer Specification', () => {
     describe('hasSubposts & getSubpostCount', () => {
       it('should return true and the correct count if a post acts as a parent for subposts', async () => {
         expect(await hasSubposts('series')).toBe(true)
-        expect(await getSubpostCount('series')).toBe(4) // part-1, part-2, part-2-bis, legacy-subpost
+        expect(await getSubpostCount('series')).toBe(7) // part-1, part-1-bis, part-2, part-2-bis, legacy-subpost, no-order, empty-body
       })
       it('should return false and zero count for standalone posts', async () => {
         expect(await hasSubposts('standalone')).toBe(false)
@@ -190,6 +229,10 @@ describe('Blog Content Data Layer Specification', () => {
       })
       it('should return null if the post is a standalone root post', async () => {
         const parent = await getParentPost('standalone')
+        expect(parent).toBeNull()
+      })
+      it('should return null if the post itself is not found', async () => {
+        const parent = await getParentPost('non-existent-subpost')
         expect(parent).toBeNull()
       })
     })
@@ -220,31 +263,34 @@ describe('Blog Content Data Layer Specification', () => {
     describe('getAllPostsAndSubposts', () => {
       it('should return all posts including subposts but filter out drafts', async () => {
         const posts = await getAllPostsAndSubposts()
-        expect(posts.length).toBe(6) // standalone, series, part-1, part-2, part-2-bis, legacy
+        expect(posts.length).toBe(10) // standalone, series, part-1, part-1-bis, part-2, part-2-bis, legacy, no-order, empty-body, orphan
       })
     })
 
     describe('getAllProjects', () => {
       it('should return projects sorted by startDate descending', async () => {
         const projects = await getAllProjects()
-        expect(projects).toHaveLength(3)
+        expect(projects).toHaveLength(4)
         expect(projects[0].id).toBe('proj-2') // 2025
         expect(projects[1].id).toBe('proj-1') // 2024
-        expect(projects[2].id).toBe('proj-3') // undefined date => 0
+        // proj-3 and proj-4 have no date, so they fallback to 0
       })
     })
 
     describe('getSubpostsForParent', () => {
       it('should return all subposts belonging to a specific parent ID', async () => {
         const subposts = await getSubpostsForParent('series')
-        expect(subposts.length).toBe(4)
+        expect(subposts.length).toBe(7)
       })
       it('should sort subposts primarily by their explicit order field, then by date', async () => {
         const subposts = await getSubpostsForParent('series')
-        expect(subposts[0].id).toBe('series/part-1') // order: 1
-        expect(subposts[1].id).toBe('series/part-2') // order: 2, 2024-01-03
-        expect(subposts[2].id).toBe('series/part-2-bis') // order: 2, 2024-01-04
-        expect(subposts[3].id).toBe('legacy-subpost') // order: 3
+        expect(subposts[0].id).toBe('series/part-no-order') // order: 0 (undefined), date: 05
+        expect(subposts[1].id).toBe('series/part-empty-body') // order: 0 (undefined), date: 06
+        expect(subposts[2].id).toBe('series/part-1') // order: 1, date: 02
+        expect(subposts[3].id).toBe('series/part-1-bis') // order: 1, date: 02
+        expect(subposts[4].id).toBe('series/part-2') // order: 2, 2024-01-03
+        expect(subposts[5].id).toBe('series/part-2-bis') // order: 2, 2024-01-04
+        expect(subposts[6].id).toBe('legacy-subpost') // order: 3
       })
       it('should exclude the parent post itself from the subpost list', async () => {
         const subposts = await getSubpostsForParent('series')
@@ -268,18 +314,24 @@ describe('Blog Content Data Layer Specification', () => {
         expect(adjacent.parent).toBeNull()
         expect(adjacent.newer).toBeNull() // Standalone is the newest post
         expect(adjacent.older?.id).toBe('series')
+
+        // Test the oldest post in the global pool (series)
+        const oldestAdjacent = await getAdjacentPosts('series')
+        expect(oldestAdjacent.parent).toBeNull()
+        expect(oldestAdjacent.newer?.id).toBe('standalone')
+        expect(oldestAdjacent.older).toBeNull()
       })
 
       it('should return the adjacent parts specifically from within the same series for a subpost', async () => {
-        // Series order: part-1, part-2, part-2-bis, legacy
+        // Series order: part-no-order, empty-body, part-1, part-1-bis, part-2, part-2-bis, legacy
         const adjacentPart1 = await getAdjacentPosts('series/part-1')
         expect(adjacentPart1.parent?.id).toBe('series')
-        expect(adjacentPart1.newer?.id).toBe('series/part-2') // Next part in order
-        expect(adjacentPart1.older).toBeNull() // First part in the series
+        expect(adjacentPart1.newer?.id).toBe('series/part-1-bis') // Next part in order
+        expect(adjacentPart1.older?.id).toBe('series/part-empty-body') // Previous part in the series
 
         const adjacentPart2 = await getAdjacentPosts('series/part-2')
         expect(adjacentPart2.newer?.id).toBe('series/part-2-bis')
-        expect(adjacentPart2.older?.id).toBe('series/part-1')
+        expect(adjacentPart2.older?.id).toBe('series/part-1-bis')
       })
 
       it('should return parent and nulls if the subpost is not found in subposts list', async () => {
@@ -289,6 +341,20 @@ describe('Blog Content Data Layer Specification', () => {
         expect(adjacent.newer).toBeNull()
         expect(adjacent.older).toBeNull()
         expect(adjacent.parent?.id).toBe('series')
+      })
+
+      it('should return nulls if a standalone post is not in the active pool (e.g. it is a draft)', async () => {
+        const adjacent = await getAdjacentPosts('draft-post')
+        expect(adjacent.newer).toBeNull()
+        expect(adjacent.older).toBeNull()
+        expect(adjacent.parent).toBeNull()
+      })
+
+      it('should handle orphaned subposts whose parent post does not exist', async () => {
+        const adjacent = await getAdjacentPosts('orphan-subpost')
+        expect(adjacent.parent).toBeNull()
+        expect(adjacent.newer).toBeNull()
+        expect(adjacent.older).toBeNull()
       })
     })
   })
@@ -315,6 +381,10 @@ describe('Blog Content Data Layer Specification', () => {
         const time = await getPostReadingTime('non-existent')
         expect(time).toBe('0 min read')
       })
+      it('should handle posts with empty body', async () => {
+        const time = await getPostReadingTime('draft-post')
+        expect(time).toBe('1 min read') // Math.max(1, 0)
+      })
     })
 
     describe('getCombinedReadingTime', () => {
@@ -324,12 +394,20 @@ describe('Blog Content Data Layer Specification', () => {
       })
       it('should aggregate the reading time of the parent and all its subposts for a series root', async () => {
         const time = await getCombinedReadingTime('series')
-        // Parent (5) + part-1 (5) + part-2 (5) + part-2-bis (5) + legacy (5) = 25
-        expect(time).toBe('25 min read')
+        // Parent (5) + part-1 (5) + part-1-bis (5) + part-2 (5) + part-2-bis (5) + legacy (5) + no-order (5) + empty-body (1)
+        expect(time).toBe('36 min read')
       })
       it('should return 0 min read if post is not found', async () => {
         const time = await getCombinedReadingTime('non-existent')
         expect(time).toBe('0 min read')
+      })
+      it('should calculate reading time for a standalone post with no subposts', async () => {
+        const time = await getCombinedReadingTime('standalone')
+        expect(time).toBe('5 min read')
+      })
+      it('should calculate reading time correctly when body is empty', async () => {
+        const time = await getCombinedReadingTime('draft-post')
+        expect(time).toBe('1 min read')
       })
     })
   })
@@ -353,7 +431,9 @@ describe('Blog Content Data Layer Specification', () => {
         const sorted = await getSortedTags()
         expect(sorted[0].tag).toBe('Astro')
         expect(sorted[0].count).toBe(2)
+        // Tech and ZZZ both have count 1, should be sorted alphabetically
         expect(sorted[1].tag).toBe('Tech')
+        expect(sorted[2].tag).toBe('ZZZ')
       })
     })
 
