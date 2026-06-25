@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi } from 'vitest'
 import { experimental_AstroContainer as AstroContainer } from 'astro/container'
 import SubpostItem from './SubpostItem.astro'

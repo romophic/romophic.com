@@ -102,19 +102,28 @@ export class GraphViewManager {
       if (nodeMap.has(sourceId) && nodeMap.has(targetId)) {
         const s = nodeMap.get(sourceId)!
         const t = nodeMap.get(targetId)!
-        
+
         const reverseKey = `${targetId}->${sourceId}`
         const reverseLink = linkMap.get(reverseKey)
-        
+
         if (reverseLink) {
-          (reverseLink as any).isBidirectional = true
-          links.push({ ...l, source: s, target: t, isReverse: true } as any)
+          ;(reverseLink as unknown as Record<string, unknown>).isBidirectional =
+            true
+          links.push({
+            ...l,
+            source: s,
+            target: t,
+            isReverse: true,
+          } as unknown as D3GraphLink)
         } else {
           const newLink = { ...l, source: s, target: t, isBidirectional: false }
-          linkMap.set(`${sourceId}->${targetId}`, newLink as any)
-          links.push(newLink as any)
+          linkMap.set(
+            `${sourceId}->${targetId}`,
+            newLink as unknown as D3GraphLink,
+          )
+          links.push(newLink as unknown as D3GraphLink)
         }
-        
+
         s.degree = (s.degree || 0) + 1
         t.degree = (t.degree || 0) + 1
       }
@@ -192,7 +201,7 @@ export class GraphViewManager {
       height,
       (updatedNodes) => {
         if (!this.data) return
-        const nodeMap = new Map(this.data.nodes.map(n => [n.id, n]))
+        const nodeMap = new Map(this.data.nodes.map((n) => [n.id, n]))
         for (const un of updatedNodes) {
           const n = nodeMap.get(un.id)
           if (n) {
@@ -203,7 +212,7 @@ export class GraphViewManager {
           }
         }
         this.scheduleRender()
-      }
+      },
     )
 
     // Resize Observer

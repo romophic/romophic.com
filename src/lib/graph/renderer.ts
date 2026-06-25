@@ -49,8 +49,6 @@ export function getNodeColor(
   return activeTheme.nodeDefault
 }
 
-
-
 /**
  * Render the full graph scene onto a 2D canvas context.
  */
@@ -98,11 +96,11 @@ export function renderGraph(
     const source = link.source as D3GraphNode,
       target = link.target as D3GraphNode
 
-    if ((link as any).isReverse) return
+    if ((link as unknown as Record<string, unknown>).isReverse) return
 
     const isRelated =
       hoverNode && (source.id === hoverNode.id || target.id === hoverNode.id)
-    
+
     const sx = source.x!
     const sy = source.y!
     const tx = target.x!
@@ -110,7 +108,8 @@ export function renderGraph(
 
     const getRadius = (node: D3GraphNode) => {
       const isHover = hoverNode?.id === node.id
-      const baseRadius = node.group === 'tag' ? RENDER.node.radiusTag : RENDER.node.radiusPost
+      const baseRadius =
+        node.group === 'tag' ? RENDER.node.radiusTag : RENDER.node.radiusPost
       return isHover ? baseRadius * RENDER.node.hoverScale : baseRadius
     }
 
@@ -130,7 +129,9 @@ export function renderGraph(
       ctx.moveTo(sx + nx * rSource, sy + ny * rSource)
       ctx.lineTo(tx - nx * rTarget, ty - ny * rTarget)
       ctx.strokeStyle = isRelated ? activeTheme.linkHighlight : activeTheme.link
-      ctx.lineWidth = isRelated ? RENDER.link.widthHighlight : RENDER.link.widthDefault
+      ctx.lineWidth = isRelated
+        ? RENDER.link.widthHighlight
+        : RENDER.link.widthDefault
       ctx.stroke()
     }
   })

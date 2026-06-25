@@ -68,16 +68,27 @@ export function setupInteraction(
       })
       .on('start', (event) => {
         if (!event.active && physicsController) {
-          physicsController.controlSimulation(GRAPH_CONFIG.physics.alphaTarget, true)
+          physicsController.controlSimulation(
+            GRAPH_CONFIG.physics.alphaTarget,
+            true,
+          )
         }
         event.subject.fx = event.subject.x
         event.subject.fy = event.subject.y
-        physicsController?.updateNode(event.subject.id, event.subject.fx, event.subject.fy)
+        physicsController?.updateNode(
+          event.subject.id,
+          event.subject.fx,
+          event.subject.fy,
+        )
       })
       .on('drag', (event) => {
         event.subject.fx = currentTransform.invertX(event.sourceEvent.offsetX)
         event.subject.fy = currentTransform.invertY(event.sourceEvent.offsetY)
-        physicsController?.updateNode(event.subject.id, event.subject.fx, event.subject.fy)
+        physicsController?.updateNode(
+          event.subject.id,
+          event.subject.fx,
+          event.subject.fy,
+        )
       })
       .on('end', (event) => {
         if (!event.active && physicsController) {

@@ -104,12 +104,14 @@ const ogImageUrl = `/og/${ogSlug.replaceAll('/', '-')}.png`
     }
 
     <article class="prose col-start-2 max-w-none">
-      <Content components={{
-        img: MdxImageCaption,
-        // Add more standard markdown mappings here in the future:
-        // a: CustomLink,
-        // blockquote: CustomQuote,
-      }} />
+      <Content
+        components={{
+          img: MdxImageCaption,
+          // Add more standard markdown mappings here in the future:
+          // a: CustomLink,
+          // blockquote: CustomQuote,
+        }}
+      />
     </article>
 
     <div class="col-start-2 max-w-none">

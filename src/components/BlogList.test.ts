@@ -2,9 +2,18 @@
 import { describe, it, expect, vi } from 'vitest'
 import { experimental_AstroContainer as AstroContainer } from 'astro/container'
 import BlogList from './BlogList.astro'
-vi.mock('@/components/PageHead.astro', async () => await import('./__mocks__/Mock.astro'))
-vi.mock('@/components/BlogCard.astro', async () => await import('./__mocks__/Mock.astro'))
-vi.mock('@/layouts/Layout.astro', async () => await import('./__mocks__/Mock.astro'))
+vi.mock(
+  '@/components/PageHead.astro',
+  async () => await import('./__mocks__/Mock.astro'),
+)
+vi.mock(
+  '@/components/BlogCard.astro',
+  async () => await import('./__mocks__/Mock.astro'),
+)
+vi.mock(
+  '@/layouts/Layout.astro',
+  async () => await import('./__mocks__/Mock.astro'),
+)
 
 describe('BlogList.astro', () => {
   it('renders a list of blog posts grouped by year', async () => {
@@ -13,7 +22,11 @@ describe('BlogList.astro', () => {
         {
           id: 'post-1',
           collection: 'blog',
-          data: { title: 'Post 1', date: new Date('2026-05-27'), tags: ['test'] },
+          data: {
+            title: 'Post 1',
+            date: new Date('2026-05-27'),
+            tags: ['test'],
+          },
         },
         {
           id: 'post-2',

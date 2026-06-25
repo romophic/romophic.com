@@ -11,7 +11,10 @@ vi.mock('astro:content', async (importOriginal) => {
     render: vi.fn().mockResolvedValue({ Content: mock.default, headings: [] }),
   }
 })
-vi.mock('@/components/GiscusComments.astro', async () => await import('./__mocks__/Mock.astro'))
+vi.mock(
+  '@/components/GiscusComments.astro',
+  async () => await import('./__mocks__/Mock.astro'),
+)
 
 describe('BlogPost.astro', () => {
   it('renders a blog post without crashing', async () => {

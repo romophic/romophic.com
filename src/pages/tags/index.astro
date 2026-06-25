@@ -1,9 +1,9 @@
 ---
 import PageHead from '@/components/PageHead.astro'
+import { ICONS } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import { getSortedTags } from '@/lib/data-utils'
 import { Icon } from 'astro-icon/components'
-import { ICONS } from '@/consts'
 
 const tags = await getSortedTags()
 ---

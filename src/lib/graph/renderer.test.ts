@@ -86,8 +86,10 @@ describe('renderGraph (Mocked)', () => {
     ]
 
     // Assign coordinates to ensure length > radii and trigger stroke
-    nodes[0].x = 0; nodes[0].y = 0;
-    nodes[1].x = 100; nodes[1].y = 100;
+    nodes[0].x = 0
+    nodes[0].y = 0
+    nodes[1].x = 100
+    nodes[1].y = 100
 
     // Call the function in dark mode
     renderGraph(
@@ -117,7 +119,12 @@ describe('renderGraph (Mocked)', () => {
         value: number
       },
       // Reverse link
-      { source: lightNodes[1], target: lightNodes[0], value: 1, isReverse: true } as unknown as {
+      {
+        source: lightNodes[1],
+        target: lightNodes[0],
+        value: 1,
+        isReverse: true,
+      } as unknown as {
         source: string
         target: string
         value: number
@@ -130,9 +137,12 @@ describe('renderGraph (Mocked)', () => {
       },
     ]
 
-    lightNodes[0].x = 0; lightNodes[0].y = 0;
-    lightNodes[1].x = 100; lightNodes[1].y = 100; 
-    lightNodes[2].x = 50; lightNodes[2].y = 50; 
+    lightNodes[0].x = 0
+    lightNodes[0].y = 0
+    lightNodes[1].x = 100
+    lightNodes[1].y = 100
+    lightNodes[2].x = 50
+    lightNodes[2].y = 50
 
     // Call the function in light mode
     renderGraph(

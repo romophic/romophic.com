@@ -12,8 +12,16 @@ describe('PostNavigation.astro', () => {
     const container = await AstroContainer.create()
     const html = await container.renderToString(PostNavigation, {
       props: {
-        newerPost: { id: 'newer', data: { title: 'Newer Post' }, collection: 'blog' },
-        olderPost: { id: 'older', data: { title: 'Older Post' }, collection: 'blog' },
+        newerPost: {
+          id: 'newer',
+          data: { title: 'Newer Post' },
+          collection: 'blog',
+        },
+        olderPost: {
+          id: 'older',
+          data: { title: 'Older Post' },
+          collection: 'blog',
+        },
       } as any,
     })
 
@@ -27,7 +35,11 @@ describe('PostNavigation.astro', () => {
     const container = await AstroContainer.create()
     const html = await container.renderToString(PostNavigation, {
       props: {
-        parentPost: { id: 'parent', data: { title: 'Parent Post' }, collection: 'blog' },
+        parentPost: {
+          id: 'parent',
+          data: { title: 'Parent Post' },
+          collection: 'blog',
+        },
       } as any,
     })
 

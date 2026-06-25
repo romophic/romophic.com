@@ -44,7 +44,7 @@ vi.mock('./posts', () => ({
     if (parentId === 'parent') {
       return [
         { id: 'parent/child-1', data: { title: 'Child 1' } },
-        { id: 'parent/child-empty', data: { title: 'Child Empty' } }
+        { id: 'parent/child-empty', data: { title: 'Child Empty' } },
       ]
     }
     return []
@@ -88,7 +88,9 @@ describe('TOC Generation Specification', () => {
     it('should skip subposts that have no headings', async () => {
       const sections = await getTOCSections('parent')
       // 'parent/child-empty' returns empty headings in the mock, so it should not be added to sections
-      const emptyChildSection = sections.find(s => 'subpostId' in s && s.subpostId === 'parent/child-empty')
+      const emptyChildSection = sections.find(
+        (s) => 'subpostId' in s && s.subpostId === 'parent/child-empty',
+      )
       expect(emptyChildSection).toBeUndefined()
     })
 
