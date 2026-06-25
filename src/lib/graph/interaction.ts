@@ -7,7 +7,7 @@ import type { PhysicsController } from './physics'
 
 export const EMPTY_SET: ReadonlySet<string> = new Set()
 
-export function buildNeighborIds(
+function buildNeighborIds(
   nodeId: string,
   links: D3GraphLink[],
 ): ReadonlySet<string> {

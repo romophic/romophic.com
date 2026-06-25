@@ -17,7 +17,6 @@ export {
   getAllPosts,
   getAllPostsAndSubposts,
   getAllProjects,
-  getAllTags,
   getPostsByTag,
   getRecentPosts,
   getSortedTags,
@@ -31,7 +30,6 @@ export {
 export {
   parseAuthors,
   getAllAuthors,
-  getPostsByAuthor,
 } from './content/authors'
 export { normalizeId, extractInternalLinks } from './content/links'
 export { getSubpostsData } from './content/subposts-data'

@@ -183,7 +183,7 @@ export async function getSubpostCount(parentId: string): Promise<number> {
 }
 
 /** Returns reading time in minutes as a number. */
-export function calculateReadingTimeMinutes(body: string): number {
+function calculateReadingTimeMinutes(body: string): number {
   if (!body) return 1
   const chars = body.replace(/\s+/g, '').length
   // Avg Japanese/English technical reading speed is ~400 chars/min

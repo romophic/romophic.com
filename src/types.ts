@@ -24,7 +24,7 @@ export type Author = {
   isRegistered: boolean
 }
 
-export type TOCHeading = {
+type TOCHeading = {
   slug: string
   text: string
   depth: number
@@ -53,7 +53,7 @@ export interface D3GraphLink extends SimulationLinkDatum<D3GraphNode> {
   value: number
 }
 
-export type AdjacentPosts = {
+type AdjacentPosts = {
   newer: CollectionEntry<'blog'> | null
   older: CollectionEntry<'blog'> | null
   parent: CollectionEntry<'blog'> | null
