@@ -10,7 +10,7 @@ import SubpostsHeader from '@/components/SubpostsHeader.astro'
 import TOCHeader from '@/components/TOCHeader.astro'
 import TOCSidebar from '@/components/TOCSidebar.astro'
 import Layout from '@/layouts/Layout.astro'
-import { getParentId, getPostPageData } from '@/lib/data-utils'
+import { getOgImageSlug, getParentId, getPostPageData } from '@/lib/data-utils'
 import { Image } from 'astro:assets'
 import type { CollectionEntry } from 'astro:content'
 import { render } from 'astro:content'
@@ -36,8 +36,7 @@ const {
   backlinks,
 } = await getPostPageData(post)
 
-const ogSlug = hasChildPosts ? `${post.id}/index` : post.id
-const ogImageUrl = `/og/${ogSlug.replaceAll('/', '-')}.png`
+const ogImageUrl = `/og/${getOgImageSlug(post.id, hasChildPosts)}.png`
 ---
 
 <Layout>

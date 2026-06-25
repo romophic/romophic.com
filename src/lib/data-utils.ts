@@ -24,6 +24,7 @@ export {
   getParentId,
   getSubpostCount,
   getCombinedReadingTime,
+  getOgImageSlug,
   groupPostsByYear,
 } from './content/posts'
 

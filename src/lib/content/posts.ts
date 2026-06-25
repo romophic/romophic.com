@@ -216,3 +216,9 @@ export async function getCombinedReadingTime(postId: string): Promise<string> {
 
   return `${Math.max(1, totalMinutes)} min read`
 }
+
+export function getOgImageSlug(postId: string, isParent: boolean): string {
+  const finalSlug = isParent ? `${postId}/index` : postId
+  return finalSlug.replaceAll('/', '-')
+}
+

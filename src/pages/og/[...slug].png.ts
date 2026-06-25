@@ -1,5 +1,6 @@
 import { SITE } from '@/consts'
 import { Resvg } from '@resvg/resvg-js'
+import { getOgImageSlug } from '@/lib/data-utils'
 import { getCollection, type CollectionEntry } from 'astro:content'
 import { createHash } from 'node:crypto'
 import { existsSync } from 'node:fs'
@@ -14,11 +15,10 @@ export async function getStaticPaths() {
   )
 
   return posts.map((post) => {
-    const slug = post.id
-    const finalSlug = parentIds.has(slug) ? `${slug}/index` : slug
+    const slug = getOgImageSlug(post.id, parentIds.has(post.id))
 
     return {
-      params: { slug: finalSlug.replaceAll('/', '-') },
+      params: { slug },
       props: { post },
     }
   })
