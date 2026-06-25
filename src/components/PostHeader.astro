@@ -96,7 +96,7 @@ const { post, authors, postReadingTime, combinedReadingTime, subpostCount } =
           post.data.tags.length > 0 &&
           post.data.tags.map((tag) => (
             <a
-              href={`/blog?tag=${encodeURIComponent(tag)}`}
+              href={`/tags/${tag}/`}
               class={getBadgeStyles({ variant: 'muted' })}
             >
               <Icon name={ICONS.hash} class="size-3" />
