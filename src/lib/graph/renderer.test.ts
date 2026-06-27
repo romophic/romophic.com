@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { getNodeColor } from './renderer'
-import type { D3GraphNode } from '@/types'
+import type { D3GraphNode, D3GraphLink } from '@/types'
 import type { GraphThemeColors } from './types'
 
 const mockTheme: GraphThemeColors = {
@@ -77,12 +77,8 @@ describe('renderGraph (Mocked)', () => {
 
     const nodes = [makeNode({ id: '1' }), makeNode({ id: '2', group: 'tag' })]
     // Make this tag -> post to cover the else branch in drawArrow
-    const links = [
-      { source: nodes[1], target: nodes[0], value: 1 } as unknown as {
-        source: string
-        target: string
-        value: number
-      },
+    const links: D3GraphLink[] = [
+      { source: nodes[1], target: nodes[0], value: 1 },
     ]
 
     // Assign coordinates to ensure length > radii and trigger stroke
@@ -112,29 +108,17 @@ describe('renderGraph (Mocked)', () => {
       makeNode({ id: '2', group: 'tag', degree: 0 }), // isImportant false
       makeNode({ id: '3', degree: 5 }), // Unrelated node to test isHover/isNeighbor false but isImportant true
     ]
-    const lightLinks = [
-      { source: lightNodes[0], target: lightNodes[1], value: 1 } as unknown as {
-        source: string
-        target: string
-        value: number
-      },
+    const lightLinks: D3GraphLink[] = [
+      { source: lightNodes[0], target: lightNodes[1], value: 1 },
       // Reverse link
       {
         source: lightNodes[1],
         target: lightNodes[0],
         value: 1,
         isReverse: true,
-      } as unknown as {
-        source: string
-        target: string
-        value: number
       },
       // Overlapping link
-      { source: lightNodes[0], target: lightNodes[0], value: 1 } as unknown as {
-        source: string
-        target: string
-        value: number
-      },
+      { source: lightNodes[0], target: lightNodes[0], value: 1 },
     ]
 
     lightNodes[0].x = 0

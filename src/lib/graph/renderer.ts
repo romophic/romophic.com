@@ -96,7 +96,7 @@ export function renderGraph(
     const source = link.source as D3GraphNode,
       target = link.target as D3GraphNode
 
-    if ((link as unknown as Record<string, unknown>).isReverse) return
+    if (link.isReverse) return
 
     const isRelated =
       hoverNode && (source.id === hoverNode.id || target.id === hoverNode.id)

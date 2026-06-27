@@ -85,19 +85,24 @@ const CACHE_DIR = path.join(
   'og-images',
 )
 
+async function getCacheFilePath(
+  slug: string,
+  hashKey: string,
+): Promise<string> {
+  if (!existsSync(CACHE_DIR)) {
+    await mkdir(CACHE_DIR, { recursive: true })
+  }
+  const hash = createHash('md5').update(hashKey).digest('hex')
+  const safeSlug = slug.replace(/[^a-z0-9]/gi, '_')
+  return path.join(CACHE_DIR, `${safeSlug}-${hash}.png`)
+}
+
 async function getCachedImage(
   slug: string,
   hashKey: string,
 ): Promise<Buffer | null> {
   try {
-    if (!existsSync(CACHE_DIR)) {
-      await mkdir(CACHE_DIR, { recursive: true })
-    }
-
-    const hash = createHash('md5').update(hashKey).digest('hex')
-    const safeSlug = slug.replace(/[^a-z0-9]/gi, '_')
-    const filePath = path.join(CACHE_DIR, `${safeSlug}-${hash}.png`)
-
+    const filePath = await getCacheFilePath(slug, hashKey)
     if (existsSync(filePath)) {
       return await readFile(filePath)
     }
@@ -114,12 +119,7 @@ async function saveCachedImage(
   buffer: Uint8Array,
 ) {
   try {
-    if (!existsSync(CACHE_DIR)) {
-      await mkdir(CACHE_DIR, { recursive: true })
-    }
-    const hash = createHash('md5').update(hashKey).digest('hex')
-    const safeSlug = slug.replace(/[^a-z0-9]/gi, '_')
-    const filePath = path.join(CACHE_DIR, `${safeSlug}-${hash}.png`)
+    const filePath = await getCacheFilePath(slug, hashKey)
     await writeFile(filePath, buffer)
   } catch (e) {
     console.warn('Cache write error:', e)

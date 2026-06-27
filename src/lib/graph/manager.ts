@@ -107,21 +107,22 @@ export class GraphViewManager {
         const reverseLink = linkMap.get(reverseKey)
 
         if (reverseLink) {
-          ;(reverseLink as unknown as Record<string, unknown>).isBidirectional =
-            true
+          reverseLink.isBidirectional = true
           links.push({
             ...l,
             source: s,
             target: t,
             isReverse: true,
-          } as unknown as D3GraphLink)
+          })
         } else {
-          const newLink = { ...l, source: s, target: t, isBidirectional: false }
-          linkMap.set(
-            `${sourceId}->${targetId}`,
-            newLink as unknown as D3GraphLink,
-          )
-          links.push(newLink as unknown as D3GraphLink)
+          const newLink: D3GraphLink = {
+            ...l,
+            source: s,
+            target: t,
+            isBidirectional: false,
+          }
+          linkMap.set(`${sourceId}->${targetId}`, newLink)
+          links.push(newLink)
         }
 
         s.degree = (s.degree || 0) + 1

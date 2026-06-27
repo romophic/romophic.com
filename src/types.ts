@@ -51,6 +51,8 @@ export interface D3GraphLink extends SimulationLinkDatum<D3GraphNode> {
   source: string | D3GraphNode
   target: string | D3GraphNode
   value: number
+  isReverse?: boolean
+  isBidirectional?: boolean
 }
 
 type AdjacentPosts = {
