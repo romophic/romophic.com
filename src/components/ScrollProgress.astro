@@ -25,7 +25,7 @@
         const height =
           document.documentElement.scrollHeight -
           document.documentElement.clientHeight
-        const scrolled = (scrollTop / height) * 100
+        const scrolled = height > 0 ? (scrollTop / height) * 100 : 0
         progressBar.style.width = `${scrolled}%`
       }
 

@@ -10,7 +10,7 @@ const SCROLL_TO_TOP_THRESHOLD = 300
   id="scroll-to-top"
   title="Scroll to top"
   aria-label="Scroll to top"
-  class={`${getButtonStyles({ variant: 'outline', size: 'icon' })} fixed bottom-8 right-8 z-50 rounded-full opacity-0 shadow-md transition-all duration-300 hover:-translate-y-1`}
+  class={`${getButtonStyles({ variant: 'outline', size: 'icon' })} fixed bottom-8 right-8 z-50 rounded-full opacity-0 pointer-events-none shadow-md transition-all duration-300 hover:-translate-y-1`}
 >
   <Icon
     name={ICONS.arrowUp}
@@ -35,10 +35,10 @@ const SCROLL_TO_TOP_THRESHOLD = 300
       handleScroll = () => {
         const isFooterVisible =
           footer.getBoundingClientRect().top <= window.innerHeight
-        btn.classList.toggle(
-          'hidden',
-          window.scrollY <= SCROLL_TO_TOP_THRESHOLD || isFooterVisible,
-        )
+        const shouldHide =
+          window.scrollY <= SCROLL_TO_TOP_THRESHOLD || isFooterVisible
+        btn.classList.toggle('opacity-0', shouldHide)
+        btn.classList.toggle('pointer-events-none', shouldHide)
       }
 
       btn.addEventListener('click', handleClick)
