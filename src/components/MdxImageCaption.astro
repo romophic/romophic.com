@@ -29,7 +29,7 @@ const isLocalImage = typeof src === 'object' && src !== null
         src={src as string}
         alt={alt || ''}
         class={`!m-0 rounded-xl border ${className || ''}`}
-        {...(props as Record<string, unknown>)}
+        {...props}
       />
     )
   }
