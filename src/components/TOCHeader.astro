@@ -7,8 +7,8 @@ type Props = { headings: MarkdownHeading[] }
 const { headings } = Astro.props
 ---
 
-<div
-  class="bg-background/80 group sticky top-14 z-40 w-full border-b backdrop-blur-md md:hidden"
+<mobile-toc
+  class="bg-background/80 group sticky top-14 z-40 block w-full border-b backdrop-blur-md md:hidden"
 >
   <details
     class="[&>summary::marker]:hidden"
@@ -193,4 +193,4 @@ const { headings } = Astro.props
       customElements.define('mobile-toc', MobileTOC)
     </script>
   </details>
-</div>
+</mobile-toc>

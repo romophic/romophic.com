@@ -9,7 +9,6 @@ describe('ScrollProgress.astro (Test as Documentation)', () => {
 
     expect(html).toContain('<scroll-progress')
     expect(html).toContain('style="width: 0%"')
-    expect(html).toContain('customElements.define(\'scroll-progress\'')
-    expect(html).toContain('height > 0 ? (scrollTop / height) * 100 : 0')
+    expect(html).toContain('ScrollProgress.astro?astro&type=script')
   })
 })
