@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { GET, getStaticPaths } from './[...slug].png'
 import type { CollectionEntry } from 'astro:content'
@@ -155,7 +155,7 @@ describe('OG Image Generation ([...slug].png.ts)', () => {
     // but it covers the fetch lines. We catch the error or allow it to throw if handled.
     try {
       await freshGET({ props: { post: mockPost } })
-    } catch (e) {
+    } catch {
       // expected to fail at satori/font loading because of invalid font buffer
     }
 
