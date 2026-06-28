@@ -1,11 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { describe, test, expect } from 'vitest'
 import fs from 'fs'
 import path from 'path'
 
-const __dirname = new URL('.', import.meta.url).pathname
-// On Windows, the pathname from URL might have a leading slash, e.g. /C:/path
-// Let's use a more robust way to get root dir
+// On Windows, resolve root dir cleanly
 const srcDir = path.resolve(process.cwd(), 'src')
 
 function findAstroFiles(dir: string, fileList: string[] = []): string[] {

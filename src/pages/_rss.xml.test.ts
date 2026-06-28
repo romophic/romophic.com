@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { GET } from './rss.xml'
 import { SITE } from '@/consts'
@@ -44,11 +44,12 @@ describe('rss.xml endpoint', () => {
       new Error('Simulated Error'),
     )
 
-    // Suppress console.error in tests
+    // Suppress console.error in tests and verify error logging
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     const response = await GET(mockContext)
     expect(response.status).toBe(500)
     expect(await response.text()).toBe('Error generating RSS feed')
+    expect(consoleSpy).toHaveBeenCalled()
   })
 })
