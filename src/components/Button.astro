@@ -22,6 +22,7 @@ const {
   size = 'default',
   class: className = '',
   as: Tag = 'button',
+  type = Tag === 'button' ? 'button' : undefined,
   ...props
 } = Astro.props
 
@@ -60,6 +61,7 @@ const Element = Tag as any
 
 <Element
   data-slot="button"
+  type={type}
   class={getButtonStyles({ variant, size, class: className })}
   {...props}
 >

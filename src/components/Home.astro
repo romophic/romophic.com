@@ -31,6 +31,7 @@ const blog = await getRecentPosts(SITE.featuredPostCount)
   {/* 2. EXIT BUTTON (Hidden by default, shown when graph is interactive) */}
   <button
     id="exit-graph-btn"
+    type="button"
     class="bg-background/80 border-border/40 hover:bg-background pointer-events-none fixed top-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border px-6 py-2.5 text-sm font-semibold tracking-wide opacity-0 shadow-lg backdrop-blur-xl transition-all duration-1000 data-[visible=true]:pointer-events-auto data-[visible=true]:opacity-100"
   >
     <Icon name="lucide:arrow-up" class="size-4" />
