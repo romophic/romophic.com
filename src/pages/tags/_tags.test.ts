@@ -30,17 +30,31 @@ describe('tags routing and index (Test as Documentation)', () => {
     const mockPosts = [
       { id: 'post-1', data: { title: 'Post 1', tags: ['Web'] } },
     ]
-    vi.mocked(dataUtils.getPostsByTag).mockResolvedValue(mockPosts as unknown as Awaited<ReturnType<typeof dataUtils.getPostsByTag>>)
+    vi.mocked(dataUtils.getPostsByTag).mockResolvedValue(
+      mockPosts as unknown as Awaited<
+        ReturnType<typeof dataUtils.getPostsByTag>
+      >,
+    )
 
-    const paginate = vi.fn().mockImplementation((items, { params, pageSize }) => {
-      return [{ params: { tag: params.tag, page: undefined }, props: { page: { data: items.slice(0, pageSize) } } }]
-    })
+    const paginate = vi
+      .fn()
+      .mockImplementation((items, { params, pageSize }) => {
+        return [
+          {
+            params: { tag: params.tag, page: undefined },
+            props: { page: { data: items.slice(0, pageSize) } },
+          },
+        ]
+      })
 
     const paths = await getTagPaginationPaths({ paginate })
     expect(dataUtils.getSortedTags).toHaveBeenCalled()
     expect(dataUtils.getPostsByTag).toHaveBeenCalledWith('Web')
     expect(paths).toEqual([
-      { params: { tag: 'Web', page: undefined }, props: { page: { data: mockPosts } } },
+      {
+        params: { tag: 'Web', page: undefined },
+        props: { page: { data: mockPosts } },
+      },
     ])
   })
 })

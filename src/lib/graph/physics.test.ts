@@ -16,7 +16,9 @@ describe('physics (Test as Documentation)', () => {
       postMessage: vi.fn(),
       terminate: vi.fn(),
     }
-    globalThis.Worker = vi.fn().mockImplementation(() => mockWorkerInstance) as unknown as typeof Worker
+    globalThis.Worker = vi
+      .fn()
+      .mockImplementation(() => mockWorkerInstance) as unknown as typeof Worker
   })
 
   afterEach(() => {
@@ -54,13 +56,20 @@ describe('physics (Test as Documentation)', () => {
     // Simulate TICK from worker
     if (mockWorkerInstance.onmessage) {
       mockWorkerInstance.onmessage({
-        data: { type: 'TICK', payload: [{ id: 'node-1', x: 10, y: 20, vx: 0, vy: 0 }] },
+        data: {
+          type: 'TICK',
+          payload: [{ id: 'node-1', x: 10, y: 20, vx: 0, vy: 0 }],
+        },
       } as MessageEvent)
     }
-    expect(onTick).toHaveBeenCalledWith([{ id: 'node-1', x: 10, y: 20, vx: 0, vy: 0 }])
+    expect(onTick).toHaveBeenCalledWith([
+      { id: 'node-1', x: 10, y: 20, vx: 0, vy: 0 },
+    ])
 
     controller.destroy()
-    expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith({ type: 'DESTROY' })
+    expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith({
+      type: 'DESTROY',
+    })
     expect(mockWorkerInstance.terminate).toHaveBeenCalled()
   })
 })

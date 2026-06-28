@@ -6,7 +6,9 @@ describe('Badge.astro (Test as Documentation)', () => {
   it('generates proper style classes for different variants', () => {
     expect(getBadgeStyles({ variant: 'default' })).toContain('bg-primary')
     expect(getBadgeStyles({ variant: 'secondary' })).toContain('bg-secondary')
-    expect(getBadgeStyles({ variant: 'destructive' })).toContain('bg-destructive')
+    expect(getBadgeStyles({ variant: 'destructive' })).toContain(
+      'bg-destructive',
+    )
     expect(getBadgeStyles({ variant: 'outline' })).toContain('text-foreground')
     expect(getBadgeStyles({ variant: 'muted' })).toContain('bg-primary/5')
   })

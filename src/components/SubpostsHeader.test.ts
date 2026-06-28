@@ -28,7 +28,11 @@ describe('SubpostsHeader.astro (Test as Documentation)', () => {
       isActivePost: true,
       activePostReadingTime: '2 min read',
       activePostCombinedReadingTime: '6 min read',
-      subpostsWithReadingTime: [mockSubpost as unknown as CollectionEntry<'blog'> & { readingTime: string }],
+      subpostsWithReadingTime: [
+        mockSubpost as unknown as CollectionEntry<'blog'> & {
+          readingTime: string
+        },
+      ],
       isCurrentSubpost: false,
       currentSubpostDetails: null,
     })

@@ -11,15 +11,24 @@ describe('blog routing (Test as Documentation)', () => {
       id: `post-${i}`,
       data: { title: `Post ${i}` },
     }))
-    vi.mocked(dataUtils.getAllPosts).mockResolvedValue(mockPosts as unknown as Awaited<ReturnType<typeof dataUtils.getAllPosts>>)
+    vi.mocked(dataUtils.getAllPosts).mockResolvedValue(
+      mockPosts as unknown as Awaited<ReturnType<typeof dataUtils.getAllPosts>>,
+    )
 
     const paginate = vi.fn().mockImplementation((items, { pageSize }) => {
-      return [{ params: { page: undefined }, props: { page: { data: items.slice(0, pageSize) } } }]
+      return [
+        {
+          params: { page: undefined },
+          props: { page: { data: items.slice(0, pageSize) } },
+        },
+      ]
     })
 
     const paths = await getBlogListPaths({ paginate })
     expect(dataUtils.getAllPosts).toHaveBeenCalled()
-    expect(paginate).toHaveBeenCalledWith(mockPosts, { pageSize: expect.any(Number) })
+    expect(paginate).toHaveBeenCalledWith(mockPosts, {
+      pageSize: expect.any(Number),
+    })
     expect(paths).toHaveLength(1)
   })
 
@@ -28,7 +37,11 @@ describe('blog routing (Test as Documentation)', () => {
       { id: 'post-a', data: { title: 'Post A' } },
       { id: 'post-a/sub-1', data: { title: 'Sub 1' } },
     ]
-    vi.mocked(dataUtils.getAllPostsAndSubposts).mockResolvedValue(mockAllPosts as unknown as Awaited<ReturnType<typeof dataUtils.getAllPostsAndSubposts>>)
+    vi.mocked(dataUtils.getAllPostsAndSubposts).mockResolvedValue(
+      mockAllPosts as unknown as Awaited<
+        ReturnType<typeof dataUtils.getAllPostsAndSubposts>
+      >,
+    )
 
     const paths = await getBlogPostPaths()
     expect(paths).toEqual([

@@ -35,7 +35,10 @@ describe('scroll-utils (Test as Documentation)', () => {
   describe('scrollToCenter', () => {
     it('adjusts container scrollTop to center target element', () => {
       const scrollContainer = document.createElement('div')
-      Object.defineProperty(scrollContainer, 'scrollTop', { value: 0, writable: true })
+      Object.defineProperty(scrollContainer, 'scrollTop', {
+        value: 0,
+        writable: true,
+      })
       Object.defineProperty(scrollContainer, 'scrollHeight', { value: 1000 })
       Object.defineProperty(scrollContainer, 'clientHeight', { value: 400 })
       vi.spyOn(scrollContainer, 'getBoundingClientRect').mockReturnValue({

@@ -221,4 +221,3 @@ export function getOgImageSlug(postId: string, isParent: boolean): string {
   const finalSlug = isParent ? `${postId}/index` : postId
   return finalSlug.replaceAll('/', '-')
 }
-

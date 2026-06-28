@@ -28,10 +28,7 @@ export {
   groupPostsByYear,
 } from './content/posts'
 
-export {
-  parseAuthors,
-  getAllAuthors,
-} from './content/authors'
+export { parseAuthors, getAllAuthors } from './content/authors'
 export { normalizeId, extractInternalLinks } from './content/links'
 export { getSubpostsData } from './content/subposts-data'
 
