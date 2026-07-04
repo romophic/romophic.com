@@ -37,9 +37,9 @@ describe('blog routing (Test as Documentation)', () => {
       { id: 'post-a', data: { title: 'Post A' } },
       { id: 'post-a/sub-1', data: { title: 'Sub 1' } },
     ]
-    vi.mocked(dataUtils.getAllPostsAndSubposts).mockResolvedValue(
+    vi.mocked(dataUtils.getAllPosts).mockResolvedValue(
       mockAllPosts as unknown as Awaited<
-        ReturnType<typeof dataUtils.getAllPostsAndSubposts>
+        ReturnType<typeof dataUtils.getAllPosts>
       >,
     )
 

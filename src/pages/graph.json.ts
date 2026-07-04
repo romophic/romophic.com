@@ -1,5 +1,5 @@
 import {
-  getAllPostsAndSubposts,
+  getAllPosts,
   extractInternalLinks,
   normalizeId,
 } from '@/lib/data-utils'
@@ -20,7 +20,7 @@ type GraphApiLink = {
 }
 
 export const GET: APIRoute = async () => {
-  const posts = await getAllPostsAndSubposts()
+  const posts = await getAllPosts()
 
   const nodes: GraphApiNode[] = []
   const links: GraphApiLink[] = []

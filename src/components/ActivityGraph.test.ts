@@ -1,21 +1,21 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { experimental_AstroContainer as AstroContainer } from 'astro/container'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import ActivityGraph from './ActivityGraph.astro'
 import * as dataUtils from '@/lib/data-utils'
+import type { CollectionEntry } from 'astro:content'
 
 vi.mock('@/lib/data-utils', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/data-utils')>()
   return {
     ...actual,
-    getAllPostsAndSubposts: vi.fn(),
+    getAllPosts: vi.fn(),
   }
 })
 
 describe('ActivityGraph.astro', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(dataUtils.getAllPostsAndSubposts).mockResolvedValue([])
+    vi.mocked(dataUtils.getAllPosts).mockResolvedValue([])
   })
 
   afterEach(() => {
@@ -37,12 +37,13 @@ describe('ActivityGraph.astro', () => {
     expect(html).toMatch(/<span[^>]*>More<\/span>/)
   })
 
-  it('calculates intensity levels correctly based on post counts', async () => {
+  it('renders cells with various intensity colors based on post counts', async () => {
     const today = new Date()
-    const createMockPost = (date: Date) => ({ data: { date } }) as any
+    const createMockPost = (date: Date) =>
+      ({ data: { date } }) as CollectionEntry<'blog'>
 
     // Create posts to hit level 1 (1 post), level 2 (2 posts), level 3 (3 posts), level 4 (5 posts)
-    const mockPosts = [
+    const mockPosts: CollectionEntry<'blog'>[] = [
       createMockPost(today), // Level 1
       createMockPost(new Date(today.getTime() - 86400000)),
       createMockPost(new Date(today.getTime() - 86400000)), // Level 2
@@ -56,7 +57,7 @@ describe('ActivityGraph.astro', () => {
       createMockPost(new Date(today.getTime() - 86400000 * 3)), // Level 4
     ]
 
-    vi.mocked(dataUtils.getAllPostsAndSubposts).mockResolvedValue(mockPosts)
+    vi.mocked(dataUtils.getAllPosts).mockResolvedValue(mockPosts)
 
     const container = await AstroContainer.create()
     const html = await container.renderToString(ActivityGraph)

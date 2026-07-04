@@ -21,17 +21,14 @@ export async function getNormalizedPosts(): Promise<CollectionEntry<'blog'>[]> {
 export async function getAllPosts(): Promise<CollectionEntry<'blog'>[]> {
   const posts = await getNormalizedPosts()
   return posts
-    .filter((post) => !post.data.draft && !isSubpost(post))
+    .filter((post) => !post.data.draft)
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
 }
 
 export async function getAllPostsAndSubposts(): Promise<
   CollectionEntry<'blog'>[]
 > {
-  const posts = await getNormalizedPosts()
-  return posts
-    .filter((post) => !post.data.draft)
-    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  return getAllPosts()
 }
 
 export async function getAllProjects(): Promise<CollectionEntry<'projects'>[]> {

@@ -1,5 +1,5 @@
 ---
-import { getAllPostsAndSubposts } from '@/lib/data-utils'
+import { getAllPosts } from '@/lib/data-utils'
 import type { CollectionEntry } from 'astro:content'
 
 const INTENSITY_COLORS = [
@@ -16,7 +16,7 @@ function getIntensityColor(level: number) {
   )
 }
 
-const posts = await getAllPostsAndSubposts()
+const posts = await getAllPosts()
 
 // 1. Create a map of date string (YYYY-MM-DD) -> count
 const activityMap = new Map<string, number>()

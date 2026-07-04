@@ -9,7 +9,7 @@ import {
 import type { CollectionEntry } from 'astro:content'
 
 vi.mock('./posts', () => ({
-  getAllPostsAndSubposts: vi.fn().mockResolvedValue([
+  getAllPosts: vi.fn().mockResolvedValue([
     {
       id: 'post-1',
       data: {},

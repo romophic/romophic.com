@@ -1,10 +1,10 @@
 ---
 import BlogPost from '@/components/BlogPost.astro'
-import { getAllPostsAndSubposts } from '@/lib/data-utils'
+import { getAllPosts } from '@/lib/data-utils'
 import type { CollectionEntry } from 'astro:content'
 
 export async function getStaticPaths() {
-  const posts = await getAllPostsAndSubposts()
+  const posts = await getAllPosts()
 
   return posts.map((post) => ({
     params: { id: post.id },

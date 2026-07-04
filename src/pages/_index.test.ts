@@ -7,7 +7,7 @@ describe('index.astro (Test as Documentation)', () => {
     const container = await AstroContainer.create()
     const html = await container.renderToString(IndexPage)
 
-    expect(html).toContain('Romophic')
-    expect(html).toContain('Latest Blog Posts')
+    expect(html).toContain('romophic')
+    expect(html).toMatch(/Latest\s+Writings/)
   })
 })

@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { getAllPostsAndSubposts } from './posts'
+import { getAllPosts } from './posts'
 import type { CollectionEntry } from 'astro:content'
 
 /**
@@ -79,7 +79,7 @@ async function getBacklinksMap(): Promise<
   if (_backlinksMap) return _backlinksMap
 
   _backlinksMap = new Map()
-  const allPosts = await getAllPostsAndSubposts()
+  const allPosts = await getAllPosts()
 
   for (const sourcePost of allPosts) {
     const targetIds = await extractInternalLinks(sourcePost)

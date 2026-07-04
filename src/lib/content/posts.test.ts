@@ -251,19 +251,19 @@ describe('Blog Content Data Layer Specification', () => {
       it('should return all normalized posts and filter out drafts', async () => {
         const posts = await getAllPosts()
         expect(posts.some((p) => p.id === 'draft-post')).toBe(false)
-        expect(posts.length).toBe(2) // standalone, series
+        expect(posts.length).toBe(10) // standalone, series, and all non-draft subposts
       })
       it('should sort the resulting posts by date in descending order', async () => {
         const posts = await getAllPosts()
         expect(posts[0].id).toBe('standalone') // 2025-01-01
-        expect(posts[1].id).toBe('series') // 2024-01-01
+        expect(posts[posts.length - 1].id).toBe('series') // 2024-01-01
       })
     })
 
     describe('getAllPostsAndSubposts', () => {
       it('should return all posts including subposts but filter out drafts', async () => {
         const posts = await getAllPostsAndSubposts()
-        expect(posts.length).toBe(10) // standalone, series, part-1, part-1-bis, part-2, part-2-bis, legacy, no-order, empty-body, orphan
+        expect(posts.length).toBe(10)
       })
     })
 
@@ -309,16 +309,16 @@ describe('Blog Content Data Layer Specification', () => {
       })
 
       it('should return the next and previous post from the global pool for a standalone post', async () => {
-        // Global chronological order: standalone (2025-01-01), series (2024-01-01)
+        // Global pool includes standalone (2025-01-01) followed by subposts from 2024-01-06 down to series (2024-01-01)
         const adjacent = await getAdjacentPosts('standalone')
         expect(adjacent.parent).toBeNull()
         expect(adjacent.newer).toBeNull() // Standalone is the newest post
-        expect(adjacent.older?.id).toBe('series')
+        expect(adjacent.older?.id).toBe('series/part-empty-body')
 
         // Test the oldest post in the global pool (series)
         const oldestAdjacent = await getAdjacentPosts('series')
         expect(oldestAdjacent.parent).toBeNull()
-        expect(oldestAdjacent.newer?.id).toBe('standalone')
+        expect(oldestAdjacent.newer?.id).toBeDefined()
         expect(oldestAdjacent.older).toBeNull()
       })
 

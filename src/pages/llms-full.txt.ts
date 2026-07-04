@@ -1,9 +1,9 @@
 import { SITE } from '@/consts'
-import { getAllPostsAndSubposts } from '@/lib/data-utils'
+import { getAllPosts } from '@/lib/data-utils'
 import type { APIRoute } from 'astro'
 
 export const GET: APIRoute = async ({ site }) => {
-  const posts = await getAllPostsAndSubposts()
+  const posts = await getAllPosts()
 
   const siteTitle = SITE.title
   const siteDescription = SITE.description
