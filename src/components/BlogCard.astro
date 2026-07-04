@@ -45,7 +45,6 @@ const subpostCount = !isSubpost(entry) ? await getSubpostCount(entry.id) : 0
             width={1200}
             height={630}
             class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            transition:name={`image-${entry.id}`}
           />
         </div>
       )
