@@ -16,9 +16,10 @@ describe('physics (Test as Documentation)', () => {
       postMessage: vi.fn(),
       terminate: vi.fn(),
     }
-    globalThis.Worker = vi
-      .fn()
-      .mockImplementation(() => mockWorkerInstance) as unknown as typeof Worker
+    const instance = mockWorkerInstance
+    globalThis.Worker = vi.fn(function (this: unknown) {
+      return instance
+    }) as unknown as typeof Worker
   })
 
   afterEach(() => {

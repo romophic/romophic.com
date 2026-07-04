@@ -1,7 +1,38 @@
-import { describe, it, expect, vi } from 'vitest'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { updateScrollMaskClasses, scrollToCenter } from './scroll-utils'
 
+function createMockElement() {
+  const classes = new Set<string>()
+  return {
+    getBoundingClientRect: () => ({ top: 0, left: 0, width: 0, height: 0 }),
+    classList: {
+      toggle: (cls: string, force?: boolean) => {
+        if (force === undefined) {
+          if (classes.has(cls)) classes.delete(cls)
+          else classes.add(cls)
+        } else if (force) {
+          classes.add(cls)
+        } else {
+          classes.delete(cls)
+        }
+      },
+      contains: (cls: string) => classes.has(cls),
+    },
+  } as unknown as HTMLElement
+}
+
 describe('scroll-utils (Test as Documentation)', () => {
+  beforeEach(() => {
+    globalThis.document = {
+      createElement: () => createMockElement(),
+    } as any
+  })
+
+  afterEach(() => {
+    delete (globalThis as any).document
+  })
+
   describe('updateScrollMaskClasses', () => {
     it('toggles top and bottom mask classes depending on scroll position', () => {
       const scrollContainer = {
