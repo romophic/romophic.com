@@ -169,9 +169,9 @@
 
   /* Apple HIG "Liquid Glass" Utility (for Navigation, Headers, and Modals only) */
   .liquid-glass {
-    @apply bg-white/65 dark:bg-background/60 border border-border/40;
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    @apply bg-white/35 dark:bg-background/35 border border-border/40;
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
     box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.6), inset 0 -1px 0 0 rgba(255, 255, 255, 0.3), 0 4px 24px rgba(0, 0, 0, 0.04);
   }
   .dark .liquid-glass {
@@ -181,8 +181,8 @@
   /* Progressive Enhancement: SVG Refraction filter in supported Chromium browsers */
   @supports (backdrop-filter: url(#liquid-glass-refraction)) {
     .liquid-glass {
-      backdrop-filter: blur(16px) saturate(180%) url(#liquid-glass-refraction);
-      -webkit-backdrop-filter: blur(16px) saturate(180%) url(#liquid-glass-refraction);
+      backdrop-filter: blur(8px) saturate(180%) url(#liquid-glass-refraction);
+      -webkit-backdrop-filter: blur(8px) saturate(180%) url(#liquid-glass-refraction);
     }
   }
 
