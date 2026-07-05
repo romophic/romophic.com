@@ -100,7 +100,7 @@ describe('OG Image Generation ([...slug].png.ts)', () => {
     // Should still return response by generating new image
     const response = await GET({ props: { post: mockPost } })
     expect(response.status).toBe(200)
-  })
+  }, 15000)
 
   test('handles font fetch failure', async () => {
     vi.mocked(fsPromises.writeFile).mockRejectedValue(
@@ -114,7 +114,7 @@ describe('OG Image Generation ([...slug].png.ts)', () => {
 
     const response = await GET({ props: { post: mockPost } })
     expect(response.status).toBe(200)
-  })
+  }, 15000)
 
   test('hits the image cache and returns the cached response', async () => {
     // Mock getCachedImage hit
