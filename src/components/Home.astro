@@ -47,11 +47,11 @@ const blog = await getRecentPosts(SITE.featuredPostCount)
     <div class="pointer-events-auto flex min-h-[100svh] w-full flex-col">
       {/* Giant Full-Width Glass Pane */}
       <div
-        class="border-border/40 bg-background/60 dark:bg-background/50 relative z-10 flex w-full grow transform-gpu flex-col rounded-b-2xl border-b pb-10 shadow-[0_20px_50px_rgba(0,0,0,0.08)] backdrop-blur-md will-change-transform sm:rounded-b-[3rem] sm:pb-16 dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)]"
+        class="glass-pane relative z-10 flex w-full grow transform-gpu flex-col rounded-b-2xl pb-10 will-change-transform sm:rounded-b-[3rem] sm:pb-16"
       >
         {/* Global Header */}
         <div
-          class="border-border/20 bg-background/40 sticky top-0 z-50 border-b backdrop-blur-sm"
+          class="glass-pane border-b sticky top-0 z-50"
         >
           <Header />
         </div>
