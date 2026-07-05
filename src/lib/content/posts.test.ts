@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi } from 'vitest'
 import {
   isSubpost,
   getParentId,
   getNormalizedPosts,
   getAllPosts,
-  getAllPostsAndSubposts,
   getAllProjects,
   getSubpostsForParent,
   getAdjacentPosts,
@@ -14,146 +14,156 @@ import {
   getParentPost,
   getSubpostCount,
   groupPostsByYear,
-  calculateReadingTimeFast,
+  calculateReadingTimeMinutes,
+  formatReadingTime,
 } from './posts'
 import type { CollectionEntry } from 'astro:content'
 
 // Mock astro:content to simulate a file system with a mix of standalone posts and a series.
 vi.mock('astro:content', () => {
+  const getMockItems = (collection: string) => {
+    if (collection === 'projects') {
+      return [
+        { id: 'proj-1', data: { startDate: new Date('2024-01-01') } },
+        { id: 'proj-2', data: { startDate: new Date('2025-01-01') } },
+        { id: 'proj-3', data: {} }, // missing startDate
+        { id: 'proj-4', data: {} }, // another missing startDate to test both sides of sort
+      ]
+    }
+    if (collection === 'blog') {
+      return [
+        {
+          id: 'standalone',
+          data: {
+            title: 'Standalone',
+            draft: false,
+            date: new Date('2025-01-01'),
+            tags: ['Tech', 'Astro', 'ZZZ'], // ZZZ added to test sorting tie-breaker with Tech
+          },
+          body: 'A'.repeat(2000), // 5 min read
+        },
+        {
+          id: 'draft-post',
+          data: {
+            title: 'Draft',
+            draft: true,
+            date: new Date('2025-01-02'),
+            tags: ['Draft'],
+          },
+          body: '',
+        },
+        {
+          id: 'series/index',
+          data: {
+            title: 'Series Root',
+            draft: false,
+            date: new Date('2024-01-01'),
+            tags: ['Astro'],
+          },
+          body: 'A'.repeat(2000), // 5 min read
+        },
+        {
+          id: 'series/part-1',
+          data: {
+            title: 'Part 1',
+            draft: false,
+            date: new Date('2024-01-02'),
+            order: 1,
+          },
+          body: 'A'.repeat(2000), // 5 min read
+        },
+        {
+          id: 'series/part-1-bis',
+          data: {
+            title: 'Part 1 Bis',
+            draft: false,
+            date: new Date('2024-01-02'),
+            order: 1, // Same order to test date fallback
+          },
+          body: 'A'.repeat(2000), // 5 min read
+        },
+        {
+          id: 'series/part-2',
+          data: {
+            title: 'Part 2',
+            draft: false,
+            date: new Date('2024-01-03'),
+            order: 2,
+          },
+          body: 'A'.repeat(2000), // 5 min read
+        },
+        {
+          id: 'series/part-2-bis',
+          data: {
+            title: 'Part 2 Bis',
+            draft: false,
+            date: new Date('2024-01-04'),
+            order: 2,
+          },
+          body: 'A'.repeat(2000), // 5 min read
+        },
+        // Legacy support testing: explicit parent declared in frontmatter
+        {
+          id: 'legacy-subpost',
+          data: {
+            title: 'Legacy',
+            draft: false,
+            date: new Date('2024-01-04'),
+            parent: { id: 'series/index', collection: 'blog' },
+            order: 3,
+          },
+          body: 'A'.repeat(2000), // 5 min read
+        },
+        {
+          id: 'series/part-no-order',
+          data: {
+            title: 'No Order',
+            draft: false,
+            date: new Date('2024-01-05'),
+          },
+          body: 'A'.repeat(2000), // 5 min read
+        },
+        {
+          id: 'series/part-empty-body',
+          data: {
+            title: 'Empty Body',
+            draft: false,
+            date: new Date('2024-01-06'),
+          },
+          body: '', // Empty body to test combined reading time subpost fallback
+        },
+        {
+          id: 'orphan-subpost',
+          data: {
+            title: 'Orphan',
+            draft: false,
+            date: new Date('2024-01-06'),
+            parent: { id: 'non-existent-parent', collection: 'blog' },
+          },
+          body: 'A',
+        },
+        {
+          id: 'series/draft-subpost',
+          data: {
+            title: 'Draft Subpost',
+            draft: true,
+            date: new Date('2024-01-05'),
+          },
+          body: '',
+        },
+      ]
+    }
+    return []
+  }
+
   return {
-    getCollection: vi.fn(async (collection) => {
-      if (collection === 'projects') {
-        return [
-          { id: 'proj-1', data: { startDate: new Date('2024-01-01') } },
-          { id: 'proj-2', data: { startDate: new Date('2025-01-01') } },
-          { id: 'proj-3', data: {} }, // missing startDate
-          { id: 'proj-4', data: {} }, // another missing startDate to test both sides of sort
-        ]
-      }
-      if (collection === 'blog') {
-        return [
-          {
-            id: 'standalone',
-            data: {
-              title: 'Standalone',
-              draft: false,
-              date: new Date('2025-01-01'),
-              tags: ['Tech', 'Astro', 'ZZZ'], // ZZZ added to test sorting tie-breaker with Tech
-            },
-            body: 'A'.repeat(2000), // 5 min read
-          },
-          {
-            id: 'draft-post',
-            data: {
-              title: 'Draft',
-              draft: true,
-              date: new Date('2025-01-02'),
-              tags: ['Draft'],
-            },
-            body: '',
-          },
-          {
-            id: 'series/index',
-            data: {
-              title: 'Series Root',
-              draft: false,
-              date: new Date('2024-01-01'),
-              tags: ['Astro'],
-            },
-            body: 'A'.repeat(2000), // 5 min read
-          },
-          {
-            id: 'series/part-1',
-            data: {
-              title: 'Part 1',
-              draft: false,
-              date: new Date('2024-01-02'),
-              order: 1,
-            },
-            body: 'A'.repeat(2000), // 5 min read
-          },
-          {
-            id: 'series/part-1-bis',
-            data: {
-              title: 'Part 1 Bis',
-              draft: false,
-              date: new Date('2024-01-02'),
-              order: 1, // Same order to test date fallback
-            },
-            body: 'A'.repeat(2000), // 5 min read
-          },
-          {
-            id: 'series/part-2',
-            data: {
-              title: 'Part 2',
-              draft: false,
-              date: new Date('2024-01-03'),
-              order: 2,
-            },
-            body: 'A'.repeat(2000), // 5 min read
-          },
-          {
-            id: 'series/part-2-bis',
-            data: {
-              title: 'Part 2 Bis',
-              draft: false,
-              date: new Date('2024-01-04'),
-              order: 2,
-            },
-            body: 'A'.repeat(2000), // 5 min read
-          },
-          // Legacy support testing: explicit parent declared in frontmatter
-          {
-            id: 'legacy-subpost',
-            data: {
-              title: 'Legacy',
-              draft: false,
-              date: new Date('2024-01-04'),
-              parent: { id: 'series/index', collection: 'blog' },
-              order: 3,
-            },
-            body: 'A'.repeat(2000), // 5 min read
-          },
-          {
-            id: 'series/part-no-order',
-            data: {
-              title: 'No Order',
-              draft: false,
-              date: new Date('2024-01-05'),
-            },
-            body: 'A'.repeat(2000), // 5 min read
-          },
-          {
-            id: 'series/part-empty-body',
-            data: {
-              title: 'Empty Body',
-              draft: false,
-              date: new Date('2024-01-06'),
-            },
-            body: '', // Empty body to test combined reading time subpost fallback
-          },
-          {
-            id: 'orphan-subpost',
-            data: {
-              title: 'Orphan',
-              draft: false,
-              date: new Date('2024-01-06'),
-              parent: { id: 'non-existent-parent', collection: 'blog' },
-            },
-            body: 'A',
-          },
-          {
-            id: 'series/draft-subpost',
-            data: {
-              title: 'Draft Subpost',
-              draft: true,
-              date: new Date('2024-01-05'),
-            },
-            body: '',
-          },
-        ]
-      }
-      return []
+    getCollection: vi.fn(async (collection: string, filterFn?: (entry: any) => boolean) => {
+      const items = getMockItems(collection)
+      return filterFn ? items.filter(filterFn) : items
+    }),
+    getEntry: vi.fn(async ({ collection, id }: { collection: string; id: string }) => {
+      const items = getMockItems(collection)
+      return items.find((item: any) => item.id === id) ?? null
     }),
   }
 })
@@ -260,13 +270,6 @@ describe('Blog Content Data Layer Specification', () => {
       })
     })
 
-    describe('getAllPostsAndSubposts', () => {
-      it('should return all posts including subposts but filter out drafts', async () => {
-        const posts = await getAllPostsAndSubposts()
-        expect(posts.length).toBe(10)
-      })
-    })
-
     describe('getAllProjects', () => {
       it('should return projects sorted by startDate descending', async () => {
         const projects = await getAllProjects()
@@ -334,13 +337,11 @@ describe('Blog Content Data Layer Specification', () => {
         expect(adjacentPart2.older?.id).toBe('series/part-1-bis')
       })
 
-      it('should return parent and nulls if the subpost is not found in subposts list', async () => {
-        // Edge case where a subpost is somehow not in the parent's subposts array
-        // (e.g. it is a draft, but we directly called getAdjacentPosts with its ID)
+      it('should return nulls if a subpost is not in the active pool (e.g. it is a draft)', async () => {
         const adjacent = await getAdjacentPosts('series/draft-subpost')
         expect(adjacent.newer).toBeNull()
         expect(adjacent.older).toBeNull()
-        expect(adjacent.parent?.id).toBe('series')
+        expect(adjacent.parent).toBeNull()
       })
 
       it('should return nulls if a standalone post is not in the active pool (e.g. it is a draft)', async () => {
@@ -360,54 +361,62 @@ describe('Blog Content Data Layer Specification', () => {
   })
 
   describe('Reading Time Calculation', () => {
-    describe('calculateReadingTimeFast', () => {
-      it('should calculate reading time by counting characters ignoring whitespace', () => {
+    describe('calculateReadingTimeMinutes', () => {
+      it('should calculate reading time in minutes by counting characters ignoring whitespace', () => {
         // 400 chars = 1 min
-        expect(calculateReadingTimeFast('A'.repeat(800))).toBe('2 min read')
-        expect(calculateReadingTimeFast('A '.repeat(800))).toBe('2 min read') // spaces ignored
+        expect(calculateReadingTimeMinutes('A'.repeat(800))).toBe(2)
+        expect(calculateReadingTimeMinutes('A '.repeat(800))).toBe(2) // spaces ignored
       })
       it('should return at least 1 min', () => {
-        expect(calculateReadingTimeFast('A')).toBe('1 min read')
-        expect(calculateReadingTimeFast('')).toBe('1 min read')
+        expect(calculateReadingTimeMinutes('A')).toBe(1)
+        expect(calculateReadingTimeMinutes('')).toBe(1)
+      })
+    })
+
+    describe('formatReadingTime', () => {
+      it('should format minutes to string', () => {
+        expect(formatReadingTime(5)).toBe('5 min read')
+        expect(formatReadingTime(0)).toBe('0 min read')
+        expect(formatReadingTime(null)).toBe('0 min read')
       })
     })
 
     describe('getPostReadingTime', () => {
       it('should calculate reading time directly from the post body', async () => {
         const time = await getPostReadingTime('standalone')
-        expect(time).toBe('5 min read')
+        expect(time).toBe(5)
       })
-      it('should return 0 min read if post is not found', async () => {
+      it('should return 0 if post is not found', async () => {
         const time = await getPostReadingTime('non-existent')
-        expect(time).toBe('0 min read')
+        expect(time).toBe(0)
       })
-      it('should handle posts with empty body', async () => {
+      it('should return 0 for draft posts as they are excluded from data layer', async () => {
         const time = await getPostReadingTime('draft-post')
-        expect(time).toBe('1 min read') // Math.max(1, 0)
+        expect(time).toBe(0)
       })
     })
 
     describe('getCombinedReadingTime', () => {
       it('should return only the individual reading time for a subpost', async () => {
         const time = await getCombinedReadingTime('series/part-1')
-        expect(time).toBe('5 min read')
+        expect(time).toBe(5)
       })
       it('should aggregate the reading time of the parent and all its subposts for a series root', async () => {
         const time = await getCombinedReadingTime('series')
         // Parent (5) + part-1 (5) + part-1-bis (5) + part-2 (5) + part-2-bis (5) + legacy (5) + no-order (5) + empty-body (1)
-        expect(time).toBe('36 min read')
+        expect(time).toBe(36)
       })
-      it('should return 0 min read if post is not found', async () => {
+      it('should return null if post is not found', async () => {
         const time = await getCombinedReadingTime('non-existent')
-        expect(time).toBe('0 min read')
+        expect(time).toBeNull()
       })
       it('should calculate reading time for a standalone post with no subposts', async () => {
         const time = await getCombinedReadingTime('standalone')
-        expect(time).toBe('5 min read')
+        expect(time).toBe(5)
       })
-      it('should calculate reading time correctly when body is empty', async () => {
+      it('should return null for draft posts as they are excluded from data layer', async () => {
         const time = await getCombinedReadingTime('draft-post')
-        expect(time).toBe('1 min read')
+        expect(time).toBeNull()
       })
     })
   })

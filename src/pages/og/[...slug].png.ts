@@ -9,7 +9,7 @@ import path from 'node:path'
 import satori, { type SatoriNode } from 'satori'
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog')
+  const posts = await getCollection('blog', ({ data }) => !data.draft)
   const parentIds = new Set(
     posts.map((p) => p.data.parent?.id).filter(Boolean) as string[],
   )

@@ -1,4 +1,4 @@
-import { getCollection, type CollectionEntry } from 'astro:content'
+import { getCollection, getEntry, type CollectionEntry } from 'astro:content'
 
 // Module-level cache: getCollection is only called once per build
 let _cache: CollectionEntry<'blog'>[] | null = null
@@ -10,7 +10,7 @@ let _cache: CollectionEntry<'blog'>[] | null = null
  */
 export async function getNormalizedPosts(): Promise<CollectionEntry<'blog'>[]> {
   if (_cache) return _cache
-  const rawPosts = await getCollection('blog')
+  const rawPosts = await getCollection('blog', ({ data }) => !data.draft)
   _cache = rawPosts.map((post) => ({
     ...post,
     id: post.id.replace(/\/index$/, ''),
@@ -20,15 +20,7 @@ export async function getNormalizedPosts(): Promise<CollectionEntry<'blog'>[]> {
 
 export async function getAllPosts(): Promise<CollectionEntry<'blog'>[]> {
   const posts = await getNormalizedPosts()
-  return posts
-    .filter((post) => !post.data.draft)
-    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-}
-
-export async function getAllPostsAndSubposts(): Promise<
-  CollectionEntry<'blog'>[]
-> {
-  return getAllPosts()
+  return [...posts].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
 }
 
 export async function getAllProjects(): Promise<CollectionEntry<'projects'>[]> {
@@ -64,7 +56,7 @@ export async function getSubpostsForParent(
   return posts
     .filter(
       (post) =>
-        !post.data.draft && isSubpost(post) && getParentId(post) === parentId,
+        isSubpost(post) && getParentId(post) === parentId,
     )
     .sort((a, b) => {
       const orderDiff = (a.data.order ?? 0) - (b.data.order ?? 0)
@@ -169,6 +161,15 @@ export async function getParentPost(
 ): Promise<CollectionEntry<'blog'> | null> {
   const post = await getPostById(subpostId)
   if (!post) return null
+  if (post.data.parent) {
+    const parentEntry = await getEntry(post.data.parent)
+    if (parentEntry) {
+      return {
+        ...parentEntry,
+        id: parentEntry.id.replace(/\/index$/, ''),
+      }
+    }
+  }
   const parentId = getParentId(post)
   if (!parentId) return null
   return getPostById(parentId)
@@ -180,27 +181,31 @@ export async function getSubpostCount(parentId: string): Promise<number> {
 }
 
 /** Returns reading time in minutes as a number. */
-function calculateReadingTimeMinutes(body: string): number {
+export function calculateReadingTimeMinutes(body: string): number {
   if (!body) return 1
   const chars = body.replace(/\s+/g, '').length
   // Avg Japanese/English technical reading speed is ~400 chars/min
   return Math.max(1, Math.ceil(chars / 400))
 }
 
-/** Returns a formatted reading time string, e.g. "5 min read". */
-export function calculateReadingTimeFast(body: string): string {
-  return `${calculateReadingTimeMinutes(body)} min read`
+/** Formats reading time in minutes for display, e.g. "5 min read". */
+export function formatReadingTime(minutes: number | null | undefined): string {
+  if (minutes === null || minutes === undefined || minutes <= 0)
+    return '0 min read'
+  return `${minutes} min read`
 }
 
-export async function getPostReadingTime(postId: string): Promise<string> {
+export async function getPostReadingTime(postId: string): Promise<number> {
   const post = await getPostById(postId)
-  if (!post) return '0 min read'
-  return calculateReadingTimeFast(post.body || '')
+  if (!post) return 0
+  return calculateReadingTimeMinutes(post.body || '')
 }
 
-export async function getCombinedReadingTime(postId: string): Promise<string> {
+export async function getCombinedReadingTime(
+  postId: string,
+): Promise<number | null> {
   const post = await getPostById(postId)
-  if (!post) return '0 min read'
+  if (!post) return null
 
   let totalMinutes = calculateReadingTimeMinutes(post.body || '')
 
@@ -211,7 +216,7 @@ export async function getCombinedReadingTime(postId: string): Promise<string> {
     }
   }
 
-  return `${Math.max(1, totalMinutes)} min read`
+  return Math.max(1, totalMinutes)
 }
 
 export function getOgImageSlug(postId: string, isParent: boolean): string {
