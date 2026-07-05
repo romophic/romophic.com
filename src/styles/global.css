@@ -179,9 +179,10 @@
   }
 
   /* Progressive Enhancement: SVG Refraction filter in supported Chromium browsers */
-  @supports (backdrop-filter: url(#liquid-glass-refraction) blur(20px)) {
+  @supports (backdrop-filter: url(#liquid-glass-refraction)) {
     .liquid-glass {
-      backdrop-filter: url(#liquid-glass-refraction) blur(20px) saturate(180%);
+      backdrop-filter: blur(16px) saturate(180%) url(#liquid-glass-refraction);
+      -webkit-backdrop-filter: blur(16px) saturate(180%) url(#liquid-glass-refraction);
     }
   }
 

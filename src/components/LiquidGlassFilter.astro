@@ -2,13 +2,13 @@
 /*
  * Apple Liquid Glass Refraction SVG Filter
  * Provides a physics-based optical distortion (refraction) map for backdrop-filter.
- * Used by .liquid-glass utility in global.css via progressive enhancement.
+ * Uses low baseFrequency + Gaussian blur + high scale (45) for unmistakable liquid glass light bending.
  */
 ---
 
 <svg
   id="liquid-glass-svg"
-  class="pointer-events-none absolute h-0 w-0 overflow-hidden"
+  class="pointer-events-none absolute -left-[9999px] -top-[9999px] h-0 w-0 overflow-hidden"
   aria-hidden="true"
 >
   <defs>
@@ -20,18 +20,24 @@
       height="140%"
       color-interpolation-filters="sRGB"
     >
-      {/* Generate organic turbulence/noise texture for optical distortion */}
+      {/* 1. Generate broad, smooth organic waves (low frequency = fluid glass curves) */}
       <feTurbulence
         type="fractalNoise"
-        baseFrequency="0.03"
+        baseFrequency="0.008"
         numOctaves="2"
         result="noise"
       ></feTurbulence>
-      {/* Displace source graphics based on noise to simulate genuine glass refraction */}
+      {/* 2. Soften the noise texture so light bends like polished crystal instead of jagged noise */}
+      <feGaussianBlur
+        in="noise"
+        stdDeviation="3"
+        result="smoothNoise"
+      ></feGaussianBlur>
+      {/* 3. Apply strong optical displacement (scale=45) for vivid, unmistakable refraction */}
       <feDisplacementMap
         in="SourceGraphic"
-        in2="noise"
-        scale="6"
+        in2="smoothNoise"
+        scale="45"
         xChannelSelector="R"
         yChannelSelector="G"
         result="displaced"
