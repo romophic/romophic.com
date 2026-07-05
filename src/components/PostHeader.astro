@@ -1,6 +1,7 @@
 ---
 import { getBadgeStyles } from '@/components/Badge.astro'
 import { ICONS } from '@/consts'
+import { formatReadingTime } from '@/lib/data-utils'
 import { formatDate } from '@/lib/utils'
 import type { Author } from '@/types'
 import { Icon } from 'astro-icon/components'
@@ -10,13 +11,15 @@ import type { CollectionEntry } from 'astro:content'
 interface Props {
   post: CollectionEntry<'blog'>
   authors: Author[]
-  postReadingTime: string
-  combinedReadingTime: string | null
+  postReadingTime: number
+  combinedReadingTime: number | null
   subpostCount: number
 }
 
 const { post, authors, postReadingTime, combinedReadingTime, subpostCount } =
   Astro.props
+const formattedPostReadingTime = formatReadingTime(postReadingTime)
+const formattedCombinedReadingTime = formatReadingTime(combinedReadingTime)
 ---
 
 <section class="col-start-2 flex flex-col gap-y-6 text-center">
@@ -69,12 +72,12 @@ const { post, authors, postReadingTime, combinedReadingTime, subpostCount } =
         class="flex w-full items-center justify-center gap-2 py-2 sm:w-fit sm:px-2 sm:py-0 first:sm:pl-0 last:sm:pr-0"
       >
         <span>
-          {postReadingTime}
+          {formattedPostReadingTime}
           {
             combinedReadingTime && combinedReadingTime !== postReadingTime && (
               <span class="text-muted-foreground">
                 {' '}
-                ({combinedReadingTime} total)
+                ({formattedCombinedReadingTime} total)
               </span>
             )
           }

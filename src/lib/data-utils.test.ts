@@ -11,8 +11,8 @@ vi.mock('./content/posts', () => ({
   getParentPost: vi.fn().mockResolvedValue({ id: 'parent-mock' }),
   hasSubposts: vi.fn(async (id) => id === 'parent'),
   getSubpostCount: vi.fn(async (id) => (id === 'parent' ? 3 : 0)),
-  getPostReadingTime: vi.fn().mockResolvedValue('5 min read'),
-  getCombinedReadingTime: vi.fn().mockResolvedValue('15 min read'),
+  getPostReadingTime: vi.fn().mockResolvedValue(5),
+  getCombinedReadingTime: vi.fn().mockResolvedValue(15),
 }))
 
 vi.mock('./content/authors', () => ({
@@ -51,7 +51,7 @@ describe('data-utils Specification', () => {
 
       // Standard properties
       expect(data.authors).toHaveLength(1)
-      expect(data.postReadingTime).toBe('5 min read')
+      expect(data.postReadingTime).toBe(5)
       expect(data.tocSections).toHaveLength(1)
       expect(data.backlinks).toHaveLength(1)
     })
@@ -68,7 +68,7 @@ describe('data-utils Specification', () => {
       expect(data.hasChildPosts).toBe(true)
       expect(data.subpostCount).toBe(3)
       expect(data.parentPost).toBeNull() // Parent doesn't have a parent
-      expect(data.combinedReadingTime).toBe('15 min read') // Combined reading time is calculated
+      expect(data.combinedReadingTime).toBe(15) // Combined reading time is calculated
     })
 
     it('should aggregate data correctly for a subpost', async () => {

@@ -68,8 +68,8 @@ export type PostPageData = {
   parentPost: CollectionEntry<'blog'> | null
   hasChildPosts: boolean
   subpostCount: number
-  postReadingTime: string
-  combinedReadingTime: string | null
+  postReadingTime: number
+  combinedReadingTime: number | null
   tocSections: TOCSection[]
   backlinks: CollectionEntry<'blog'>[]
 }

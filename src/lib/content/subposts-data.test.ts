@@ -29,9 +29,9 @@ vi.mock('./posts', () => {
       }
       return []
     }),
-    getPostReadingTime: vi.fn(async () => '5 min read'),
-    getCombinedReadingTime: vi.fn(async () => '10 min read'),
-    calculateReadingTimeFast: vi.fn(() => '5 min read'),
+    getPostReadingTime: vi.fn(async () => 5),
+    getCombinedReadingTime: vi.fn(async () => 10),
+    calculateReadingTimeMinutes: vi.fn(() => 5),
   }
 })
 
@@ -43,7 +43,7 @@ describe('Subposts Data Aggregation Specification', () => {
       expect(data.isActivePost).toBe(true)
       expect(data.isCurrentSubpost).toBe(false)
       expect(data.activePost!.id).toBe('standalone')
-      expect(data.activePostReadingTime).toBe('5 min read')
+      expect(data.activePostReadingTime).toBe(5)
 
       // Standalone has no subposts, so combined reading time is null
       expect(data.activePostCombinedReadingTime).toBeNull()
@@ -57,15 +57,15 @@ describe('Subposts Data Aggregation Specification', () => {
       expect(data.isActivePost).toBe(true)
       expect(data.isCurrentSubpost).toBe(false)
       expect(data.activePost!.id).toBe('series')
-      expect(data.activePostReadingTime).toBe('5 min read')
+      expect(data.activePostReadingTime).toBe(5)
 
       // Parent with subposts should have combined reading time
-      expect(data.activePostCombinedReadingTime).toBe('10 min read')
+      expect(data.activePostCombinedReadingTime).toBe(10)
 
       // Should populate subposts array with reading times
       expect(data.subpostsWithReadingTime).toHaveLength(1)
       expect(data.subpostsWithReadingTime[0].id).toBe('series/part-1')
-      expect(data.subpostsWithReadingTime[0].readingTime).toBe('5 min read')
+      expect(data.subpostsWithReadingTime[0].readingTime).toBe(5)
 
       // Root post itself is not a subpost
       expect(data.currentSubpostDetails).toBeNull()
@@ -82,7 +82,7 @@ describe('Subposts Data Aggregation Specification', () => {
       // Subpost details should be extracted correctly from the list
       expect(data.currentSubpostDetails).not.toBeNull()
       expect(data.currentSubpostDetails?.id).toBe('series/part-1')
-      expect(data.currentSubpostDetails?.readingTime).toBe('5 min read')
+      expect(data.currentSubpostDetails?.readingTime).toBe(5)
     })
 
     it('should throw an error if the requested post ID does not exist', async () => {

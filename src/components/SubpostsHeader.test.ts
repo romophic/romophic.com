@@ -4,7 +4,13 @@ import type { CollectionEntry } from 'astro:content'
 import SubpostsHeader from './SubpostsHeader.astro'
 import * as dataUtils from '@/lib/data-utils'
 
-vi.mock('@/lib/data-utils')
+vi.mock('@/lib/data-utils', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/data-utils')>()
+  return {
+    ...actual,
+    getSubpostsData: vi.fn(),
+  }
+})
 vi.mock('astro-icon/components', async () => {
   const mock = await import('./__mocks__/Mock.astro')
   return { Icon: mock.default }
@@ -19,18 +25,18 @@ describe('SubpostsHeader.astro (Test as Documentation)', () => {
 
     const mockSubpost = {
       id: 'subpost-1',
-      readingTime: '4 min read',
+      readingTime: 4,
       data: { title: 'First Subpost Chapter' },
     }
 
     vi.mocked(dataUtils.getSubpostsData).mockResolvedValue({
       activePost: mockActivePost,
       isActivePost: true,
-      activePostReadingTime: '2 min read',
-      activePostCombinedReadingTime: '6 min read',
+      activePostReadingTime: 2,
+      activePostCombinedReadingTime: 6,
       subpostsWithReadingTime: [
         mockSubpost as unknown as CollectionEntry<'blog'> & {
-          readingTime: string
+          readingTime: number
         },
       ],
       isCurrentSubpost: false,

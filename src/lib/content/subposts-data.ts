@@ -1,5 +1,5 @@
 import {
-  calculateReadingTimeFast,
+  calculateReadingTimeMinutes,
   getCombinedReadingTime,
   getParentPost,
   getPostById,
@@ -11,15 +11,15 @@ import {
 type SubpostWithReadingTime = Awaited<
   ReturnType<typeof getSubpostsForParent>
 >[number] & {
-  readingTime: string
+  readingTime: number
 }
 
 type SubpostsData = {
   activePost: Awaited<ReturnType<typeof getPostById>>
   isActivePost: boolean
   isCurrentSubpost: boolean
-  activePostReadingTime: string | null
-  activePostCombinedReadingTime: string | null
+  activePostReadingTime: number | null
+  activePostCombinedReadingTime: number | null
   subpostsWithReadingTime: SubpostWithReadingTime[]
   currentSubpostDetails: SubpostWithReadingTime | null
 }
@@ -52,7 +52,7 @@ export async function getSubpostsData(
   const isActivePost = activePost?.id === currentPostId
 
   const activePostReadingTime = activePost
-    ? calculateReadingTimeFast(activePost.body || '')
+    ? calculateReadingTimeMinutes(activePost.body || '')
     : null
   const activePostCombinedReadingTime =
     activePost && subposts.length > 0
@@ -61,7 +61,7 @@ export async function getSubpostsData(
 
   const subpostsWithReadingTime = subposts.map((subpost) => ({
     ...subpost,
-    readingTime: calculateReadingTimeFast(subpost.body || ''),
+    readingTime: calculateReadingTimeMinutes(subpost.body || ''),
   }))
 
   const currentSubpostDetails = isCurrentSubpost

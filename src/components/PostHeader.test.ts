@@ -28,8 +28,8 @@ describe('PostHeader.astro (Test as Documentation)', () => {
       props: {
         post: mockPost,
         authors: mockAuthors,
-        postReadingTime: '5 min read',
-        combinedReadingTime: '15 min read',
+        postReadingTime: 5,
+        combinedReadingTime: 15,
         subpostCount: 3,
       },
     })

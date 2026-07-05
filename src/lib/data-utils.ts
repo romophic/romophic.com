@@ -15,7 +15,6 @@ import { getBacklinks } from './content/links'
 
 export {
   getAllPosts,
-  getAllPostsAndSubposts,
   getAllProjects,
   getPostsByTag,
   getRecentPosts,
@@ -24,6 +23,9 @@ export {
   getParentId,
   getSubpostCount,
   getCombinedReadingTime,
+  getPostReadingTime,
+  calculateReadingTimeMinutes,
+  formatReadingTime,
   getOgImageSlug,
   groupPostsByYear,
 } from './content/posts'

@@ -9,7 +9,7 @@ vi.mock('@/lib/data-utils', async (importOriginal) => {
   return {
     ...actual,
     getSubpostCount: vi.fn(),
-    getCombinedReadingTime: vi.fn().mockResolvedValue('5 min read'),
+    getCombinedReadingTime: vi.fn().mockResolvedValue(5),
     parseAuthors: vi.fn().mockResolvedValue([]),
     isSubpost: vi.fn(),
   }
