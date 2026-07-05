@@ -5,6 +5,7 @@ import '@fontsource-variable/noto-sans-jp'
 import 'katex/dist/katex.min.css'
 
 import Head from '@/components/Head.astro'
+import LiquidGlassFilter from '@/components/LiquidGlassFilter.astro'
 import SearchDialog from '@/components/SearchDialog.astro'
 
 interface Props {
@@ -26,5 +27,6 @@ const {
   <body class={bodyClass}>
     <slot />
     <SearchDialog />
+    <LiquidGlassFilter />
   </body>
 </html>
