@@ -5,6 +5,20 @@ import type { CollectionEntry } from 'astro:content'
 import * as fs from 'node:fs'
 import * as fsPromises from 'node:fs/promises'
 
+vi.mock('satori', () => ({
+  default: vi.fn().mockResolvedValue('<svg></svg>'),
+}))
+
+vi.mock('@resvg/resvg-js', () => ({
+  Resvg: class {
+    render() {
+      return {
+        asPng: () => new Uint8Array([0x89, 0x50, 0x4e, 0x47]),
+      }
+    }
+  },
+}))
+
 // Mock astro:content so getStaticPaths works without real data
 vi.mock('astro:content', () => {
   return {
@@ -54,6 +68,14 @@ describe('OG Image Generation ([...slug].png.ts)', () => {
   })
 
   test('generates a valid PNG image bypassing cache', async () => {
+    vi.mocked(fs.existsSync).mockReturnValue(false)
+    vi.mocked(fsPromises.readFile).mockRejectedValue(new Error('Cache miss'))
+    vi.mocked(fsPromises.writeFile).mockResolvedValue()
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => new Uint8Array([0x00]).buffer,
+    } as any)
+
     // Mock blog post entry with unique title to bypass cache
     const mockPost: CollectionEntry<'blog'> = {
       id: 'test-post-' + Date.now(),
@@ -84,13 +106,14 @@ describe('OG Image Generation ([...slug].png.ts)', () => {
     const uint8Array = new Uint8Array(arrayBuffer)
     expect(uint8Array[0]).toBe(0x89)
     expect(uint8Array[1]).toBe(0x50)
-  }, 15000)
+  })
 
   test('handles cache read error gracefully', async () => {
     vi.mocked(fs.existsSync).mockReturnValue(true)
-    vi.mocked(fsPromises.readFile).mockRejectedValue(
-      new Error('Simulated read error'),
-    )
+    vi.mocked(fsPromises.readFile)
+      .mockRejectedValueOnce(new Error('Simulated read error'))
+      .mockResolvedValue(new Uint8Array([0x00]) as any)
+    vi.mocked(fsPromises.writeFile).mockResolvedValue()
 
     const mockPost: CollectionEntry<'blog'> = {
       id: 'test-read-error',
@@ -100,12 +123,17 @@ describe('OG Image Generation ([...slug].png.ts)', () => {
     // Should still return response by generating new image
     const response = await GET({ props: { post: mockPost } })
     expect(response.status).toBe(200)
-  }, 15000)
+  })
 
   test('handles font fetch failure', async () => {
+    vi.mocked(fs.existsSync).mockReturnValue(false)
     vi.mocked(fsPromises.writeFile).mockRejectedValue(
       new Error('Simulated write error'),
     )
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => new Uint8Array([0x00]).buffer,
+    } as any)
 
     const mockPost: CollectionEntry<'blog'> = {
       id: 'test-write-error',
@@ -114,7 +142,7 @@ describe('OG Image Generation ([...slug].png.ts)', () => {
 
     const response = await GET({ props: { post: mockPost } })
     expect(response.status).toBe(200)
-  }, 15000)
+  })
 
   test('hits the image cache and returns the cached response', async () => {
     // Mock getCachedImage hit
