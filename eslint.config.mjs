@@ -4,7 +4,14 @@ import tseslint from 'typescript-eslint'
 import eslintPluginAstro from 'eslint-plugin-astro'
 export default [
   {
-    ignores: ['dist/', 'dev-dist/', '.astro/', 'node_modules/', '.git/'],
+    ignores: [
+      'dist/',
+      'dev-dist/',
+      '.astro/',
+      'node_modules/',
+      '.git/',
+      'coverage/',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -21,7 +28,7 @@ export default [
   {
     files: ['**/*.astro'],
     rules: {
-      // Override/disable rules for Astro files if needed
+      'astro/no-exports-from-components': 'off',
     },
   },
   {

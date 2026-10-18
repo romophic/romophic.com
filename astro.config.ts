@@ -1,4 +1,4 @@
-import { defineConfig } from 'astro/config'
+import { defineConfig, fontProviders } from 'astro/config'
 
 import mdx from '@astrojs/mdx'
 import sitemap from '@astrojs/sitemap'
@@ -8,7 +8,7 @@ import astroExpressiveCode from 'astro-expressive-code'
 import { pluginCollapsibleSections } from '@expressive-code/plugin-collapsible-sections'
 import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers'
 
-import { rehypeHeadingIds } from '@astrojs/markdown-remark'
+import { rehypeHeadingIds, unified } from '@astrojs/markdown-remark'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypeExternalLinks from 'rehype-external-links'
 import rehypeKatex from 'rehype-katex'
@@ -19,6 +19,16 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   site: 'https://romophic.com',
+  fonts: [
+    {
+      provider: fontProviders.npm(),
+      name: 'Noto Sans JP Variable',
+      cssVariable: '--font-noto-sans-jp',
+      options: {
+        package: '@fontsource-variable/noto-sans-jp',
+      },
+    },
+  ],
   prefetch: {
     defaultStrategy: 'hover',
   },
@@ -41,11 +51,6 @@ export default defineConfig({
   ],
   vite: {
     plugins: [tailwindcss()],
-    build: {
-      rollupOptions: {
-        external: ['/pagefind/pagefind.js'],
-      },
-    },
   },
   server: {
     port: 1234,
@@ -58,38 +63,40 @@ export default defineConfig({
     checkOrigin: true,
   },
   markdown: {
-    rehypePlugins: [
-      [
-        rehypeExternalLinks,
-        {
-          target: '_blank',
-          rel: ['nofollow', 'noreferrer', 'noopener'],
-        },
-      ],
-      rehypeHeadingIds,
-      [
-        rehypeAutolinkHeadings,
-        {
-          behavior: 'prepend',
-          properties: {
-            className: ['anchor-link'],
-            ariaHidden: true,
-            tabIndex: -1,
+    processor: unified({
+      rehypePlugins: [
+        [
+          rehypeExternalLinks,
+          {
+            target: '_blank',
+            rel: ['nofollow', 'noreferrer', 'noopener'],
           },
-          content: {
-            type: 'text',
-            value: '#',
+        ],
+        rehypeHeadingIds,
+        [
+          rehypeAutolinkHeadings,
+          {
+            behavior: 'prepend',
+            properties: {
+              className: ['anchor-link'],
+              ariaHidden: true,
+              tabIndex: -1,
+            },
+            content: {
+              type: 'text',
+              value: '#',
+            },
           },
-        },
+        ],
+        [
+          rehypeKatex,
+          {
+            output: 'htmlAndMathml',
+            throwOnError: false,
+          },
+        ],
       ],
-      [
-        rehypeKatex,
-        {
-          output: 'htmlAndMathml',
-          throwOnError: false,
-        },
-      ],
-    ],
-    remarkPlugins: [remarkMath, remarkEmoji],
+      remarkPlugins: [remarkMath, remarkEmoji],
+    }),
   },
 })
