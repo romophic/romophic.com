@@ -82,20 +82,22 @@ const {
               )}
 
               {subpostsWithReadingTime.length > 0 && (
-                <div class="ml-4 space-y-1">
-                  {subpostsWithReadingTime.map((subpost) => (
-                    <SubpostItem
-                      title={subpost.data.title}
-                      href={`/blog/${subpost.id}`}
-                      readingTime={subpost.readingTime}
-                      isActive={currentPostId === subpost.id}
-                      icon={ICONS.file}
-                      activeIcon={ICONS.fileText}
-                      activeClassName="mobile-subposts-active-item"
-                      linkClassName="mobile-subposts-link"
-                    />
-                  ))}
-                </div>
+                <li>
+                  <div class="ml-4 space-y-1">
+                    {subpostsWithReadingTime.map((subpost) => (
+                      <SubpostItem
+                        title={subpost.data.title}
+                        href={`/blog/${subpost.id}`}
+                        readingTime={subpost.readingTime}
+                        isActive={currentPostId === subpost.id}
+                        icon={ICONS.file}
+                        activeIcon={ICONS.fileText}
+                        activeClassName="mobile-subposts-active-item"
+                        linkClassName="mobile-subposts-link"
+                      />
+                    ))}
+                  </div>
+                </li>
               )}
             </ul>
           </div>

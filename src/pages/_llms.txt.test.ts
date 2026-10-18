@@ -55,4 +55,20 @@ describe('llms.txt endpoint', () => {
 
     expect(text).toContain('...and 1 more posts at')
   })
+
+  it('lists authors as plain names without dead author page links', async () => {
+    vi.mocked(dataUtils.getAllPosts).mockResolvedValue([])
+    vi.mocked(dataUtils.getAllProjects).mockResolvedValue([])
+    vi.mocked(dataUtils.getAllAuthors).mockResolvedValue([
+      { id: 'romophic', data: { name: 'romophic' } },
+    ] as any)
+
+    const response = await GET({
+      site: new URL('https://romophic.com/'),
+    } as any)
+    const text = await response.text()
+
+    expect(text).toContain('- romophic\n')
+    expect(text).not.toContain('/authors/')
+  })
 })

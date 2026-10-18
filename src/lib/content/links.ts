@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { getAllPosts } from './posts'
+import { getAllPosts, normalizePostId } from './posts'
 import type { CollectionEntry } from 'astro:content'
 
 /**
@@ -11,18 +11,21 @@ export async function extractInternalLinks(
 ): Promise<string[]> {
   const body = post.body || ''
 
-  // Remove markdown code blocks to prevent false positive link extraction
-  const bodyWithoutCodeBlocks = body.replace(/```[\s\S]*?```/g, '')
+  // Remove fenced code blocks and inline code spans to prevent false positives
+  const bodyWithoutCode = body
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/`[^`\n]*`/g, '')
 
-  const linkRegex = /\[[^\]]*\]\(([^)]+)\)/g
+  // (?<!!) skips markdown images: ![alt](src) is not a link
+  const linkRegex = /(?<!!)\[[^\]]*\]\(([^)]+)\)/g
   const targets: string[] = []
 
   let match
-  while ((match = linkRegex.exec(bodyWithoutCodeBlocks)) !== null) {
+  while ((match = linkRegex.exec(bodyWithoutCode)) !== null) {
     const url = match[1]
     const targetId = resolveLinkToId(url, post.id)
     if (targetId) {
-      targets.push(normalizeId(targetId))
+      targets.push(normalizePostId(targetId))
     }
   }
 
@@ -65,10 +68,6 @@ export function resolveLinkToId(url: string, sourceId: string): string | null {
   return null
 }
 
-export function normalizeId(id: string): string {
-  return id.endsWith('/index') ? id.replace(/\/index$/, '') : id
-}
-
 /**
  * Builds a map of TargetID -> SourcePosts[] efficiently (O(N)).
  * Iterates through all posts once, extracts links, and populates the map.
@@ -104,7 +103,7 @@ export async function getBacklinks(
   postId: string,
 ): Promise<CollectionEntry<'blog'>[]> {
   const map = await getBacklinksMap()
-  const normalizedId = normalizeId(postId)
+  const normalizedId = normalizePostId(postId)
 
   const backlinks = map.get(normalizedId) || []
 

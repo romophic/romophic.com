@@ -49,6 +49,38 @@ export function getNodeColor(
   return activeTheme.nodeDefault
 }
 
+/** Visual radius for a node, enlarged while hovered. */
+function nodeRadius(node: D3GraphNode, hoverNode: D3GraphNode | null): number {
+  const baseRadius =
+    node.group === 'tag' ? RENDER.node.radiusTag : RENDER.node.radiusPost
+  return hoverNode?.id === node.id
+    ? baseRadius * RENDER.node.hoverScale
+    : baseRadius
+}
+
+// Label metrics are stable for a given font + text, so cache across frames.
+const labelWidthCache = new Map<string, number>()
+
+/** Test-only: clear the label width cache. */
+export function _resetLabelWidthCache(): void {
+  labelWidthCache.clear()
+}
+
+function measureLabelWidth(
+  ctx: CanvasRenderingContext2D,
+  label: string,
+  font: string,
+): number {
+  const key = `${font}\u0000${label}`
+  const cached = labelWidthCache.get(key)
+  if (cached !== undefined) return cached
+
+  ctx.font = font
+  const width = ctx.measureText(label).width
+  labelWidthCache.set(key, width)
+  return width
+}
+
 /**
  * Render the full graph scene onto a 2D canvas context.
  */
@@ -106,15 +138,8 @@ export function renderGraph(
     const tx = target.x!
     const ty = target.y!
 
-    const getRadius = (node: D3GraphNode) => {
-      const isHover = hoverNode?.id === node.id
-      const baseRadius =
-        node.group === 'tag' ? RENDER.node.radiusTag : RENDER.node.radiusPost
-      return isHover ? baseRadius * RENDER.node.hoverScale : baseRadius
-    }
-
-    const rSource = getRadius(source)
-    const rTarget = getRadius(target)
+    const rSource = nodeRadius(source, hoverNode)
+    const rTarget = nodeRadius(target, hoverNode)
 
     const dx = tx - sx
     const dy = ty - sy
@@ -140,10 +165,10 @@ export function renderGraph(
   nodes.forEach((node) => {
     const isHover = hoverNode?.id === node.id
     const isNeighbor = hoverNode !== null && neighborIds.has(node.id)
+    const isImportant =
+      (node.degree || 0) > GRAPH_CONFIG.interaction.importantDegree
 
-    const baseRadius =
-      node.group === 'tag' ? RENDER.node.radiusTag : RENDER.node.radiusPost
-    const radius = isHover ? baseRadius * RENDER.node.hoverScale : baseRadius
+    const radius = nodeRadius(node, hoverNode)
     const nodeColor = getNodeColor(node, isDark, activeTheme)
 
     // Halo
@@ -159,14 +184,17 @@ export function renderGraph(
       ctx.fill()
     }
 
-    // Core
+    // Core. Shadow blur is expensive: only glow for hovered, neighbor and
+    // high-degree nodes instead of every node on screen.
     ctx.beginPath()
     ctx.arc(node.x!, node.y!, radius, 0, 2 * Math.PI)
 
     ctx.shadowColor = isDark ? nodeColor : RENDER.shadow.light
     ctx.shadowBlur = isHover
       ? activeTheme.glowIntensityHover
-      : activeTheme.glowIntensity
+      : isImportant || isNeighbor
+        ? activeTheme.glowIntensity
+        : 0
 
     ctx.fillStyle = nodeColor
     ctx.fill()
@@ -176,8 +204,6 @@ export function renderGraph(
     // If we are currently behind the glass pane (isInteractive is false), skip heavy label rendering completely.
     if (!isInteractive) return
 
-    const degree = node.degree || 0
-    const isImportant = degree > GRAPH_CONFIG.interaction.importantDegree
     if (
       isHover ||
       transform.k > GRAPH_CONFIG.interaction.lodThreshold ||
@@ -188,7 +214,7 @@ export function renderGraph(
       ctx.translate(node.x!, node.y!)
       ctx.scale(1 / transform.k, 1 / transform.k)
       ctx.font = `${isHover || isImportant ? '600' : 'normal'} ${RENDER.label.fontSize}px Sans-Serif`
-      const textWidth = ctx.measureText(label).width
+      const textWidth = measureLabelWidth(ctx, label, ctx.font)
 
       ctx.fillStyle = isDark ? RENDER.labelBg.dark : RENDER.labelBg.light
       const px = -textWidth / 2 - RENDER.label.paddingX,

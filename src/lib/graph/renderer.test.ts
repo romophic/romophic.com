@@ -52,7 +52,7 @@ describe('getNodeColor', () => {
   })
 })
 
-import { renderGraph } from './renderer'
+import { renderGraph, _resetLabelWidthCache } from './renderer'
 
 describe('renderGraph (Mocked)', () => {
   it('should run renderGraph without crashing', () => {
@@ -161,5 +161,109 @@ describe('renderGraph (Mocked)', () => {
     // Check that ctx methods were called
     expect(ctx.clearRect).toHaveBeenCalled()
     expect(ctx.fill).toHaveBeenCalled()
+  })
+})
+
+describe('renderGraph label cache and glow gating', () => {
+  function makeCtx(): CanvasRenderingContext2D {
+    return {
+      clearRect: vi.fn(),
+      save: vi.fn(),
+      translate: vi.fn(),
+      scale: vi.fn(),
+      beginPath: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      stroke: vi.fn(),
+      fill: vi.fn(),
+      arc: vi.fn(),
+      closePath: vi.fn(),
+      restore: vi.fn(),
+      measureText: vi.fn().mockReturnValue({ width: 50 }),
+      fillText: vi.fn(),
+      quadraticCurveTo: vi.fn(),
+    } as unknown as CanvasRenderingContext2D
+  }
+
+  it('measures each unique label only once across frames', () => {
+    _resetLabelWidthCache()
+    const ctx = makeCtx()
+    const nodes = [makeNode({ id: '1', name: 'Stable Label' })]
+    nodes[0].x = 0
+    nodes[0].y = 0
+
+    const render = () =>
+      renderGraph(
+        ctx,
+        800,
+        600,
+        nodes,
+        [],
+        { x: 0, y: 0, k: 2 },
+        true,
+        mockTheme,
+        null,
+        new Set(),
+        true,
+      )
+
+    render()
+    render()
+
+    expect(ctx.measureText).toHaveBeenCalledTimes(1)
+  })
+
+  it('applies glow only to important or hovered nodes', () => {
+    const ctx = makeCtx()
+    const blurAssignments: number[] = []
+    Object.defineProperty(ctx, 'shadowBlur', {
+      set(value: number) {
+        blurAssignments.push(value)
+      },
+      configurable: true,
+    })
+
+    const plain = makeNode({ id: 'plain', name: 'Plain', degree: 0 })
+    const important = makeNode({ id: 'hub', name: 'Hub', degree: 10 })
+    plain.x = 0
+    plain.y = 0
+    important.x = 50
+    important.y = 0
+    const nodes = [plain, important]
+
+    renderGraph(
+      ctx,
+      800,
+      600,
+      nodes,
+      [],
+      { x: 0, y: 0, k: 2 },
+      true,
+      mockTheme,
+      null,
+      new Set(),
+      true,
+    )
+
+    // Ordinary node draws without glow (0), the hub keeps the theme glow
+    expect(blurAssignments).toContain(0)
+    expect(blurAssignments).toContain(mockTheme.glowIntensity)
+
+    blurAssignments.length = 0
+    renderGraph(
+      ctx,
+      800,
+      600,
+      nodes,
+      [],
+      { x: 0, y: 0, k: 2 },
+      true,
+      mockTheme,
+      important,
+      new Set(),
+      true,
+    )
+
+    expect(blurAssignments).toContain(mockTheme.glowIntensityHover)
   })
 })

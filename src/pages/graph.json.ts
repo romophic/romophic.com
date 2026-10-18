@@ -1,7 +1,7 @@
 import {
   getAllPosts,
   extractInternalLinks,
-  normalizeId,
+  normalizePostId,
 } from '@/lib/data-utils'
 import type { APIRoute } from 'astro'
 
@@ -30,7 +30,7 @@ export const GET: APIRoute = async () => {
   // Build a normalized ID -> actual ID map for O(1) lookup
   const normalizedIdMap = new Map<string, string>()
   for (const pid of postIds) {
-    normalizedIdMap.set(normalizeId(pid), pid)
+    normalizedIdMap.set(normalizePostId(pid), pid)
   }
 
   // 1. Add Post Nodes and Tag Links

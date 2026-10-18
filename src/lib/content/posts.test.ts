@@ -151,20 +151,35 @@ vi.mock('astro:content', () => {
           },
           body: '',
         },
+        // A published post whose declared parent is a draft: the draft must not leak
+        {
+          id: 'child-of-draft',
+          data: {
+            title: 'Child of Draft',
+            draft: false,
+            date: new Date('2024-01-07'),
+            parent: { id: 'draft-post', collection: 'blog' },
+          },
+          body: 'A'.repeat(400),
+        },
       ]
     }
     return []
   }
 
   return {
-    getCollection: vi.fn(async (collection: string, filterFn?: (entry: any) => boolean) => {
-      const items = getMockItems(collection)
-      return filterFn ? items.filter(filterFn) : items
-    }),
-    getEntry: vi.fn(async ({ collection, id }: { collection: string; id: string }) => {
-      const items = getMockItems(collection)
-      return items.find((item: any) => item.id === id) ?? null
-    }),
+    getCollection: vi.fn(
+      async (collection: string, filterFn?: (entry: any) => boolean) => {
+        const items = getMockItems(collection)
+        return filterFn ? items.filter(filterFn) : items
+      },
+    ),
+    getEntry: vi.fn(
+      async ({ collection, id }: { collection: string; id: string }) => {
+        const items = getMockItems(collection)
+        return items.find((item: any) => item.id === id) ?? null
+      },
+    ),
   }
 })
 
@@ -245,6 +260,10 @@ describe('Blog Content Data Layer Specification', () => {
         const parent = await getParentPost('non-existent-subpost')
         expect(parent).toBeNull()
       })
+      it('should return null when the declared parent is a draft (no draft leak)', async () => {
+        const parent = await getParentPost('child-of-draft')
+        expect(parent).toBeNull()
+      })
     })
   })
 
@@ -261,12 +280,21 @@ describe('Blog Content Data Layer Specification', () => {
       it('should return all normalized posts and filter out drafts', async () => {
         const posts = await getAllPosts()
         expect(posts.some((p) => p.id === 'draft-post')).toBe(false)
-        expect(posts.length).toBe(10) // standalone, series, and all non-draft subposts
+        expect(posts.length).toBe(11) // standalone, series root, child-of-draft and all non-draft subposts
       })
       it('should sort the resulting posts by date in descending order', async () => {
         const posts = await getAllPosts()
         expect(posts[0].id).toBe('standalone') // 2025-01-01
         expect(posts[posts.length - 1].id).toBe('series') // 2024-01-01
+      })
+      it('should order posts sharing a timestamp deterministically by id', async () => {
+        // series/part-1 and series/part-1-bis share 2024-01-02
+        const posts = await getAllPosts()
+        const first = posts.findIndex((p) => p.id === 'series/part-1')
+        const second = posts.findIndex((p) => p.id === 'series/part-1-bis')
+        expect(first).toBeGreaterThanOrEqual(0)
+        expect(second).toBeGreaterThanOrEqual(0)
+        expect(first).toBeLessThan(second)
       })
     })
 
@@ -312,11 +340,11 @@ describe('Blog Content Data Layer Specification', () => {
       })
 
       it('should return the next and previous post from the global pool for a standalone post', async () => {
-        // Global pool includes standalone (2025-01-01) followed by subposts from 2024-01-06 down to series (2024-01-01)
+        // Global pool includes standalone (2025-01-01) followed by child-of-draft (2024-01-07) and the rest
         const adjacent = await getAdjacentPosts('standalone')
         expect(adjacent.parent).toBeNull()
         expect(adjacent.newer).toBeNull() // Standalone is the newest post
-        expect(adjacent.older?.id).toBe('series/part-empty-body')
+        expect(adjacent.older?.id).toBe('child-of-draft')
 
         // Test the oldest post in the global pool (series)
         const oldestAdjacent = await getAdjacentPosts('series')
@@ -467,6 +495,20 @@ describe('Blog Content Data Layer Specification', () => {
         expect(Object.keys(grouped)).toHaveLength(2)
         expect(grouped['2025']).toHaveLength(2)
         expect(grouped['2024']).toHaveLength(1)
+      })
+
+      it('should group by the JST year across the UTC late-night boundary', () => {
+        // 2024-12-31T15:00:00Z === 2025-01-01 00:00 JST
+        const posts = [
+          {
+            id: 'new-year-jst',
+            data: { date: new Date('2024-12-31T15:00:00Z') },
+          },
+        ] as unknown as CollectionEntry<'blog'>[]
+
+        const grouped = groupPostsByYear(posts)
+        expect(Object.keys(grouped)).toEqual(['2025'])
+        expect(grouped['2025']).toHaveLength(1)
       })
     })
   })

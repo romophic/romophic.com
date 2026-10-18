@@ -33,13 +33,31 @@ describe('physics (Test as Documentation)', () => {
     expect(globalThis.Worker).toHaveBeenCalled()
     expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith({
       type: 'INIT',
-      payload: { nodes: [], links: [], width: 800, height: 600 },
+      payload: {
+        nodes: [],
+        links: [],
+        width: 800,
+        height: 600,
+        reducedMotion: false,
+      },
     })
 
     controller.setInteractive(true)
     expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith({
       type: 'SET_INTERACTIVE',
       payload: { isInteractive: true },
+    })
+
+    controller.setVisible(false)
+    expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith({
+      type: 'SET_VISIBLE',
+      payload: { visible: false },
+    })
+
+    controller.resize(1024, 768)
+    expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith({
+      type: 'RESIZE',
+      payload: { width: 1024, height: 768 },
     })
 
     controller.updateNode('node-1', 100, 200)
@@ -72,5 +90,22 @@ describe('physics (Test as Documentation)', () => {
       type: 'DESTROY',
     })
     expect(mockWorkerInstance.terminate).toHaveBeenCalled()
+  })
+
+  it('forwards the reduced-motion preference to the worker on init', () => {
+    const controller = setupPhysics([], [], 800, 600, vi.fn(), true)
+
+    expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith({
+      type: 'INIT',
+      payload: {
+        nodes: [],
+        links: [],
+        width: 800,
+        height: 600,
+        reducedMotion: true,
+      },
+    })
+
+    controller.destroy()
   })
 })

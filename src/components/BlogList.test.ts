@@ -48,5 +48,34 @@ describe('BlogList.astro', () => {
     expect(html).toContain('2025')
     expect(html).toContain('Page 1 of 2')
     expect(html).toContain('Next →')
+    // The blog index needs a single top-level heading for a11y
+    expect(html).toMatch(/<h1[^>]*>Blog<\/h1>/)
+  })
+
+  it('renders the tag heading when currentTag is set', async () => {
+    const mockPage = {
+      data: [
+        {
+          id: 'post-1',
+          collection: 'blog',
+          data: {
+            title: 'Post 1',
+            date: new Date('2026-05-27'),
+            tags: ['test'],
+          },
+        },
+      ],
+      currentPage: 1,
+      lastPage: 1,
+      url: { next: undefined, prev: undefined },
+    } as any
+
+    const container = await AstroContainer.create()
+    const html = await container.renderToString(BlogList, {
+      props: { page: mockPage, currentTag: 'test' },
+    })
+
+    expect(html).toMatch(/<h1[^>]*>Tag: test<\/h1>/)
+    expect(html).not.toMatch(/<h1[^>]*>Blog<\/h1>/)
   })
 })

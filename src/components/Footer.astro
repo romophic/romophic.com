@@ -1,5 +1,5 @@
 ---
-import { ICON_MAP, ICONS, SITE, SOCIAL_LINKS } from '@/consts'
+import { getSocialIcon, SITE, SOCIAL_LINKS } from '@/consts'
 import { Icon } from 'astro-icon/components'
 ---
 
@@ -30,13 +30,7 @@ import { Icon } from 'astro-icon/components'
                 class="bg-background text-muted-foreground hover:bg-muted hover:text-foreground inline-flex size-9 items-center justify-center rounded-md border transition-colors"
                 aria-label={link.label}
               >
-                <Icon
-                  name={
-                    (ICON_MAP as Record<string, string>)[link.label] ||
-                    ICONS.link
-                  }
-                  class="size-4"
-                />
+                <Icon name={getSocialIcon(link.label)} class="size-4" />
               </a>
             ))
           }

@@ -20,4 +20,24 @@ describe('Header.astro', () => {
     // Check if the theme toggle or command menu button exists (search icon)
     expect(html).toContain('aria-label="Open Command Menu"')
   })
+
+  it('marks only the active section with aria-current="page"', async () => {
+    const container = await AstroContainer.create()
+
+    // Home is active only on the home page (not on every "/" prefix)
+    const homeHtml = await container.renderToString(Header, {
+      request: new Request('https://romophic.com/'),
+    })
+    const homeMatches = homeHtml.match(/<a[^>]*aria-current="page"[^>]*>/g)
+    expect(homeMatches).toHaveLength(1)
+    expect(homeMatches?.[0]).toContain('href="/"')
+
+    // Inside /blog/... only the blog link is current, home is not
+    const blogHtml = await container.renderToString(Header, {
+      request: new Request('https://romophic.com/blog/some-post'),
+    })
+    const blogMatches = blogHtml.match(/<a[^>]*aria-current="page"[^>]*>/g)
+    expect(blogMatches).toHaveLength(1)
+    expect(blogMatches?.[0]).toContain('href="/blog"')
+  })
 })

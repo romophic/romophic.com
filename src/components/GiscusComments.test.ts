@@ -19,4 +19,19 @@ describe('GiscusComments.astro', () => {
     expect(html).toContain(`mapping="${GISCUS_CONFIG.mapping}"`)
     expect(html).toContain(`strict="${GISCUS_CONFIG.strict}"`)
   })
+
+  it('pins the theme attribute at parse time so the lazy iframe never boots light in dark mode', async () => {
+    const container = await AstroContainer.create()
+    const html = await container.renderToString(GiscusComments)
+
+    // The theme must not be a static attribute (it depends on the stored
+    // preference), and it must not depend on astro:page-load alone: that runs
+    // at window.load, after the widget already snapshotted its default theme.
+    expect(html).not.toMatch(/theme="(light|transparent_dark)"/)
+    expect(html).toContain(
+      "document.documentElement.classList.contains('dark')",
+    )
+    expect(html).toContain("widget.setAttribute('theme'")
+    expect(html).toContain("'transparent_dark'")
+  })
 })

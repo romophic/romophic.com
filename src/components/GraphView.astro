@@ -26,18 +26,42 @@ const {
 <script>
   import { GraphViewManager } from '@/lib/graph/manager'
 
+  let manager: GraphViewManager | null = null
+  let pendingInit: { kind: 'idle' | 'timeout'; id: number } | null = null
+
+  const cancelPendingInit = () => {
+    if (!pendingInit) return
+    if (pendingInit.kind === 'idle') cancelIdleCallback(pendingInit.id)
+    else clearTimeout(pendingInit.id)
+    pendingInit = null
+  }
+
+  const init = () => {
+    pendingInit = null
+    if (!document.getElementById('graph-container')) return
+    manager?.destroy()
+    manager = new GraphViewManager('graph-container', 'graph-canvas')
+  }
+
   // Initialize when the DOM is ready and during Astro view transitions
   document.addEventListener('astro:page-load', () => {
-    if (document.getElementById('graph-container')) {
-      const initGraph = () =>
-        new GraphViewManager('graph-container', 'graph-canvas')
+    if (!document.getElementById('graph-container')) return
 
-      // Delay initialization until the main thread is idle (improves LCP/TTI)
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(initGraph, { timeout: 2000 })
-      } else {
-        setTimeout(initGraph, 1)
+    // Delay initialization until the main thread is idle (improves LCP/TTI)
+    if (typeof requestIdleCallback === 'function') {
+      pendingInit = {
+        kind: 'idle',
+        id: requestIdleCallback(init, { timeout: 2000 }),
       }
+    } else {
+      pendingInit = { kind: 'timeout', id: window.setTimeout(init, 1) }
     }
+  })
+
+  // Tear the graph down before the page is swapped out (view transitions)
+  document.addEventListener('astro:before-swap', () => {
+    cancelPendingInit()
+    manager?.destroy()
+    manager = null
   })
 </script>

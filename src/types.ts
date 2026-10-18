@@ -28,7 +28,6 @@ type TOCHeading = {
   slug: string
   text: string
   depth: number
-  isSubpostTitle?: boolean
 }
 
 export type TOCSection = {

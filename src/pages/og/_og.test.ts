@@ -53,6 +53,10 @@ describe('OG Image Generation ([...slug].png.ts)', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    // vi.restoreAllMocks() does not reset vi.fn() implementations, so give the
+    // filesystem mocks a clean default before each test overrides them.
+    vi.mocked(fsPromises.writeFile).mockResolvedValue()
+    vi.mocked(fsPromises.mkdir).mockResolvedValue(undefined)
   })
 
   afterEach(() => {
@@ -60,11 +64,12 @@ describe('OG Image Generation ([...slug].png.ts)', () => {
     vi.restoreAllMocks()
   })
 
-  test('getStaticPaths returns correct paths including parent nested slugs', async () => {
+  test('getStaticPaths returns one path per post plus the default image', async () => {
     const paths = await getStaticPaths()
-    expect(paths).toHaveLength(2)
-    expect(paths[0].params.slug).toBe('parent-1-index') // replaced slash with dash
+    expect(paths).toHaveLength(3)
+    expect(paths[0].params.slug).toBe('parent-1') // slashes become dashes
     expect(paths[1].params.slug).toBe('post-2')
+    expect(paths[2].params.slug).toBe('default')
   })
 
   test('generates a valid PNG image bypassing cache', async () => {
@@ -106,6 +111,21 @@ describe('OG Image Generation ([...slug].png.ts)', () => {
     const uint8Array = new Uint8Array(arrayBuffer)
     expect(uint8Array[0]).toBe(0x89)
     expect(uint8Array[1]).toBe(0x50)
+  })
+
+  test('generates the default image when no post prop is given', async () => {
+    vi.mocked(fs.existsSync).mockReturnValue(false)
+    vi.mocked(fsPromises.readFile).mockRejectedValue(new Error('Cache miss'))
+    vi.mocked(fsPromises.writeFile).mockResolvedValue()
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => new Uint8Array([0x00]).buffer,
+    } as any)
+
+    const response = await GET({ props: {} })
+
+    expect(response).toBeInstanceOf(Response)
+    expect(response.headers.get('Content-Type')).toBe('image/png')
   })
 
   test('handles cache read error gracefully', async () => {
@@ -179,13 +199,10 @@ describe('OG Image Generation ([...slug].png.ts)', () => {
       data: { title: 'Fetch Font', date: new Date() },
     } as any
 
-    // This will error down the line because fake font buffer is invalid for satori,
-    // but it covers the fetch lines. We catch the error or allow it to throw if handled.
-    try {
-      await freshGET({ props: { post: mockPost } })
-    } catch {
-      // expected to fail at satori/font loading because of invalid font buffer
-    }
+    // Fresh module means a fresh in-memory font cache, so the fetch path runs.
+    await expect(
+      freshGET({ props: { post: mockPost } }),
+    ).resolves.toBeInstanceOf(Response)
 
     expect(global.fetch).toHaveBeenCalled()
     expect(fsPromises.mkdir).toHaveBeenCalled()
@@ -203,13 +220,9 @@ describe('OG Image Generation ([...slug].png.ts)', () => {
       data: { title: 'Network Err', date: new Date() },
     } as any
 
-    try {
-      await freshGET({ props: { post: mockPost } })
-    } catch (e) {
-      expect((e as Error).message).toContain(
-        'Failed to load Inter font for OG images',
-      )
-    }
+    await expect(freshGET({ props: { post: mockPost } })).rejects.toThrow(
+      'Failed to load Inter font for OG images',
+    )
   })
 
   test('handles fetch non-ok response for fonts', async () => {
@@ -227,12 +240,8 @@ describe('OG Image Generation ([...slug].png.ts)', () => {
       data: { title: 'Not Found Err', date: new Date() },
     } as any
 
-    try {
-      await freshGET({ props: { post: mockPost } })
-    } catch (e) {
-      expect((e as Error).message).toContain(
-        'Failed to load Inter font for OG images',
-      )
-    }
+    await expect(freshGET({ props: { post: mockPost } })).rejects.toThrow(
+      'Failed to load Inter font for OG images',
+    )
   })
 })

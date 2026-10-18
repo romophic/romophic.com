@@ -18,6 +18,19 @@ import { GISCUS_CONFIG } from '@/consts'
     loading={GISCUS_CONFIG.loading}
     crossorigin="anonymous"
     async></giscus-widget>
+
+  <script is:inline>
+    // Pin the initial theme before the giscus-widget custom element upgrades.
+    // The widget snapshots its theme when it first renders. Waiting for
+    // astro:page-load (window.load) loses the race: the lazy iframe boots with
+    // the default "light" theme and the later theme-change message is dropped
+    // because the iframe content is not loaded yet.
+    const widget = document.querySelector('giscus-widget')
+    if (widget) {
+      const isDark = document.documentElement.classList.contains('dark')
+      widget.setAttribute('theme', isDark ? 'transparent_dark' : 'light')
+    }
+  </script>
 </div>
 
 <script>

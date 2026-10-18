@@ -2,6 +2,8 @@ import type { D3GraphLink, D3GraphNode } from '@/types'
 
 export interface PhysicsController {
   setInteractive: (val: boolean) => void
+  setVisible: (val: boolean) => void
+  resize: (width: number, height: number) => void
   updateNode: (id: string, fx: number | null, fy: number | null) => void
   controlSimulation: (alphaTarget?: number, restart?: boolean) => void
   destroy: () => void
@@ -21,6 +23,7 @@ export function setupPhysics(
       vy: number
     }[],
   ) => void,
+  reducedMotion: boolean = false,
 ): PhysicsController {
   const worker = new Worker(new URL('./physics.worker.ts', import.meta.url), {
     type: 'module',
@@ -34,7 +37,7 @@ export function setupPhysics(
 
   worker.postMessage({
     type: 'INIT',
-    payload: { nodes, links, width, height },
+    payload: { nodes, links, width, height, reducedMotion },
   })
 
   return {
@@ -42,6 +45,15 @@ export function setupPhysics(
       worker.postMessage({
         type: 'SET_INTERACTIVE',
         payload: { isInteractive },
+      })
+    },
+    setVisible: (visible: boolean) => {
+      worker.postMessage({ type: 'SET_VISIBLE', payload: { visible } })
+    },
+    resize: (newWidth: number, newHeight: number) => {
+      worker.postMessage({
+        type: 'RESIZE',
+        payload: { width: newWidth, height: newHeight },
       })
     },
     updateNode: (id: string, fx: number | null, fy: number | null) => {

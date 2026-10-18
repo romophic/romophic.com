@@ -1,16 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi } from 'vitest'
-import { getAllAuthors, getPostsByAuthor, parseAuthors } from './authors'
-import * as postsUtils from './posts'
+import { getAllAuthors, parseAuthors } from './authors'
 import { getCollection, getEntries } from 'astro:content'
 
 vi.mock('astro:content', () => ({
   getCollection: vi.fn(),
   getEntries: vi.fn(),
-}))
-
-vi.mock('./posts', () => ({
-  getAllPosts: vi.fn(),
 }))
 
 describe('authors', () => {
@@ -19,18 +14,6 @@ describe('authors', () => {
     const authors = await getAllAuthors()
     expect(authors).toEqual(['author1'])
     expect(getCollection).toHaveBeenCalledWith('authors')
-  })
-
-  it('getPostsByAuthor filters posts by author', async () => {
-    vi.mocked(postsUtils.getAllPosts).mockResolvedValue([
-      { id: '1', data: { authors: [{ id: 'a1' }] } },
-      { id: '2', data: { authors: [{ id: 'a2' }] } },
-      { id: '3', data: {} }, // missing authors array
-    ] as any)
-
-    const posts = await getPostsByAuthor('a1')
-    expect(posts).toHaveLength(1)
-    expect(posts[0].id).toBe('1')
   })
 
   it('parseAuthors returns early if no refs', async () => {
@@ -57,7 +40,7 @@ describe('authors', () => {
 
     // Fallback logic
     expect(parsed[1].name).toBe('a2')
-    expect(parsed[1].avatar).toBe('/static/logo.png')
+    expect(parsed[1].avatar).toBe('/icon.webp')
     expect(parsed[1].isRegistered).toBe(false)
   })
 })

@@ -2,7 +2,7 @@
 import { getBadgeStyles } from '@/components/Badge.astro'
 import { ICONS } from '@/consts'
 import { formatReadingTime } from '@/lib/data-utils'
-import { formatDate } from '@/lib/utils'
+import { formatDate, pluralize } from '@/lib/utils'
 import type { Author } from '@/types'
 import { Icon } from 'astro-icon/components'
 import { Image } from 'astro:assets'
@@ -65,7 +65,9 @@ const formattedCombinedReadingTime = formatReadingTime(combinedReadingTime)
       <div
         class="flex w-full items-center justify-center gap-2 py-2 sm:w-fit sm:px-2 sm:py-0 first:sm:pl-0 last:sm:pr-0"
       >
-        <span>{formatDate(post.data.date)}</span>
+        <time datetime={post.data.date.toISOString()}>
+          {formatDate(post.data.date)}
+        </time>
       </div>
 
       <div
@@ -88,7 +90,7 @@ const formattedCombinedReadingTime = formatReadingTime(combinedReadingTime)
         subpostCount > 0 && (
           <div class="flex w-full items-center justify-center gap-1 py-2 sm:w-fit sm:px-2 sm:py-0 first:sm:pl-0 last:sm:pr-0">
             <Icon name={ICONS.fileText} class="size-3" />
-            {subpostCount} subpost{subpostCount === 1 ? '' : 's'}
+            {subpostCount} {pluralize(subpostCount, 'subpost')}
           </div>
         )
       }

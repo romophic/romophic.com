@@ -8,11 +8,17 @@ import {
   forceSimulation,
   forceX,
   forceY,
+  type ForceCenter,
+  type ForceX,
+  type ForceY,
   type Simulation,
 } from 'd3-force'
 
 let simulation: Simulation<D3GraphNode, D3GraphLink> | null = null
 let nodes: D3GraphNode[] = []
+let isInteractive = false
+let isVisible = true
+let reducedMotion = false
 
 // Custom rotational force params
 const TARGET_STRENGTH = 0.001
@@ -21,6 +27,22 @@ let targetStrength = TARGET_STRENGTH
 let width = 0
 let height = 0
 
+/** Rotation only runs while the graph is idle behind the glass pane. */
+function targetStrengthForState(): number {
+  if (reducedMotion || isInteractive) return 0
+  return TARGET_STRENGTH
+}
+
+/** Single place that decides whether the simulation may tick right now. */
+function applyRunState() {
+  if (!simulation) return
+  if (!isVisible) {
+    simulation.stop()
+    return
+  }
+  simulation.alphaTarget(reducedMotion || isInteractive ? 0 : 0.02).restart()
+}
+
 self.onmessage = (event: MessageEvent) => {
   const { type, payload } = event.data
 
@@ -28,8 +50,12 @@ self.onmessage = (event: MessageEvent) => {
     nodes = payload.nodes
     width = payload.width
     height = payload.height
+    reducedMotion = payload.reducedMotion ?? false
     const links = payload.links
     const { physics } = GRAPH_CONFIG
+
+    currentStrength = reducedMotion ? 0 : TARGET_STRENGTH
+    targetStrength = currentStrength
 
     simulation = forceSimulation<D3GraphNode>(nodes)
       .force(
@@ -69,16 +95,27 @@ self.onmessage = (event: MessageEvent) => {
       }
     })
 
-    simulation.alphaTarget(0.02).restart()
+    simulation.alphaTarget(reducedMotion ? 0 : 0.02).restart()
   } else if (type === 'SET_INTERACTIVE') {
-    const isInteractive = payload.isInteractive
-    targetStrength = isInteractive ? 0 : TARGET_STRENGTH
+    isInteractive = payload.isInteractive
+    targetStrength = targetStrengthForState()
+    applyRunState()
+  } else if (type === 'SET_VISIBLE') {
+    isVisible = payload.visible
+    applyRunState()
+  } else if (type === 'RESIZE') {
+    width = payload.width
+    height = payload.height
     if (simulation) {
-      if (isInteractive) {
-        simulation.alphaTarget(0)
-      } else {
-        simulation.alphaTarget(0.02).restart()
-      }
+      const center = simulation.force(
+        'center',
+      ) as ForceCenter<D3GraphNode> | null
+      center?.x(width / 2).y(height / 2)
+      const forceXEntry = simulation.force('x') as ForceX<D3GraphNode> | null
+      forceXEntry?.x(width / 2)
+      const forceYEntry = simulation.force('y') as ForceY<D3GraphNode> | null
+      forceYEntry?.y(height / 2)
+      simulation.alpha(0.3).restart()
     }
   } else if (type === 'UPDATE_NODE') {
     const { id, fx, fy } = payload

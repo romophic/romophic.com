@@ -1,14 +1,14 @@
 ---
-import BlogCard from '@/components/BlogCard.astro'
 import ActivityGraph from '@/components/ActivityGraph.astro'
+import BlogCard from '@/components/BlogCard.astro'
+import { getButtonStyles } from '@/components/Button.astro'
 import GraphView from '@/components/GraphView.astro'
 import Header from '@/components/Header.astro'
 import PageHead from '@/components/PageHead.astro'
-import { getButtonStyles } from '@/components/Button.astro'
-import { ICON_MAP, ICONS, SITE, SOCIAL_LINKS } from '@/consts'
+import { getSocialIcon, ICONS, SITE, SOCIAL_LINKS } from '@/consts'
+import BaseLayout from '@/layouts/BaseLayout.astro'
 import { getRecentPosts } from '@/lib/data-utils'
 import { Icon } from 'astro-icon/components'
-import BaseLayout from '@/layouts/BaseLayout.astro'
 
 const blog = await getRecentPosts(SITE.featuredPostCount)
 ---
@@ -50,9 +50,7 @@ const blog = await getRecentPosts(SITE.featuredPostCount)
         class="relative z-10 flex w-full grow flex-col rounded-b-2xl border-b border-border/40 bg-white/70 pb-10 shadow-[0_20px_50px_rgba(0,0,0,0.04)] backdrop-blur-md sm:rounded-b-[3rem] sm:pb-16 dark:bg-background/60 dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)]"
       >
         {/* Global Header */}
-        <div
-          class="liquid-glass border-b sticky top-0 z-50"
-        >
+        <div class="liquid-glass border-b sticky top-0 z-50">
           <Header />
         </div>
 
@@ -105,13 +103,7 @@ const blog = await getRecentPosts(SITE.featuredPostCount)
                         class="bg-background/80 hover:bg-muted text-muted-foreground hover:text-foreground inline-flex size-10 items-center justify-center rounded-xl border shadow-sm transition-colors"
                         aria-label={link.label}
                       >
-                        <Icon
-                          name={
-                            (ICON_MAP as Record<string, string>)[link.label] ||
-                            ICONS.link
-                          }
-                          class="size-5"
-                        />
+                        <Icon name={getSocialIcon(link.label)} class="size-5" />
                       </a>
                     ))
                   }

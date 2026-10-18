@@ -7,8 +7,6 @@
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.141 0.005 285.823);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.141 0.005 285.823);
   --primary: oklch(0.21 0.006 285.885);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.967 0.001 286.375);
@@ -22,11 +20,6 @@
   --border: oklch(0.92 0.004 286.32);
   --input: oklch(0.92 0.004 286.32);
   --ring: oklch(0.705 0.015 286.067);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
   --radius: 0.625rem;
 }
 
@@ -35,8 +28,6 @@
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.141 0.005 285.823);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.141 0.005 285.823);
-  --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.985 0 0);
   --primary-foreground: oklch(0.21 0.006 285.885);
   --secondary: oklch(0.274 0.006 286.033);
@@ -50,22 +41,17 @@
   --border: oklch(0.274 0.006 286.033);
   --input: oklch(0.274 0.006 286.033);
   --ring: oklch(0.442 0.017 285.786);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.417 0.122 170.263);
-  --chart-3: oklch(0.697 0.17 162.48);
-  --chart-4: oklch(0.769 0.188 70.08);
-  --chart-5: oklch(0.645 0.246 16.439);
 }
 
 @theme inline {
-  --font-sans: 'Geist Variable', 'Noto Sans JP Variable', sans-serif;
-  --font-mono: 'Geist Mono Variable', 'Noto Sans JP Variable', monospace;
+  --font-sans: var(--font-noto-sans-jp, 'Noto Sans JP Variable'), sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', var(--font-noto-sans-jp), monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
@@ -79,39 +65,12 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.25rem;
   --radius-2xl: 1.5rem;
   --radius-3xl: 1.75rem;
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
-
-  @keyframes accordion-down {
-    from {
-      height: 0;
-    }
-
-    to {
-      height: var(--radix-accordion-content-height);
-    }
-  }
-
-  @keyframes accordion-up {
-    from {
-      height: var(--radix-accordion-content-height);
-    }
-
-    to {
-      height: 0;
-    }
-  }
 }
 
 @layer base {
@@ -169,52 +128,84 @@
 
   /* Apple HIG "Liquid Glass" Utility (for Navigation, Headers, and Modals only) */
   .liquid-glass {
-    @apply bg-white/35 dark:bg-background/35 border border-border/40;
+    @apply dark:bg-background/35 border-border/40 border bg-white/35;
     backdrop-filter: blur(10px) saturate(180%);
     -webkit-backdrop-filter: blur(10px) saturate(180%);
-    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.6), inset 0 -1px 0 0 rgba(255, 255, 255, 0.3), 0 4px 24px rgba(0, 0, 0, 0.04);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.6),
+      inset 0 -1px 0 0 rgba(255, 255, 255, 0.3),
+      0 4px 24px rgba(0, 0, 0, 0.04);
   }
   .dark .liquid-glass {
-    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 0 rgba(255, 255, 255, 0.1), 0 4px 24px rgba(0, 0, 0, 0.3);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 0 rgba(255, 255, 255, 0.1),
+      0 4px 24px rgba(0, 0, 0, 0.3);
   }
 
   /* Progressive Enhancement: SVG Refraction filter in supported Chromium browsers */
   @supports (backdrop-filter: url(#liquid-glass-refraction)) {
     .liquid-glass {
       backdrop-filter: blur(8px) saturate(180%) url(#liquid-glass-refraction);
-      -webkit-backdrop-filter: blur(8px) saturate(180%) url(#liquid-glass-refraction);
+      -webkit-backdrop-filter: blur(8px) saturate(180%)
+        url(#liquid-glass-refraction);
     }
   }
 
   /* Specular Highlights (Top and Left light reflections) */
   .liquid-glass::before {
-    content: "";
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.8) 50%,
+      transparent 100%
+    );
     pointer-events: none;
     z-index: 10;
   }
   .dark .liquid-glass::before {
-    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      transparent 100%
+    );
   }
   .liquid-glass::after {
-    content: "";
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
     width: 1px;
     bottom: 0;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, transparent 50%, rgba(255, 255, 255, 0.2) 100%);
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.8) 0%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.2) 100%
+    );
     pointer-events: none;
     z-index: 10;
   }
   .dark .liquid-glass::after {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, transparent 50%, rgba(255, 255, 255, 0.1) 100%);
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.3) 0%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.1) 100%
+    );
   }
+}
+
+/* Shared content-card surface: change the look here, not in every component */
+@utility card {
+  @apply border-border/60 bg-card/60 hover:border-primary/40 hover:bg-card dark:hover:bg-muted/30 relative overflow-hidden rounded-xl border p-4 transition-all duration-300 hover:shadow-sm dark:bg-transparent;
 }
 
 /* Force disable transitions during theme switch/page swap */
@@ -224,4 +215,16 @@
 .transition-none ::after {
   transition: none !important;
   animation: none !important;
+}
+
+/* Respect prefers-reduced-motion: no decorative motion for users who opt out */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

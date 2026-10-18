@@ -1,6 +1,7 @@
 import { GRAPH_CONFIG } from '@/consts'
 import type { D3GraphLink, D3GraphNode } from '@/types'
 import { zoomIdentity, type ZoomTransform } from 'd3-zoom'
+import { buildGraphData, type RawGraphData } from './data'
 import type { PhysicsController } from './physics'
 import { renderGraph } from './renderer'
 import { setupPhysics } from './physics'
@@ -33,6 +34,9 @@ export class GraphViewManager {
 
   private interactionCleanup: (() => void) | null = null
 
+  private abortController = new AbortController()
+  private destroyed = false
+
   constructor(containerId: string, canvasId: string) {
     this.container = document.getElementById(containerId) as HTMLDivElement
     this.canvas = document.getElementById(canvasId) as HTMLCanvasElement
@@ -51,8 +55,15 @@ export class GraphViewManager {
 
     this.initThemeDetection()
     this.fetchData()
-      .then(() => this.initVisualization())
-      .catch((err) => console.error('Graph initialization failed:', err))
+      .then(() => {
+        if (this.destroyed) return
+        this.initVisualization()
+      })
+      .catch((err) => {
+        if (!this.destroyed) {
+          console.error('Graph initialization failed:', err)
+        }
+      })
   }
 
   private initThemeDetection() {
@@ -73,101 +84,14 @@ export class GraphViewManager {
 
   private async fetchData() {
     const endpoint = '/graph.json'
-    const res = await fetch(endpoint)
+    const res = await fetch(endpoint, { signal: this.abortController.signal })
     if (!res.ok)
       throw new Error(`HTTP ${res.status}: Failed to fetch ${endpoint}`)
-    const fetchedData: { nodes: D3GraphNode[]; links: D3GraphLink[] } =
-      await res.json()
-
-    const seenIds = new Set<string>()
-    const nodes: D3GraphNode[] = []
-
-    fetchedData.nodes.forEach((n) => {
-      if (!n.id || seenIds.has(n.id)) return
-      seenIds.add(n.id)
-      nodes.push({ ...n, val: 5, degree: 0 })
-    })
-
-    const nodeMap = new Map<string, D3GraphNode>(nodes.map((n) => [n.id, n]))
-    const links: D3GraphLink[] = []
-
-    let categoryIdx = 0
-    const tagToCategory = new Map<string, number>()
-    const linkMap = new Map<string, D3GraphLink>()
-
-    fetchedData.links.forEach((l) => {
-      const sourceId = typeof l.source === 'object' ? l.source.id : l.source
-      const targetId = typeof l.target === 'object' ? l.target.id : l.target
-
-      if (nodeMap.has(sourceId) && nodeMap.has(targetId)) {
-        const s = nodeMap.get(sourceId)!
-        const t = nodeMap.get(targetId)!
-
-        const reverseKey = `${targetId}->${sourceId}`
-        const reverseLink = linkMap.get(reverseKey)
-
-        if (reverseLink) {
-          reverseLink.isBidirectional = true
-          links.push({
-            ...l,
-            source: s,
-            target: t,
-            isReverse: true,
-          })
-        } else {
-          const newLink: D3GraphLink = {
-            ...l,
-            source: s,
-            target: t,
-            isBidirectional: false,
-          }
-          linkMap.set(`${sourceId}->${targetId}`, newLink)
-          links.push(newLink)
-        }
-
-        s.degree = (s.degree || 0) + 1
-        t.degree = (t.degree || 0) + 1
-      }
-    })
-
-    nodes.forEach((n) => {
-      if (n.group === 'tag') {
-        tagToCategory.set(
-          n.id,
-          categoryIdx % GRAPH_CONFIG.theme.palettes.dark.length,
-        )
-        n.category = categoryIdx % GRAPH_CONFIG.theme.palettes.dark.length
-        categoryIdx++
-      }
-    })
-
-    const nodeToTag = new Map<string, string>()
-    links.forEach((l) => {
-      const sId = typeof l.source === 'object' ? l.source.id : String(l.source)
-      const tId = typeof l.target === 'object' ? l.target.id : String(l.target)
-      if (nodeMap.get(tId)?.group === 'tag' && !nodeToTag.has(sId)) {
-        nodeToTag.set(sId, tId)
-      } else if (nodeMap.get(sId)?.group === 'tag' && !nodeToTag.has(tId)) {
-        nodeToTag.set(tId, sId)
-      }
-    })
-
-    nodes.forEach((n) => {
-      if (n.group === 'post') {
-        const tagId = nodeToTag.get(n.id)
-        if (tagId) n.category = tagToCategory.get(tagId)
-      }
-    })
+    const raw: RawGraphData = await res.json()
 
     const initialX = this.container.clientWidth / 2 || window.innerWidth / 2
     const initialY = this.container.clientHeight / 2 || window.innerHeight / 2
-    const { initialRadius } = GRAPH_CONFIG.physics
-    nodes.forEach((n) => {
-      n.x = initialX + (Math.random() - 0.5) * initialRadius
-      n.y = initialY + (Math.random() - 0.5) * initialRadius
-    })
-
-    this.data = { nodes, links }
+    this.data = buildGraphData(raw, { x: initialX, y: initialY })
 
     this.fadeInTimeoutId = setTimeout(() => {
       this.fadeInTimeoutId = null
@@ -189,12 +113,17 @@ export class GraphViewManager {
   }
 
   private initVisualization() {
-    if (!this.data || !this.ctx) return
+    if (this.destroyed || !this.data || !this.ctx) return
 
     this.updateCanvasSize()
     const { width, height } = this.size
 
+    // Empty graph: nothing to simulate or interact with
+    if (!this.data.nodes.length) return
+
     // Physics
+    const reducedMotion =
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
     this.physicsController = setupPhysics(
       this.data.nodes,
       this.data.links,
@@ -214,14 +143,23 @@ export class GraphViewManager {
         }
         this.scheduleRender()
       },
+      reducedMotion,
     )
 
-    // Resize Observer
+    // Resize Observer: keep the canvas and the force center in sync
     this.resizeObserver = new ResizeObserver(() => {
       this.updateCanvasSize()
+      this.physicsController?.resize(this.size.width, this.size.height)
       this.scheduleRender()
     })
     this.resizeObserver.observe(this.container)
+
+    // Pause the simulation while the tab is hidden
+    document.addEventListener(
+      'visibilitychange',
+      () => this.physicsController?.setVisible(!document.hidden),
+      { signal: this.abortController.signal },
+    )
 
     // Interaction
     const { cleanup, getInitialTransform } = setupInteraction(
@@ -318,18 +256,33 @@ export class GraphViewManager {
     if (target.group === 'post') {
       window.location.href = `/blog/${target.id}`
     } else if (target.group === 'tag') {
-      window.location.href = `/blog?tag=${encodeURIComponent(target.id.replace(/^tag-/, ''))}`
+      window.location.href = `/tags/${encodeURIComponent(target.id.replace(/^tag-/, ''))}/`
     }
   }
 
   public destroy() {
+    if (this.destroyed) return
+    this.destroyed = true
+    this.abortController.abort()
+
     this.resizeObserver?.disconnect()
     this.styleObserver?.disconnect()
     this.themeObserver?.disconnect()
+
     if (this.interactionCleanup) this.interactionCleanup()
-    if (this.animationFrameId !== null)
+    this.interactionCleanup = null
+
+    if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId)
-    if (this.fadeInTimeoutId !== null) clearTimeout(this.fadeInTimeoutId)
+      this.animationFrameId = null
+    }
+    if (this.fadeInTimeoutId !== null) {
+      clearTimeout(this.fadeInTimeoutId)
+      this.fadeInTimeoutId = null
+    }
+
     this.physicsController?.destroy()
+    this.physicsController = null
+    this.data = null
   }
 }

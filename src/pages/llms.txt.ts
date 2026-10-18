@@ -45,8 +45,7 @@ export const GET: APIRoute = async ({ site }) => {
   if (authors.length > 0) {
     content += `## Authors\n\n`
     authors.forEach((author) => {
-      content += `- [${author.data.name}](${new URL(`/authors/${author.id}`, site)})
-`
+      content += `- ${author.data.name}\n`
     })
   }
 

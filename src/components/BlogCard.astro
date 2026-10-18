@@ -2,13 +2,14 @@
 import Separator from '@/components/Separator.astro'
 import { ICONS } from '@/consts'
 import {
+  formatReadingTime,
   getCombinedReadingTime,
   getSubpostCount,
   isSubpost,
+  normalizeImage,
   parseAuthors,
-  formatReadingTime,
 } from '@/lib/data-utils'
-import { formatDate } from '@/lib/utils'
+import { formatDate, pluralize } from '@/lib/utils'
 import { Icon } from 'astro-icon/components'
 import { Image } from 'astro:assets'
 import type { CollectionEntry } from 'astro:content'
@@ -23,11 +24,10 @@ const readTimeMinutes = await getCombinedReadingTime(entry.id)
 const readTime = formatReadingTime(readTimeMinutes)
 const authors = await parseAuthors(entry.data.authors ?? [])
 const subpostCount = !isSubpost(entry) ? await getSubpostCount(entry.id) : 0
+const entryImage = normalizeImage(entry.data.image)
 ---
 
-<div
-  class="group relative overflow-hidden rounded-xl border border-border/60 bg-card/60 p-4 transition-all duration-300 hover:border-primary/40 hover:bg-card hover:shadow-sm dark:bg-transparent dark:hover:bg-muted/30"
->
+<div class="card group">
   <div
     class="from-primary/0 via-primary/0 to-primary/0 group-hover:from-primary/5 absolute inset-0 -z-10 bg-gradient-to-br opacity-0 transition-opacity duration-500 group-hover:to-purple-500/5 group-hover:opacity-100"
   >
@@ -37,10 +37,10 @@ const subpostCount = !isSubpost(entry) ? await getSubpostCount(entry.id) : 0
       <span class="sr-only">Read {entry.data.title}</span>
     </a>
     {
-      entry.data.image && (
+      entryImage && (
         <div class="aspect-[1200/630] w-full overflow-hidden rounded-lg sm:max-w-3xs sm:shrink-0 sm:self-start">
           <Image
-            src={entry.data.image}
+            src={entryImage}
             alt={entry.data.title}
             widths={[400, 800, 1200]}
             sizes="(max-width: 640px) 400px, (max-width: 1024px) 800px, 1200px"
@@ -87,7 +87,7 @@ const subpostCount = !isSubpost(entry) ? await getSubpostCount(entry.id) : 0
               <Separator orientation="vertical" class="h-4!" />
               <span class="flex items-center gap-1">
                 <Icon name={ICONS.fileText} class="size-3" />
-                {subpostCount} subpost{subpostCount === 1 ? '' : 's'}
+                {subpostCount} {pluralize(subpostCount, 'subpost')}
               </span>
             </>
           )

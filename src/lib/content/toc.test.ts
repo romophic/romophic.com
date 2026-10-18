@@ -73,8 +73,6 @@ describe('TOC Generation Specification', () => {
       expect(sections[1].type).toBe('subpost')
       expect(sections[1].title).toBe('Child 1')
       expect(sections[1].headings).toHaveLength(2)
-      expect(sections[1].headings[0].isSubpostTitle).toBe(true) // The first heading is marked as the subpost title
-      expect(sections[1].headings[1].isSubpostTitle).toBe(false)
     })
 
     it('should resolve TOC starting from the parent even when requested from a subpost', async () => {

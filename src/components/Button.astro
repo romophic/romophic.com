@@ -2,12 +2,7 @@
 import type { HTMLAttributes } from 'astro/types'
 
 type Variant =
-  | 'default'
-  | 'destructive'
-  | 'outline'
-  | 'muted'
-  | 'ghost'
-  | 'link'
+  'default' | 'destructive' | 'outline' | 'muted' | 'ghost' | 'link'
 type Size = 'default' | 'sm' | 'lg' | 'icon'
 
 interface Props extends HTMLAttributes<'button'> {
@@ -60,7 +55,6 @@ const Element = Tag as any
 ---
 
 <Element
-  data-slot="button"
   type={type}
   class={getButtonStyles({ variant, size, class: className })}
   {...props}

@@ -129,9 +129,43 @@ describe('PageHead.astro', () => {
       props: { post: mockPost },
     })
 
-    // Should fallback to default image
+    // Should fallback to the generated default OG image
     expect(html).toContain(
-      '<meta property="og:image" content="https://romophic.com/static/1200x630.png">',
+      '<meta property="og:image" content="https://romophic.com/og/default.png">',
     )
+  })
+
+  it('exposes the twitter image via name (not property) and escapes JSON-LD', async () => {
+    const container = await AstroContainer.create()
+    const request = new Request('https://romophic.com/blog/test3')
+
+    const mockPost = {
+      id: 'test-post-escape',
+      collection: 'blog',
+      data: {
+        title: '</script><script>alert(1)</script>',
+        date: new Date('2024-01-01T00:00:00Z'),
+      },
+    } as any
+
+    const html = await container.renderToString(PageHead, {
+      request,
+      props: { post: mockPost },
+    })
+
+    // twitter:image must be a name meta tag for crawlers to pick it up
+    expect(html).toContain('<meta name="twitter:image"')
+    expect(html).not.toContain('property="twitter:image"')
+
+    // The embedded JSON-LD must not be able to close the script tag:
+    // every JSON-LD payload parses as JSON and contains no raw "<"
+    const ldBlocks = [
+      ...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/g),
+    ]
+    expect(ldBlocks).toHaveLength(2)
+    for (const block of ldBlocks) {
+      expect(block[1]).not.toContain('<')
+      expect(() => JSON.parse(block[1])).not.toThrow()
+    }
   })
 })

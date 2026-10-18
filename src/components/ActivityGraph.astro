@@ -1,5 +1,6 @@
 ---
 import { getAllPosts } from '@/lib/data-utils'
+import { dateKey } from '@/lib/utils'
 import type { CollectionEntry } from 'astro:content'
 
 const INTENSITY_COLORS = [
@@ -18,24 +19,19 @@ function getIntensityColor(level: number) {
 
 const posts = await getAllPosts()
 
-// 1. Create a map of date string (YYYY-MM-DD) -> count
+// 1. Create a map of JST date string (YYYY-MM-DD) -> count
 const activityMap = new Map<string, number>()
 posts.forEach((post: CollectionEntry<'blog'>) => {
-  const dateObj = post.data.date
-  const dateStr = dateObj.toISOString().split('T')[0]
+  const dateStr = dateKey(post.data.date)
   activityMap.set(dateStr, (activityMap.get(dateStr) || 0) + 1)
 })
 
-// 2. Generate the last 365 days
-const today = new Date()
+// 2. Generate the last 365 days, anchored to today's JST calendar date
+const today = new Date(`${dateKey(new Date())}T00:00:00Z`)
 const days = []
-// Start from 52 weeks ago (approx 1 year) to align weeks nicely, or just 365 days.
-// GitHub usually shows exactly 1 year or 52-53 weeks.
-// Let's aim for 52 full columns + current partial week.
-// To keep it simple, let's just generate the last 365 days.
 for (let i = 364; i >= 0; i--) {
   const d = new Date(today)
-  d.setDate(d.getDate() - i)
+  d.setUTCDate(d.getUTCDate() - i)
   days.push(d)
 }
 
@@ -63,7 +59,7 @@ const getLevel = (count: number) => {
       <div class="grid w-fit grid-flow-col grid-rows-7 gap-1">
         {
           days.map((date) => {
-            const dateStr = date.toISOString().split('T')[0]
+            const dateStr = dateKey(date)
             const count = activityMap.get(dateStr) || 0
             const level = getLevel(count)
 

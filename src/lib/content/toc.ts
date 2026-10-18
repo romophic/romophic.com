@@ -38,11 +38,10 @@ export async function getTOCSections(postId: string): Promise<TOCSection[]> {
       sections.push({
         type: 'subpost',
         title: subpost.data.title,
-        headings: subpostHeadings.map((heading, index) => ({
+        headings: subpostHeadings.map((heading) => ({
           slug: heading.slug,
           text: heading.text,
           depth: heading.depth,
-          isSubpostTitle: index === 0,
         })),
         subpostId: subpost.id,
       })

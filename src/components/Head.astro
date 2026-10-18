@@ -2,6 +2,7 @@
 import AppScript from '@/components/AppScript.astro'
 import Favicons from '@/components/Favicons.astro'
 import { SITE } from '@/consts'
+import { Font } from 'astro:assets'
 import { ClientRouter } from 'astro:transitions'
 ---
 
@@ -39,6 +40,7 @@ import { ClientRouter } from 'astro:transitions'
     href={new URL('rss.xml', Astro.site ?? Astro.url)}
   />
 
+  <Font cssVariable="--font-noto-sans-jp" />
   <Favicons />
   <AppScript />
   <ClientRouter />

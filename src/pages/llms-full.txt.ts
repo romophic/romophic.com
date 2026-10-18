@@ -1,5 +1,6 @@
 import { SITE } from '@/consts'
 import { getAllPosts } from '@/lib/data-utils'
+import { dateKey } from '@/lib/utils'
 import type { APIRoute } from 'astro'
 
 export const GET: APIRoute = async ({ site }) => {
@@ -23,7 +24,7 @@ export const GET: APIRoute = async ({ site }) => {
     content += `\n\n`
     content += `# ${post.data.title}\n`
     content += `ID: ${post.id}\n` // Anchor for TOC
-    content += `Date: ${post.data.date.toISOString().split('T')[0]}\n`
+    content += `Date: ${dateKey(post.data.date)}\n`
     content += `URL: ${new URL(`/blog/${post.id}`, site)}\n`
     if (post.data.description) {
       content += `Description: ${post.data.description}\n`

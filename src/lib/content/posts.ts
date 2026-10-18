@@ -1,7 +1,17 @@
-import { getCollection, getEntry, type CollectionEntry } from 'astro:content'
+import { getCollection, type CollectionEntry } from 'astro:content'
+import { dateKey } from '@/lib/utils'
 
 // Module-level cache: getCollection is only called once per build
 let _cache: CollectionEntry<'blog'>[] | null = null
+
+/**
+ * Strips the trailing /index suffix from a collection entry ID.
+ * The single source of truth for ID normalization: every consumer
+ * (posts, links, graph) must go through this function.
+ */
+export function normalizePostId(id: string): string {
+  return id.endsWith('/index') ? id.replace(/\/index$/, '') : id
+}
 
 /**
  * Get all posts, normalizing IDs.
@@ -13,14 +23,17 @@ export async function getNormalizedPosts(): Promise<CollectionEntry<'blog'>[]> {
   const rawPosts = await getCollection('blog', ({ data }) => !data.draft)
   _cache = rawPosts.map((post) => ({
     ...post,
-    id: post.id.replace(/\/index$/, ''),
+    id: normalizePostId(post.id),
   }))
   return _cache
 }
 
 export async function getAllPosts(): Promise<CollectionEntry<'blog'>[]> {
   const posts = await getNormalizedPosts()
-  return [...posts].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  return [...posts].sort(
+    (a, b) =>
+      b.data.date.valueOf() - a.data.date.valueOf() || a.id.localeCompare(b.id),
+  )
 }
 
 export async function getAllProjects(): Promise<CollectionEntry<'projects'>[]> {
@@ -37,7 +50,7 @@ export function isSubpost(post: CollectionEntry<'blog'>): boolean {
 }
 
 export function getParentId(post: CollectionEntry<'blog'>): string {
-  if (post.data.parent) return post.data.parent.id.replace(/\/index$/, '')
+  if (post.data.parent) return normalizePostId(post.data.parent.id)
   if (post.id.includes('/')) return post.id.split('/')[0]
   return ''
 }
@@ -54,14 +67,14 @@ export async function getSubpostsForParent(
 ): Promise<CollectionEntry<'blog'>[]> {
   const posts = await getNormalizedPosts()
   return posts
-    .filter(
-      (post) =>
-        isSubpost(post) && getParentId(post) === parentId,
-    )
+    .filter((post) => isSubpost(post) && getParentId(post) === parentId)
     .sort((a, b) => {
       const orderDiff = (a.data.order ?? 0) - (b.data.order ?? 0)
       if (orderDiff !== 0) return orderDiff
-      return a.data.date.valueOf() - b.data.date.valueOf()
+      return (
+        a.data.date.valueOf() - b.data.date.valueOf() ||
+        a.id.localeCompare(b.id)
+      )
     })
 }
 
@@ -143,7 +156,7 @@ export function groupPostsByYear(
 ): Record<string, CollectionEntry<'blog'>[]> {
   return posts.reduce(
     (acc: Record<string, CollectionEntry<'blog'>[]>, post) => {
-      const year = post.data.date.getFullYear().toString()
+      const year = dateKey(post.data.date).slice(0, 4)
       ;(acc[year] ??= []).push(post)
       return acc
     },
@@ -162,13 +175,9 @@ export async function getParentPost(
   const post = await getPostById(subpostId)
   if (!post) return null
   if (post.data.parent) {
-    const parentEntry = await getEntry(post.data.parent)
-    if (parentEntry) {
-      return {
-        ...parentEntry,
-        id: parentEntry.id.replace(/\/index$/, ''),
-      }
-    }
+    // Resolve through getPostById so a draft parent never leaks out.
+    const parent = await getPostById(normalizePostId(post.data.parent.id))
+    if (parent) return parent
   }
   const parentId = getParentId(post)
   if (!parentId) return null
@@ -219,7 +228,6 @@ export async function getCombinedReadingTime(
   return Math.max(1, totalMinutes)
 }
 
-export function getOgImageSlug(postId: string, isParent: boolean): string {
-  const finalSlug = isParent ? `${postId}/index` : postId
-  return finalSlug.replaceAll('/', '-')
+export function getOgImageSlug(postId: string): string {
+  return postId.replaceAll('/', '-')
 }

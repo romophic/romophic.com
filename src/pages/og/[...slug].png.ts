@@ -10,18 +10,14 @@ import satori, { type SatoriNode } from 'satori'
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => !data.draft)
-  const parentIds = new Set(
-    posts.map((p) => p.data.parent?.id).filter(Boolean) as string[],
-  )
 
-  return posts.map((post) => {
-    const slug = getOgImageSlug(post.id, parentIds.has(post.id))
-
-    return {
-      params: { slug },
+  return [
+    ...posts.map((post) => ({
+      params: { slug: getOgImageSlug(post.id) },
       props: { post },
-    }
-  })
+    })),
+    { params: { slug: 'default' }, props: {} },
+  ]
 }
 
 // In-memory cache for the font data.
@@ -129,19 +125,29 @@ async function saveCachedImage(
 export const GET = async ({
   props,
 }: {
-  props: { post: CollectionEntry<'blog'> }
+  props: { post?: CollectionEntry<'blog'> }
 }) => {
   const { post } = props
+  const cacheKey = post?.id ?? 'default'
+  const title = post?.data.title ?? SITE.description
+  const footerText = post
+    ? post.data.date.toLocaleDateString('en-US', {
+        timeZone: 'Asia/Tokyo',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : SITE.href.replace(/^https?:\/\//, '')
 
   const hashKey = JSON.stringify({
-    title: post.data.title,
-    date: post.data.date.toISOString(),
+    title,
+    date: post?.data.date.toISOString(),
     siteTitle: SITE.title,
     version: SITE.version ?? '1', // Cache buster: update via SITE config
   })
 
   // Try cache
-  const cachedBuffer = await getCachedImage(post.id, hashKey)
+  const cachedBuffer = await getCachedImage(cacheKey, hashKey)
   if (cachedBuffer) {
     return new Response(new Uint8Array(cachedBuffer), {
       headers: {
@@ -216,7 +222,7 @@ export const GET = async ({
                 lineHeight: 1.2,
                 fontFamily: 'Noto Sans JP, Inter',
               },
-              children: post.data.title,
+              children: title,
             },
           },
           {
@@ -233,12 +239,12 @@ export const GET = async ({
                 {
                   type: 'div',
                   props: {
-                    style: { fontSize: '24px', opacity: 0.8 },
-                    children: post.data.date.toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    }),
+                    style: {
+                      fontSize: '24px',
+                      opacity: 0.8,
+                      maxWidth: '1000px',
+                    },
+                    children: footerText,
                   },
                 },
               ],
@@ -258,7 +264,7 @@ export const GET = async ({
   const pngData = resvg.render()
   const pngBuffer = pngData.asPng()
 
-  await saveCachedImage(post.id, hashKey, new Uint8Array(pngBuffer))
+  await saveCachedImage(cacheKey, hashKey, new Uint8Array(pngBuffer))
 
   return new Response(new Uint8Array(pngBuffer), {
     headers: {

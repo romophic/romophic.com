@@ -15,5 +15,8 @@ describe('404.astro', () => {
     // Check for buttons
     expect(html).toContain('Go Home')
     expect(html).toContain('href="/"')
+
+    // The 404 page must not be indexed by search engines
+    expect(html).toContain('<meta name="robots" content="noindex, nofollow">')
   })
 })

@@ -1,25 +1,33 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
   resolveLinkToId,
-  normalizeId,
   extractInternalLinks,
   getBacklinks,
   _resetBacklinksCache,
 } from './links'
+import { normalizePostId } from './posts'
 import type { CollectionEntry } from 'astro:content'
 
-vi.mock('./posts', () => ({
-  getAllPosts: vi.fn().mockResolvedValue([
-    {
-      id: 'post-1',
-      data: {},
-      body: 'Here is a [link](/blog/target-post) and another [rel](./relative-post) and a [dup](/blog/target-post)',
-    },
-    { id: 'post-2', data: {}, body: 'Link to [target](/blog/target-post)' },
-    { id: 'self-linker', data: {}, body: 'Link to [self](/blog/self-linker)' },
-    { id: 'target-post', data: {}, body: 'No links here' },
-  ]),
-}))
+vi.mock('./posts', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('./posts')>()
+  return {
+    ...actual,
+    getAllPosts: vi.fn().mockResolvedValue([
+      {
+        id: 'post-1',
+        data: {},
+        body: 'Here is a [link](/blog/target-post) and another [rel](./relative-post) and a [dup](/blog/target-post)',
+      },
+      { id: 'post-2', data: {}, body: 'Link to [target](/blog/target-post)' },
+      {
+        id: 'self-linker',
+        data: {},
+        body: 'Link to [self](/blog/self-linker)',
+      },
+      { id: 'target-post', data: {}, body: 'No links here' },
+    ]),
+  }
+})
 
 describe('Links Utils Specification', () => {
   beforeEach(() => {
@@ -62,12 +70,12 @@ describe('Links Utils Specification', () => {
     })
   })
 
-  describe('normalizeId', () => {
+  describe('normalizePostId', () => {
     it('strips /index suffix', () => {
-      expect(normalizeId('romophic-library/index')).toBe('romophic-library')
+      expect(normalizePostId('romophic-library/index')).toBe('romophic-library')
     })
     it('leaves non-index ids unchanged', () => {
-      expect(normalizeId('my-post')).toBe('my-post')
+      expect(normalizePostId('my-post')).toBe('my-post')
     })
   })
 
@@ -88,6 +96,46 @@ describe('Links Utils Specification', () => {
       const mockPost = { id: 'target-post' } as CollectionEntry<'blog'>
       const targets = await extractInternalLinks(mockPost)
       expect(targets).toHaveLength(0)
+    })
+
+    it('should ignore markdown images so image paths never become backlinks', async () => {
+      const mockPost = {
+        id: 'post-1',
+        body: '![diagram](./images/graph.png) and a real [link](./relative-post)',
+      } as CollectionEntry<'blog'>
+      const targets = await extractInternalLinks(mockPost)
+
+      expect(targets).toEqual(['relative-post'])
+    })
+
+    it('should ignore link-like text inside inline code spans', async () => {
+      const mockPost = {
+        id: 'post-1',
+        body: 'Write `[x](./fake)` in code, but [real](./relative-post) is a link',
+      } as CollectionEntry<'blog'>
+      const targets = await extractInternalLinks(mockPost)
+
+      expect(targets).toEqual(['relative-post'])
+    })
+
+    it('should ignore links inside fenced code blocks', async () => {
+      const mockPost = {
+        id: 'post-1',
+        body: '```md\n[fake](./nope)\n```\n\n[real](./relative-post)',
+      } as CollectionEntry<'blog'>
+      const targets = await extractInternalLinks(mockPost)
+
+      expect(targets).toEqual(['relative-post'])
+    })
+
+    it('should normalize /index targets to the parent directory id', async () => {
+      const mockPost = {
+        id: 'post-1',
+        body: '[root](./romophic-library/index)',
+      } as CollectionEntry<'blog'>
+      const targets = await extractInternalLinks(mockPost)
+
+      expect(targets).toEqual(['romophic-library'])
     })
   })
 

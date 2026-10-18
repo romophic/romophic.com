@@ -1,6 +1,7 @@
 ---
 import TechBadge from '@/components/TechBadge.astro'
 import { ICONS } from '@/consts'
+import { normalizeImage } from '@/lib/data-utils'
 import { formatDate } from '@/lib/utils'
 import { Icon } from 'astro-icon/components'
 import { Image } from 'astro:assets'
@@ -11,11 +12,10 @@ interface Props {
 }
 
 const { project } = Astro.props
+const projectImage = normalizeImage(project.data.image)
 ---
 
-<div
-  class="group relative overflow-hidden rounded-xl border border-border/60 bg-card/60 p-4 transition-all duration-300 ease-in-out hover:border-primary/40 hover:bg-card hover:shadow-sm dark:bg-transparent dark:hover:bg-muted/30"
->
+<div class="card group ease-in-out">
   <a
     href={project.data.link}
     class="flex flex-col gap-4 sm:flex-row"
@@ -23,10 +23,10 @@ const { project } = Astro.props
     rel="noopener noreferrer"
   >
     {
-      project.data.image && (
+      projectImage && (
         <div class="w-20 shrink-0 sm:w-32">
           <Image
-            src={project.data.image}
+            src={projectImage}
             alt={project.data.name}
             widths={[80, 128, 400]}
             sizes="(max-width: 640px) 80px, 128px"

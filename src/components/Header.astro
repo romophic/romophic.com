@@ -4,6 +4,11 @@ import { ICONS, NAV_LINKS, SITE } from '@/consts'
 import { Icon } from 'astro-icon/components'
 
 const currentPath = Astro.url.pathname
+
+const isActivePath = (href: string) =>
+  href === '/'
+    ? currentPath === '/'
+    : currentPath === href || currentPath.startsWith(`${href}/`)
 ---
 
 <div>
@@ -23,9 +28,7 @@ const currentPath = Astro.url.pathname
             <a
               href={item.href}
               class="text-foreground/60 hover:text-foreground capitalize transition-colors"
-              aria-current={
-                currentPath.startsWith(item.href) ? 'page' : undefined
-              }
+              aria-current={isActivePath(item.href) ? 'page' : undefined}
             >
               {item.label.toLowerCase()}
             </a>

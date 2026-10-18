@@ -3,6 +3,7 @@ import type { D3GraphLink, D3GraphNode } from '@/types'
 import { drag } from 'd3-drag'
 import { select } from 'd3-selection'
 import { zoom, zoomIdentity, type ZoomTransform } from 'd3-zoom'
+import { findNodeAt, hitRadiusForZoom } from './geometry'
 import type { PhysicsController } from './physics'
 
 export const EMPTY_SET: ReadonlySet<string> = new Set()
@@ -49,22 +50,15 @@ export function setupInteraction(
   let hoverNode: D3GraphNode | null = null
 
   if (fullInteraction) {
-    const zoomHandler = zoom<HTMLCanvasElement, unknown>()
-      .scaleExtent(GRAPH_CONFIG.interaction.zoomExtent)
-      .on('zoom', (event) => {
-        currentTransform = event.transform
-        onTransform(currentTransform)
-      })
-
-    select(canvas)
-      .call(zoomHandler)
-      .call(zoomHandler.transform, initialTransform)
-
     const dragHandler = drag<HTMLCanvasElement, unknown>()
       .subject((event) => {
         const x = currentTransform.invertX(event.x)
         const y = currentTransform.invertY(event.y)
-        return nodes.find((n) => Math.hypot(n.x! - x, n.y! - y) < 20)
+        const radius = hitRadiusForZoom(
+          GRAPH_CONFIG.interaction.hitRadius,
+          currentTransform.k,
+        )
+        return findNodeAt(nodes, x, y, radius)
       })
       .on('start', (event) => {
         if (!event.active && physicsController) {
@@ -99,7 +93,21 @@ export function setupInteraction(
         physicsController?.updateNode(event.subject.id, null, null)
       })
 
+    // Register drag before zoom: d3-zoom stops mousedown propagation, so a
+    // node drag must claim the event first. When no node is hit, d3-drag
+    // bails out without eating the event, letting zoom handle panning.
     select(canvas).call(dragHandler)
+
+    const zoomHandler = zoom<HTMLCanvasElement, unknown>()
+      .scaleExtent(GRAPH_CONFIG.interaction.zoomExtent)
+      .on('zoom', (event) => {
+        currentTransform = event.transform
+        onTransform(currentTransform)
+      })
+
+    select(canvas)
+      .call(zoomHandler)
+      .call(zoomHandler.transform, initialTransform)
   } else {
     // If not full interaction, just set initial transform manually
     currentTransform = initialTransform
@@ -110,14 +118,13 @@ export function setupInteraction(
     const x = currentTransform.invertX(e.offsetX)
     const y = currentTransform.invertY(e.offsetY)
 
-    const hovered =
-      nodes.find((node) => {
-        if (node.x === undefined || node.y === undefined) return false
-        return (
-          Math.hypot(node.x - x, node.y - y) <
-          GRAPH_CONFIG.interaction.hitRadius
-        )
-      }) || null
+    // Hover and drag share the same screen-constant hit radius.
+    const hovered = findNodeAt(
+      nodes,
+      x,
+      y,
+      hitRadiusForZoom(GRAPH_CONFIG.interaction.hitRadius, currentTransform.k),
+    )
 
     if (hovered?.id !== hoverNode?.id) {
       hoverNode = hovered

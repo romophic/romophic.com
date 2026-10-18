@@ -95,6 +95,9 @@ const { headings } = Astro.props
       const PROGRESS_CIRCLE_CIRCUMFERENCE = 2 * Math.PI * PROGRESS_CIRCLE_RADIUS
 
       class MobileTOC extends HTMLElement {
+        private onScroll: (() => void) | null = null
+        private observer: IntersectionObserver | null = null
+
         connectedCallback() {
           const progressCircle = this.querySelector(
             '#mobile-toc-progress-circle',
@@ -113,29 +116,23 @@ const { headings } = Astro.props
           }
 
           // Progress circle update
-          window.addEventListener(
-            'scroll',
-            () => {
-              if (!progressCircle) return
-              const scrollProgress =
-                document.documentElement.scrollTop || document.body.scrollTop
-              const scrollableDistance =
-                document.documentElement.scrollHeight -
-                document.documentElement.clientHeight
-              const progress =
-                scrollableDistance > 0
-                  ? Math.min(
-                      Math.max(scrollProgress / scrollableDistance, 0),
-                      1,
-                    )
-                  : 0
-              progressCircle.style.strokeDashoffset = (
-                PROGRESS_CIRCLE_CIRCUMFERENCE -
-                progress * PROGRESS_CIRCLE_CIRCUMFERENCE
-              ).toString()
-            },
-            { passive: true },
-          )
+          this.onScroll = () => {
+            if (!progressCircle) return
+            const scrollProgress =
+              document.documentElement.scrollTop || document.body.scrollTop
+            const scrollableDistance =
+              document.documentElement.scrollHeight -
+              document.documentElement.clientHeight
+            const progress =
+              scrollableDistance > 0
+                ? Math.min(Math.max(scrollProgress / scrollableDistance, 0), 1)
+                : 0
+            progressCircle.style.strokeDashoffset = (
+              PROGRESS_CIRCLE_CIRCUMFERENCE -
+              progress * PROGRESS_CIRCLE_CIRCUMFERENCE
+            ).toString()
+          }
+          window.addEventListener('scroll', this.onScroll, { passive: true })
 
           // Close on link click
           this.querySelectorAll('a').forEach((link) => {
@@ -145,7 +142,7 @@ const { headings } = Astro.props
           })
 
           // Intersection Observer for active heading
-          const observer = new IntersectionObserver(
+          this.observer = new IntersectionObserver(
             (entries) => {
               entries.forEach((entry) => {
                 if (!entry.isIntersecting) return
@@ -186,7 +183,16 @@ const { headings } = Astro.props
             .querySelectorAll(
               '.prose h2, .prose h3, .prose h4, .prose h5, .prose h6',
             )
-            .forEach((el) => observer.observe(el))
+            .forEach((el) => this.observer?.observe(el))
+        }
+
+        disconnectedCallback() {
+          if (this.onScroll) {
+            window.removeEventListener('scroll', this.onScroll)
+            this.onScroll = null
+          }
+          this.observer?.disconnect()
+          this.observer = null
         }
       }
 

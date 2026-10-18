@@ -54,6 +54,11 @@ export const ICON_MAP = {
   RSS: 'lucide:rss',
 } as const satisfies Record<string, string>
 
+/** Maps a social link label to its icon name, falling back to a generic link. */
+export function getSocialIcon(label: string): string {
+  return (ICON_MAP as Record<string, string>)[label] ?? ICONS.link
+}
+
 export const GISCUS_CONFIG = {
   repo: 'romophic/romophic.com',
   repoId: 'R_kgDOQil8lA',
@@ -76,7 +81,6 @@ export const GRAPH_CONFIG = {
     collideRadius: 15,
     initialRadius: 10,
     alphaTarget: 0.3,
-    velocityDecay: 0.1,
   },
   theme: {
     dark: {
