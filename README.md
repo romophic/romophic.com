@@ -1,15 +1,15 @@
 # romophic.com
 
-A minimalist, high-performance technical blog and personal portfolio. Built with Astro v6, emphasizing extreme maintainability, zero-runtime CSS, and a completely native Astro Collections architecture.
+A minimalist, high-performance technical blog and personal portfolio. Built with Astro v7, emphasizing extreme maintainability, zero-runtime CSS, and a completely native Astro Collections architecture.
 
-![Astro](https://img.shields.io/badge/Astro-v6-orange?style=flat-square&logo=astro)
+![Astro](https://img.shields.io/badge/Astro-v7-orange?style=flat-square&logo=astro)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue?style=flat-square&logo=typescript)
 
 ## ✨ Features
 
-- **⚡️ Pure Astro v6 Architecture**
+- **⚡️ Pure Astro v7 Architecture**
   - **Native Content Collections**: Fully leverages Astro's `reference()` for defining robust, type-safe relationships between authors, parent posts, and subposts.
-  - **Build-Time AST Parsing**: Custom remark plugins (`unist-util-visit`) safely extract internal links and reading times at build time, eliminating fragile regex and reducing runtime overhead.
+  - **Build-Time Content Analysis**: Internal links and reading times are computed once at build time in plain TypeScript (code blocks stripped), so backlinks and the graph need no runtime work.
   - **Zero-runtime CSS** via Tailwind v4.
 
 - **🕸 Interactive Knowledge Graph**
@@ -45,7 +45,13 @@ pnpm install
 # Start development server
 pnpm dev
 
-# Build for production
+# Run tests (Vitest)
+pnpm test:run
+
+# Type check
+pnpm typecheck
+
+# Build for production (includes type check + Pagefind index)
 pnpm build
 ```
 

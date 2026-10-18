@@ -1,0 +1,1521 @@
+<!doctype html>
+<html lang="ja" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>romophic.com の仕組み — 触れる設計図</title>
+<meta name="description" content="romophic.com がどう動いているかを、図と動くデモで理解する単一ファイルのドキュメント。">
+<style>
+  :root {
+    --bg: #f6f6f8;
+    --panel: #ffffff;
+    --panel-soft: #fafafc;
+    --border: #e4e4e7;
+    --border-strong: #d4d4d8;
+    --text: #18181b;
+    --muted: #6f6f7a;
+    --faint: #9a9aa4;
+    --accent: #a855f7;
+    --accent-ink: #7e22ce;
+    --accent-soft: #f5ecfe;
+    --ok: #059669;
+    --ok-soft: #e6f6f0;
+    --warn: #b45309;
+    --warn-soft: #fdf3e3;
+    --red: #dc2626;
+    --code-bg: #101114;
+    --code-text: #e5e7eb;
+    --code-dim: #8b8d98;
+    /* graph palette (site light palette) */
+    --c1: #7e22ce; --c2: #1d4ed8; --c3: #059669; --c4: #d97706;
+    --c5: #dc2626; --c6: #4f46e5; --c7: #db2777;
+    --node: rgba(0,0,0,.85);
+    --radius: 12px;
+    --mono: ui-monospace, "Cascadia Code", Consolas, "JetBrains Mono", monospace;
+    --sans: "Segoe UI", system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+    --shadow: 0 1px 2px rgba(0,0,0,.05);
+  }
+  html[data-theme="dark"] {
+    --bg: #0b0b0e;
+    --panel: #131317;
+    --panel-soft: #17171c;
+    --border: #26262e;
+    --border-strong: #33333d;
+    --text: #e8e8ec;
+    --muted: #a0a0ac;
+    --faint: #77777f;
+    --accent: #c084fc;
+    --accent-ink: #d8b4fe;
+    --accent-soft: #241a38;
+    --ok: #34d399;
+    --ok-soft: #0f2e25;
+    --warn: #fbbf24;
+    --warn-soft: #33270f;
+    --red: #f87171;
+    --code-bg: #0d0d11;
+    /* graph palette (site dark palette) */
+    --c1: #a855f7; --c2: #3b82f6; --c3: #10b981; --c4: #f59e0b;
+    --c5: #ef4444; --c6: #6366f1; --c7: #ec4899;
+    --node: #e2e8f0;
+    --shadow: 0 1px 2px rgba(0,0,0,.4);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: var(--sans); line-height: 1.8; font-size: 14.5px;
+  }
+  code, pre, kbd, .mono { font-family: var(--mono); }
+  h1, h2, h3, h4 { letter-spacing: -.01em; }
+  a { color: var(--accent-ink); }
+
+  /* ---------- top bar ---------- */
+  .top {
+    position: sticky; top: 0; z-index: 50;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: blur(10px) saturate(160%);
+    border-bottom: 1px solid var(--border);
+  }
+  .top-inner {
+    max-width: 1180px; margin: 0 auto; padding: 0 22px;
+    height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .brand { display: flex; align-items: baseline; gap: 9px; font-weight: 700; font-size: 14px; white-space: nowrap; }
+  .brand .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); align-self: center; }
+  .brand small { color: var(--muted); font-weight: 500; font-size: 12px; }
+  .top-actions { display: flex; gap: 8px; align-items: center; }
+  .btn {
+    appearance: none; border: 1px solid var(--border); background: var(--panel);
+    color: var(--text); border-radius: 8px; padding: 6px 11px; font-size: 12.5px;
+    font-family: var(--sans); cursor: pointer; box-shadow: var(--shadow);
+    display: inline-flex; align-items: center; gap: 7px; transition: border-color .15s, background .15s;
+  }
+  .btn:hover { border-color: var(--border-strong); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn[disabled] { opacity: .55; cursor: default; }
+  kbd {
+    border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 5px;
+    padding: 0 5px; font-size: 11px; background: var(--panel-soft); color: var(--muted);
+  }
+
+  /* ---------- shell / rail ---------- */
+  .shell {
+    max-width: 1180px; margin: 0 auto; padding: 0 22px 100px;
+    display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 40px;
+  }
+  .rail {
+    position: sticky; top: 68px; align-self: start; padding-top: 26px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .rail-cap {
+    font-family: var(--mono); font-size: 10.5px; color: var(--faint);
+    letter-spacing: .08em; margin: 0 0 8px 2px;
+  }
+  .rail a {
+    display: flex; gap: 10px; align-items: baseline;
+    padding: 7px 10px; border-left: 2px solid var(--border);
+    color: var(--muted); text-decoration: none; font-size: 13px;
+    transition: color .15s, border-color .15s, background .15s;
+  }
+  .rail a .no { font-family: var(--mono); font-size: 10.5px; color: var(--faint); }
+  .rail a:hover { color: var(--text); }
+  .rail a.active {
+    border-left-color: var(--accent); color: var(--text);
+    background: var(--accent-soft); font-weight: 600;
+  }
+  .rail a.active .no { color: var(--accent-ink); }
+
+  section { padding-top: 34px; }
+  .sec-head { margin: 0 0 18px; }
+  .sec-kicker {
+    font-family: var(--mono); font-size: 11.5px; color: var(--accent-ink);
+    letter-spacing: .06em; margin: 0 0 4px;
+  }
+  .sec-head h2 { font-size: 22px; margin: 0 0 6px; }
+  .sec-head p { margin: 0; color: var(--muted); max-width: 780px; }
+
+  /* ---------- overview ---------- */
+  .intro { padding-top: 44px; }
+  .intro h1 { font-size: clamp(24px, 4vw, 34px); margin: 0 0 10px; }
+  .intro .lede { color: var(--muted); max-width: 800px; margin: 0 0 22px; font-size: 15px; }
+  .facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 0 0 8px; }
+  @media (max-width: 900px) { .facts { grid-template-columns: repeat(2, 1fr); } }
+  .fact { border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); padding: 12px 15px; }
+  .fact b { display: block; font-family: var(--mono); font-size: 22px; line-height: 1.3; }
+  .fact span { color: var(--muted); font-size: 12px; }
+
+  /* pipeline */
+  .pipe {
+    display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 22px; margin: 26px 0 12px;
+  }
+  @media (max-width: 980px) { .pipe { grid-template-columns: repeat(4, minmax(0,1fr)); gap: 18px; } }
+  @media (max-width: 620px) { .pipe { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; } }
+  .station {
+    position: relative; text-align: left; cursor: pointer;
+    border: 1px solid var(--border); border-radius: 10px;
+    background: var(--panel); color: var(--text);
+    padding: 10px 11px 12px; font-family: var(--sans); font-size: 12.5px;
+    transition: border-color .2s, box-shadow .2s, transform .2s;
+  }
+  .station:hover { border-color: var(--border-strong); }
+  .station:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .station::after {
+    content: "→"; position: absolute; right: -17px; top: 50%;
+    transform: translateY(-50%); color: var(--faint); font-size: 12px;
+  }
+  .station:last-child::after { content: ""; }
+  @media (min-width: 981px) {
+    .station:nth-child(7)::after { content: ""; }
+  }
+  @media (max-width: 980px) {
+    .station:nth-child(4n)::after { content: ""; }
+  }
+  @media (max-width: 620px) {
+    .station:nth-child(even)::after { content: ""; }
+  }
+  .station .no { display: block; font-family: var(--mono); font-size: 10px; color: var(--faint); margin-bottom: 3px; }
+  .station .nm { font-weight: 700; display: block; font-size: 12.5px; }
+  .station .sub { display: block; color: var(--muted); font-size: 11px; margin-top: 2px; }
+  .station.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .station.done { border-color: var(--ok); }
+  .station.lit {
+    border-color: var(--accent); transform: translateY(-2px);
+    box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow);
+  }
+  .station.lit .no { color: var(--accent-ink); }
+  .pipe-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .pipe-controls .hint { color: var(--faint); font-size: 12px; }
+  .pipe-panel { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: 16px; }
+  @media (max-width: 860px) { .pipe-panel { grid-template-columns: 1fr; } }
+  .panel {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--panel); padding: 16px 18px;
+  }
+  .panel h3 { margin: 0 0 6px; font-size: 14.5px; }
+  .panel h3 .mono { color: var(--muted); font-weight: 400; font-size: 12px; }
+  .panel p { margin: 0 0 10px; color: var(--muted); font-size: 13.5px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip {
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 999px; padding: 2px 9px; background: var(--panel-soft);
+    white-space: nowrap;
+  }
+  .io { display: grid; grid-template-columns: 52px 1fr; gap: 4px 10px; font-size: 12.5px; margin-top: 10px; }
+  .io dt { font-family: var(--mono); font-size: 10.5px; color: var(--faint); padding-top: 2px; }
+  .io dd { margin: 0; color: var(--text); font-family: var(--mono); font-size: 11.5px; }
+  .log {
+    border: 1px solid var(--border); border-radius: var(--radius); background: var(--code-bg);
+    padding: 12px 14px; min-height: 132px; font-family: var(--mono); font-size: 11.5px; color: var(--code-text);
+  }
+  .log .line { margin: 3px 0; opacity: 0; animation: fadein .3s forwards; }
+  .log .line::before { content: "$ "; color: var(--code-dim); }
+  .log .line.ok::before { content: "✓ "; color: #34d399; }
+  .log .dim { color: var(--code-dim); }
+  @keyframes fadein { to { opacity: 1; } }
+
+  /* ---------- recipe stepper ---------- */
+  .step-dots { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .dot-btn {
+    appearance: none; border: 1px solid var(--border); background: var(--panel); color: var(--muted);
+    width: 32px; height: 32px; border-radius: 8px; font-family: var(--mono); font-size: 12px; cursor: pointer;
+    transition: all .15s;
+  }
+  .dot-btn:hover { border-color: var(--border-strong); color: var(--text); }
+  .dot-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+  .dot-btn.done { border-color: var(--ok); color: var(--ok); }
+  .step-body h3 { margin: 0 0 4px; font-size: 16px; }
+  .step-lede { color: var(--muted); margin: 0 0 12px; }
+  pre.code {
+    background: var(--code-bg); color: var(--code-text); border-radius: 10px;
+    padding: 13px 15px; overflow-x: auto; font-size: 12px; line-height: 1.65; margin: 0 0 12px;
+  }
+  pre.code .c { color: var(--code-dim); }
+  pre.code .k { color: #c084fc; }
+  pre.code .s { color: #86efac; }
+  .note {
+    border-left: 3px solid var(--accent); background: var(--accent-soft);
+    padding: 9px 13px; border-radius: 0 8px 8px 0; font-size: 12.8px; color: var(--text);
+  }
+  .step-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+  .step-count { font-family: var(--mono); font-size: 11.5px; color: var(--faint); }
+
+  /* ---------- graph ---------- */
+  .graph-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 16px; }
+  @media (max-width: 900px) { .graph-wrap { grid-template-columns: 1fr; } }
+  .graph-stage {
+    position: relative; height: 430px; border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; background: var(--panel);
+  }
+  @media (max-width: 620px) { .graph-stage { height: 340px; } }
+  .graph-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+  .graph-stage canvas.dragging { cursor: grabbing; }
+  .graph-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+  .graph-action {
+    margin-top: 10px; font-family: var(--mono); font-size: 12px; color: var(--muted);
+    border: 1px dashed var(--border-strong); border-radius: 8px; padding: 8px 12px; min-height: 36px;
+  }
+  .graph-action b { color: var(--accent-ink); font-weight: 700; }
+  .side-steps { margin: 0; padding: 0; list-style: none; counter-reset: gstep; }
+  .side-steps li {
+    position: relative; padding: 0 0 14px 26px; font-size: 12.8px; color: var(--muted);
+  }
+  .side-steps li::before {
+    counter-increment: gstep; content: counter(gstep);
+    position: absolute; left: 0; top: 1px; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent-ink);
+    font-family: var(--mono); font-size: 10px; display: grid; place-items: center; font-weight: 700;
+  }
+  .side-steps li b { color: var(--text); }
+  .config-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 11px; margin-top: 8px; }
+  .config-table td { border-top: 1px solid var(--border); padding: 5px 4px; color: var(--muted); }
+  .config-table td:last-child { text-align: right; color: var(--text); }
+
+  /* ---------- build ---------- */
+  .buildbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .buildbar .cmd {
+    font-family: var(--mono); font-size: 12.5px; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 8px; background: var(--panel); padding: 6px 12px;
+  }
+  .stage {
+    border: 1px solid var(--border); border-radius: 10px; background: var(--panel);
+    padding: 12px 15px; margin-bottom: 8px; opacity: 0; transform: translateY(4px);
+    transition: opacity .25s, transform .25s;
+  }
+  .stage.show { opacity: 1; transform: none; }
+  .stage-top { display: flex; align-items: center; gap: 10px; }
+  .stage-icon {
+    width: 16px; height: 16px; border-radius: 50%; flex: 0 0 auto;
+    border: 2px solid var(--border-strong); border-top-color: var(--accent);
+  }
+  .stage.running .stage-icon { animation: spin .8s linear infinite; }
+  .stage.done .stage-icon { border: none; background: var(--ok); position: relative; }
+  .stage.done .stage-icon::after { content: "✓"; position: absolute; inset: 0; color: #fff; font-size: 10px; display: grid; place-items: center; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .stage-name { font-weight: 700; font-size: 13.5px; }
+  .stage-cmd { font-family: var(--mono); font-size: 11.5px; color: var(--faint); }
+  .stage-out { font-family: var(--mono); font-size: 11.5px; color: var(--muted); margin: 7px 0 0 26px; }
+  .stage-out div { opacity: 0; animation: fadein .3s forwards; }
+  .artifacts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+
+  /* ---------- file tree ---------- */
+  .tree-wrap { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: 16px; }
+  @media (max-width: 860px) { .tree-wrap { grid-template-columns: 1fr; } }
+  .tree { font-family: var(--mono); font-size: 12px; line-height: 2.05; }
+  .tree ul { list-style: none; margin: 0; padding-left: 16px; border-left: 1px dashed var(--border); }
+  .tree > ul { border-left: none; padding-left: 0; }
+  .tree button {
+    appearance: none; border: none; background: none; cursor: pointer; padding: 0 6px;
+    border-radius: 5px; font: inherit; color: var(--text); text-align: left;
+  }
+  .tree button:hover { background: var(--accent-soft); }
+  .tree button.active { background: var(--accent); color: #fff; }
+  .tree .dir > button { font-weight: 700; }
+  .tree .dim { color: var(--faint); font-size: 11px; }
+  #tree-info h3 { margin: 0 0 6px; font-size: 15px; }
+  #tree-info .path { font-family: var(--mono); font-size: 12px; color: var(--accent-ink); word-break: break-all; }
+  #tree-info p { color: var(--muted); font-size: 13.5px; margin: 10px 0 0; }
+
+  /* ---------- runtime ---------- */
+  details.rt {
+    border: 1px solid var(--border); border-radius: 10px; background: var(--panel);
+    margin-bottom: 8px; overflow: hidden;
+  }
+  details.rt summary {
+    cursor: pointer; padding: 12px 16px; font-weight: 700; font-size: 13.5px;
+    list-style: none; display: flex; gap: 10px; align-items: baseline;
+  }
+  details.rt summary::-webkit-details-marker { display: none; }
+  details.rt summary .tag { font-family: var(--mono); font-size: 10.5px; color: var(--faint); font-weight: 400; margin-left: auto; white-space: nowrap; }
+  details.rt summary::before { content: "+"; font-family: var(--mono); color: var(--accent-ink); font-weight: 700; }
+  details.rt[open] summary::before { content: "−"; }
+  details.rt .body { padding: 0 16px 15px 42px; color: var(--muted); font-size: 13.3px; }
+  details.rt .body p { margin: 0 0 8px; }
+  details.rt .body .chips { margin-top: 10px; }
+
+  /* ---------- tests ---------- */
+  .test-grid { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 16px; }
+  @media (max-width: 760px) { .test-grid { grid-template-columns: 1fr; } }
+  .test-tabs { display: flex; flex-direction: column; gap: 6px; }
+  .test-tabs button {
+    appearance: none; text-align: left; border: 1px solid var(--border); background: var(--panel);
+    border-radius: 8px; padding: 9px 12px; cursor: pointer; color: var(--muted); font-family: var(--mono); font-size: 11.5px;
+  }
+  .test-tabs button:hover { border-color: var(--border-strong); }
+  .test-tabs button.active { border-color: var(--accent); color: var(--text); background: var(--accent-soft); font-weight: 700; }
+  .test-case h3 { margin: 0 0 4px; font-size: 15px; }
+  .test-case .where { font-family: var(--mono); font-size: 11.5px; color: var(--accent-ink); }
+  .test-case p { color: var(--muted); font-size: 13.3px; margin: 8px 0 12px; }
+
+  footer.doc-foot {
+    margin-top: 60px; border-top: 1px solid var(--border); padding-top: 18px;
+    color: var(--faint); font-size: 12px; font-family: var(--mono);
+  }
+
+  /* ---------- palette ---------- */
+  .pal-backdrop {
+    position: fixed; inset: 0; z-index: 90; background: rgba(0,0,0,.45);
+    display: grid; place-items: start center; padding-top: 12vh;
+  }
+  .pal-backdrop[hidden] { display: none; }
+  .pal {
+    width: min(540px, calc(100vw - 32px));
+    background: var(--panel); border: 1px solid var(--border-strong); border-radius: 14px;
+    box-shadow: 0 24px 70px -20px rgba(0,0,0,.5); overflow: hidden;
+  }
+  .pal input {
+    width: 100%; border: none; outline: none; background: transparent; color: var(--text);
+    font-family: var(--sans); font-size: 15px; padding: 15px 18px; border-bottom: 1px solid var(--border);
+  }
+  .pal-list { max-height: 320px; overflow-y: auto; padding: 6px; }
+  .pal-item {
+    display: block; width: 100%; text-align: left; appearance: none; border: none; background: none;
+    color: var(--text); font-family: var(--sans); font-size: 13.5px; padding: 9px 12px; border-radius: 8px; cursor: pointer;
+  }
+  .pal-item small { display: block; color: var(--faint); font-family: var(--mono); font-size: 10.5px; }
+  .pal-item:hover, .pal-item.sel { background: var(--accent-soft); }
+  .pal-empty { padding: 16px; color: var(--faint); font-size: 13px; }
+
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; gap: 0; }
+    .rail {
+      position: sticky; top: 52px; z-index: 40; flex-direction: row; overflow-x: auto;
+      background: color-mix(in srgb, var(--bg) 88%, transparent);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      margin: 0 -22px; padding: 8px 16px; gap: 4px;
+    }
+    .rail-cap { display: none; }
+    .rail a { border-left: none; border-bottom: 2px solid transparent; white-space: nowrap; padding: 4px 9px; }
+    .rail a.active { border-bottom-color: var(--accent); background: transparent; }
+    section { padding-top: 22px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand"><span class="dot"></span>romophic.com <small>の仕組み — 触れる設計図</small></div>
+    <div class="top-actions">
+      <button class="btn" id="palette-open" aria-haspopup="dialog"><span>この文書内を検索</span> <kbd>Ctrl</kbd><kbd>K</kbd></button>
+      <button class="btn" id="theme-toggle" aria-label="テーマを切り替える">◐ テーマ</button>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="rail" aria-label="セクション">
+    <p class="rail-cap">CONTENTS</p>
+    <a href="#overview"><span class="no">1</span> 全体像</a>
+    <a href="#recipe"><span class="no">2</span> 記事の一生</a>
+    <a href="#graph"><span class="no">3</span> 知識グラフ</a>
+    <a href="#build"><span class="no">4</span> ビルド</a>
+    <a href="#files"><span class="no">5</span> ファイル地図</a>
+    <a href="#runtime"><span class="no">6</span> ランタイム</a>
+    <a href="#tests"><span class="no">7</span> テスト</a>
+  </nav>
+
+  <main>
+    <!-- ============ 1. 全体像 ============ -->
+    <section id="overview" class="intro">
+      <h1>このサイトは、どう動いているか</h1>
+      <p class="lede">
+        romophic.com は Astro で作られた静的サイトです。実行時のデータベースもサーバー処理もなく、
+        <b>ビルド時にすべてが HTML・PNG・JSON に変換</b>されます。この文書は、その変換の流れを
+        図と動くデモで辿るための1枚の HTML です。下の駅（ステーション）をクリックすると、そこで起きていることを確認できます。
+      </p>
+      <div class="facts">
+        <div class="fact"><b>37</b><span>公開記事（親6 + 子31）</span></div>
+        <div class="fact"><b>210</b><span>テスト（60ファイル / Vitest）</span></div>
+        <div class="fact"><b>38</b><span>OG画像（記事37 + default）</span></div>
+        <div class="fact"><b>0</b><span>実行時のDB・サーバー処理</span></div>
+      </div>
+
+      <div class="pipe" id="pipe" role="tablist" aria-label="データの流れ"></div>
+      <div class="pipe-controls">
+        <button class="btn primary" id="pipe-run">▶ 流れを見る</button>
+        <span class="hint">駅をクリック → 詳細。ボタンで左から順に流れます。</span>
+      </div>
+      <div class="pipe-panel">
+        <div class="panel" id="pipe-detail"></div>
+        <div class="log" id="pipe-log"><div class="line dim">$ ボタンを押すとここにビルドログが流れます</div></div>
+      </div>
+    </section>
+
+    <!-- ============ 2. 記事の一生 ============ -->
+    <section id="recipe">
+      <div class="sec-head">
+        <p class="sec-kicker">2 / 記事の一生</p>
+        <h2>1本の Markdown が公開されるまで</h2>
+        <p>例として <code>romophic-library</code> シリーズの1本「強連結成分分解(SCC)」を最初から最後まで追います。番号をクリックしてください。</p>
+      </div>
+      <div class="step-dots" id="step-dots"></div>
+      <div class="panel step-body" id="step-body"></div>
+    </section>
+
+    <!-- ============ 3. 知識グラフ ============ -->
+    <section id="graph">
+      <div class="sec-head">
+        <p class="sec-kicker">3 / 知識グラフ</p>
+        <h2>トップページのグラフを、ここで触る</h2>
+        <p>本物と同じ物理パラメータ（反発 −150・ばね 60・中心 0.15）とパレットで動く縮小再現です。<b>ドラッグ</b>でノードを引っ張り、<b>ホイール</b>でズーム、<b>ホバー</b>で隣接ハイライト、<b>クリック</b>で遷移先を確認できます。</p>
+      </div>
+      <div class="graph-wrap">
+        <div>
+          <div class="graph-stage"><canvas id="demo-graph"></canvas></div>
+          <div class="graph-controls">
+            <button class="btn" id="g-reset">リセット（再加熱）</button>
+            <button class="btn" id="g-zoom-in">＋</button>
+            <button class="btn" id="g-zoom-out">−</button>
+            <span class="hint" id="g-hint" style="color:var(--faint);font-size:12px">粒子が落ち着くまでお待ちください</span>
+          </div>
+          <div class="graph-action" id="g-action">ノードをクリックすると、本番での遷移先がここに表示されます</div>
+        </div>
+        <div>
+          <div class="panel" style="margin-bottom:12px">
+            <h3>本物のパイプライン</h3>
+            <ol class="side-steps">
+              <li><b>graph.json</b> — ビルド時に全記事とタグ、内部リンクからノードとエッジを生成</li>
+              <li><b>data.ts</b> — 受け取った JSON を重複除去・双方向リンク整理・タグ色割当（純関数）</li>
+              <li><b>manager.ts</b> — fetch と初期化、Worker・描画・操作の配線</li>
+              <li><b>physics.worker.ts</b> — d3-force を Web Worker で実行（UIを固めない。タブ非表示中は自動停止、prefers-reduced-motion では静止）</li>
+              <li><b>renderer.ts</b> — Canvas 2D に毎フレーム描画（LOD でラベルを間引き）</li>
+              <li><b>interaction.ts</b> — drag / zoom / hover / click の配線</li>
+            </ol>
+          </div>
+          <div class="panel">
+            <h3>本物の設定値</h3>
+            <table class="config-table">
+              <tr><td>linkDistance</td><td>60</td></tr>
+              <tr><td>chargeStrength</td><td>−150</td></tr>
+              <tr><td>centerStrength</td><td>0.15</td></tr>
+              <tr><td>collideRadius</td><td>15</td></tr>
+              <tr><td>hitRadius</td><td>12</td></tr>
+              <tr><td>zoomExtent</td><td>0.1 – 8</td></tr>
+              <tr><td>lodThreshold</td><td>1.2</td></tr>
+            </table>
+            <p style="margin-top:12px;font-size:12.5px">
+              ノードの当たり判定は <code>hitRadius</code> をズーム倍率で割った画面上一定の半径、ラベルの表示は <code>lodThreshold</code> を超えたズームから。
+              このデモは同じ計算で動いています。
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 4. ビルド ============ -->
+    <section id="build">
+      <div class="sec-head">
+        <p class="sec-kicker">4 / ビルド</p>
+        <h2>1コマンドで dist/ まで</h2>
+        <p>実際のコマンドは <code>pnpm build</code> ひとつ。中で3つの道具が順番に走ります。ボタンで流れを再現します（所要時間はイメージです）。</p>
+      </div>
+      <div class="buildbar">
+        <button class="btn primary" id="build-run">▶ ビルド開始</button>
+        <span class="cmd">pnpm build</span>
+        <span class="cmd">CI では lint → test → build の順にゲート</span>
+      </div>
+      <div id="stages"></div>
+      <div class="artifacts" id="artifacts" style="display:none">
+        <span class="chip">dist/**.html ×50</span>
+        <span class="chip">dist/og/*.png ×38</span>
+        <span class="chip">dist/graph.json</span>
+        <span class="chip">dist/rss.xml</span>
+        <span class="chip">dist/sitemap-index.xml</span>
+        <span class="chip">dist/llms.txt / llms-full.txt</span>
+        <span class="chip">dist/pagefind/（37ページ索引・記事本文のみ）</span>
+      </div>
+    </section>
+
+    <!-- ============ 5. ファイル地図 ============ -->
+    <section id="files">
+      <div class="sec-head">
+        <p class="sec-kicker">5 / ファイル地図</p>
+        <h2>どこに何があるか</h2>
+        <p>クリックすると右側に役割が出ます。<code>src/lib</code> と <code>src/pages</code> がこのサイトの心臓部です。</p>
+      </div>
+      <div class="tree-wrap">
+        <div class="panel tree" id="tree">
+          <ul>
+            <li class="dir"><button data-node="src">src/</button>
+              <ul>
+                <li><button data-node="content-config">content.config.ts</button></li>
+                <li class="dir"><button data-node="content">content/</button>
+                  <ul>
+                    <li><button data-node="content-blog">blog/</button> <span class="dim">39 md/mdx</span></li>
+                    <li><button data-node="content-authors">authors/</button> <span class="dim">1</span></li>
+                    <li><button data-node="content-projects">projects/</button> <span class="dim">6</span></li>
+                  </ul>
+                </li>
+                <li class="dir"><button data-node="pages">pages/</button> <span class="dim">14 routes</span>
+                  <ul>
+                    <li><button data-node="page-index">index.astro</button></li>
+                    <li><button data-node="page-blog-id">blog/[...id].astro</button></li>
+                    <li><button data-node="page-blog-page">blog/[...page].astro</button></li>
+                    <li><button data-node="page-tags">tags/…</button></li>
+                    <li><button data-node="page-og">og/[...slug].png.ts</button></li>
+                    <li><button data-node="page-graphjson">graph.json.ts</button></li>
+                    <li><button data-node="page-feeds">rss.xml.ts / robots.txt.ts / llms.txt.ts</button></li>
+                  </ul>
+                </li>
+                <li class="dir"><button data-node="layouts">layouts/</button>
+                  <ul>
+                    <li><button data-node="layout-base">BaseLayout.astro</button></li>
+                    <li><button data-node="layout-main">Layout.astro</button></li>
+                  </ul>
+                </li>
+                <li class="dir"><button data-node="components">components/</button> <span class="dim">約40+</span></li>
+                <li class="dir"><button data-node="lib">lib/</button>
+                  <ul>
+                    <li><button data-node="lib-datautils">data-utils.ts</button></li>
+                    <li class="dir"><button data-node="lib-content">content/</button></li>
+                    <li class="dir"><button data-node="lib-graph">graph/</button></li>
+                  </ul>
+                </li>
+                <li class="dir"><button data-node="styles">styles/</button> <span class="dim">global.css</span></li>
+              </ul>
+            </li>
+            <li class="dir"><button data-node="public">public/</button> <span class="dim">fonts, favicons, icon.webp</span></li>
+            <li class="dir"><button data-node="docs">docs/</button> <span class="dim">この文書と計画</span></li>
+          </ul>
+        </div>
+        <div class="panel" id="tree-info">
+          <h3>ファイルを選んでください</h3>
+          <p>左のツリーをクリックすると、その場所が何を担当しているかを表示します。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 6. ランタイム ============ -->
+    <section id="runtime">
+      <div class="sec-head">
+        <p class="sec-kicker">6 / ランタイム</p>
+        <h2>ブラウザで起きること</h2>
+        <p>静的とはいえ、読みやすさのための小さな JavaScript が動いています。開いて中身を確認できます。</p>
+      </div>
+
+      <details class="rt" open>
+        <summary>テーマ切替と「チラつき」対策 <span class="tag">AppScript.astro / ThemeToggle.astro</span></summary>
+        <div class="body">
+          <p>ページが最初に描画される<strong>前</strong>に、保存されたテーマ（またはOS設定）を読み取って <code>data-theme</code> を確定します。これがないと、ダーク設定なのに一瞬白い画面が出る「FOUC」が起きます。</p>
+          <p>切替の瞬間は <code>.transition-none</code> を付けて全トランジションを止め、色がじわじわ混ざるのを防ぎます。この文書の右上のボタンも同じ考え方です。</p>
+          <div class="chips"><span class="chip">src/components/AppScript.astro</span><span class="chip">data-theme</span><span class="chip">transition-none</span></div>
+        </div>
+      </details>
+
+      <details class="rt">
+        <summary>ビュー遷移 — ページ間をSPAっぽく <span class="tag">ClientRouter</span></summary>
+        <div class="body">
+          <p><code>Head.astro</code> が <code>&lt;ClientRouter /&gt;</code> を読み込み、通常のリンク移動をフェード付きの遷移にしています。ポイントは<b>ライフサイクルイベントのペア</b>です。</p>
+          <p><code>astro:page-load</code> で「そのページ用の初期化」、<code>astro:before-swap</code> で「後片付け」を行います。この規律がないと、古いページのタイマー・Observer・Worker が残り続けます。</p>
+          <div class="chips"><span class="chip">astro:page-load</span><span class="chip">astro:before-swap</span><span class="chip">src/components/Head.astro</span></div>
+        </div>
+      </details>
+
+      <details class="rt">
+        <summary>知識グラフの一生（初期化 → 破棄） <span class="tag">GraphView.astro / manager.ts</span></summary>
+        <div class="body">
+          <p><code>GraphView.astro</code> が <code>astro:page-load</code> で待機し、メインスレッドが空いたら（requestIdleCallback）グラフを初期化します。LCP を邪魔しないための遅延です。</p>
+          <p>ページを離れるときは <code>astro:before-swap</code> で <code>manager.destroy()</code> を呼び、<b>fetch の abort・ResizeObserver / IntersectionObserver / MutationObserver の切断・Worker の terminate・requestAnimationFrame の取消</b>をまとめて行います。破棄後に非同期処理が完了しても、<code>destroyed</code> フラグが再突入を防ぎます。</p>
+          <div class="chips"><span class="chip">requestIdleCallback</span><span class="chip">destroyed フラグ</span><span class="chip">AbortController</span><span class="chip">worker.terminate()</span></div>
+        </div>
+      </details>
+
+      <details class="rt">
+        <summary>目次（モバイルの進捗リング / デスクトップの追従） <span class="tag">TOCHeader / TOCSidebar</span></summary>
+        <div class="body">
+          <p>見出しの位置は <code>IntersectionObserver</code> で追跡します。モバイルの TOC は円形の進捗リングにスクロール率を反映し、現在の見出しを自動でスクロール表示。カスタム要素なので、ページから外れたら <code>disconnectedCallback</code> でイベントと Observer を解放します。</p>
+          <div class="chips"><span class="chip">IntersectionObserver</span><span class="chip">customElements</span><span class="chip">disconnectedCallback</span></div>
+        </div>
+      </details>
+
+      <details class="rt">
+        <summary>検索（Pagefind のコマンドパレット） <span class="tag">SearchDialog.astro</span></summary>
+        <div class="body">
+          <p>検索は <code>Ctrl/Cmd + K</code>。ネイティブの <code>&lt;dialog&gt;</code> の中に Pagefind の UI を載せています。索引はビルド時に <code>dist/pagefind/</code> として静的生成され、サーバー不要で動きます。</p>
+          <p style="margin-top:8px"><b>この文書でも似たものを実装しています。</b> <kbd>Ctrl</kbd>+<kbd>K</kbd> を押すと、この1ページ内を移動できるパレットが開きます。</p>
+          <div class="chips"><span class="chip">Pagefind</span><span class="chip">native dialog</span><span class="chip">Ctrl+K</span></div>
+        </div>
+      </details>
+
+      <details class="rt">
+        <summary>その他の小物 <span class="tag">ScrollProgress / ScrollToTop / Giscus</span></summary>
+        <div class="body">
+          <p><b>ScrollProgress</b> — ページ上端の細いバーで読書位置を表示。<b>ScrollToTop</b> — 記事末の「上へ」ボタン。<b>Giscus</b> — GitHub Discussions をコメント欄にする iframe（lazy 読み込み）。テーマはウィジェットのアップグレード前に、マークアップ直後のインラインスクリプトで <code>theme</code> 属性として固定する（lazy iframe がデフォルトの light で起動してしまう競合を回避）。すべて小さな独立コンポーネントで、必要なページだけに載ります。</p>
+          <div class="chips"><span class="chip">ScrollProgress.astro</span><span class="chip">ScrollToTop.astro</span><span class="chip">GiscusComments.astro</span></div>
+        </div>
+      </details>
+    </section>
+
+    <!-- ============ 7. テスト ============ -->
+    <section id="tests">
+      <div class="sec-head">
+        <p class="sec-kicker">7 / テスト</p>
+        <h2>テストは「生きた仕様書」</h2>
+        <p>210 のテストが、コンポーネントの振る舞いを実行可能な形で文書化しています。<code>AstroContainer</code> で実際の <code>.astro</code> をレンダリングして検証します。</p>
+      </div>
+      <div class="test-grid">
+        <div class="test-tabs" id="test-tabs"></div>
+        <div class="panel test-case" id="test-case"></div>
+      </div>
+    </section>
+
+    <footer class="doc-foot">
+      docs/how-it-works.html — 単一ファイル・外部依存ゼロ / 2026-10-18 時点のコードから生成 / © romophic
+    </footer>
+  </main>
+</div>
+
+<div class="pal-backdrop" id="palette" hidden>
+  <div class="pal" role="dialog" aria-modal="true" aria-label="文書内検索">
+    <input id="pal-input" type="text" placeholder="セクションを検索…（全体像・グラフ・ビルド…を入力）" autocomplete="off">
+    <div class="pal-list" id="pal-list"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------------- theme ---------------- */
+  var root = document.documentElement;
+  var LS_KEY = 'romophic-doc-theme';
+  var stored = null;
+  try { stored = localStorage.getItem(LS_KEY); } catch (e) { /* file:// */ }
+  var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  root.setAttribute('data-theme', stored || (prefersDark ? 'dark' : 'light'));
+  var themeBtn = document.getElementById('theme-toggle');
+  themeBtn.addEventListener('click', function () {
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    themeBtn.textContent = next === 'dark' ? '☀ ライト' : '◐ ダーク';
+    try { localStorage.setItem(LS_KEY, next); } catch (e) { /* ignore */ }
+  });
+  themeBtn.textContent = root.getAttribute('data-theme') === 'dark' ? '☀ ライト' : '◐ ダーク';
+
+  /* ---------------- rail scrollspy ---------------- */
+  var railLinks = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+  var sections = railLinks.map(function (a) { return document.querySelector(a.getAttribute('href')); });
+  function setActiveSection(id) {
+    railLinks.forEach(function (a) {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+    });
+  }
+  var spy = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (en.isIntersecting) setActiveSection(en.target.id);
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(function (s) { if (s) spy.observe(s); });
+
+  /* ---------------- pipeline ---------------- */
+  var STATIONS = [
+    {
+      id: 'content', no: '01', nm: 'src/content', sub: 'Markdown',
+      title: 'コンテンツ', machine: '人が書き換える唯一の場所',
+      body: '記事は Markdown / MDX ファイルそのもの。frontmatter に title・description・date などを書き、親子関係はディレクトリ構造で表現します（子記事に parent は不要）。',
+      files: ['src/content/blog/**', 'src/content/authors/*.yaml', 'src/content/projects/**'],
+      in: '手で書いたファイル', out: 'ファイル群（39 md/mdx）',
+      log: 'src/content/blog/ から 39 個の Markdown を検出'
+    },
+    {
+      id: 'schema', no: '02', nm: 'content.config', sub: 'Zod',
+      title: 'スキーマ検証', machine: '壊れた入力をここで落とす',
+      body: 'glob ローダーがファイルをエントリ化し、Zod スキーマが形を強制します。date は自動で Date に変換され、参照（authors など）も解決されます。ここで通らなければビルドは失敗します。',
+      files: ['src/content.config.ts'],
+      in: 'ファイル群', out: '検証済みコレクション',
+      log: 'Zod 検証 ✓（date は coerce で Date 化 / _template.mdx はパターンで除外）'
+    },
+    {
+      id: 'query', no: '03', nm: 'lib/content', sub: 'TypeScript',
+      title: 'クエリ層', machine: '表示に必要な形へ整理',
+      body: 'getNormalizedPosts が draft を除外し ID を正規化してビルド中キャッシュ。目次・バックリンク・親子・前後記事・読了時間などを data-utils が並列で束ね、ページ用データを作ります。',
+      files: ['src/lib/content/posts.ts', 'src/lib/content/toc.ts', 'src/lib/content/links.ts', 'src/lib/data-utils.ts'],
+      in: 'コレクション', out: 'PostPageData（型付き）',
+      log: 'draft を除外して 37 記事に正規化'
+    },
+    {
+      id: 'views', no: '04', nm: 'components', sub: '.astro',
+      title: 'ビュー', machine: 'HTML とメタ情報の組み立て',
+      body: 'BlogPost.astro が記事ページ全体を組み立て、Layout がヘッダ・フッタ・本文枠を提供。PageHead.astro は OG メタタグと JSON-LD を出力します（既定画像は /og/default.png）。',
+      files: ['src/components/BlogPost.astro', 'src/components/PageHead.astro', 'src/layouts/Layout.astro'],
+      in: 'PostPageData', out: 'HTML / head メタ',
+      log: '記事件数ぶんのページをレンダリング'
+    },
+    {
+      id: 'routes', no: '05', nm: 'pages', sub: 'file-based',
+      title: 'ルーティング', machine: 'ファイル名が URL になる',
+      body: 'blog/[...id].astro は全記事ページを、og/[...slug].png.ts は OG 画像を、graph.json.ts はグラフデータを生成。動的ルートは getStaticPaths で全件展開されます。',
+      files: ['src/pages/blog/[...id].astro', 'src/pages/og/[...slug].png.ts', 'src/pages/graph.json.ts', 'src/pages/rss.xml.ts'],
+      in: 'クエリ結果', out: '14 ルート → 静的ファイル',
+      log: '14 ルートを静的生成（動的ルートは全件展開）'
+    },
+    {
+      id: 'build', no: '06', nm: 'astro check → build', sub: 'CLI',
+      title: 'ビルド', machine: '3つの道具が順番に走る',
+      body: 'astro check が型を検査し、astro build が全ページ・OG画像・エンドポイントを書き出し、仕上げに astro-pagefind 連携が検索索引（記事本文のみ）を作ります。実コマンドは pnpm build ひとつです。',
+      files: ['package.json（build スクリプト）', '.github/workflows/ci.yml'],
+      in: 'ソース一式', out: 'dist/',
+      log: 'astro check 132 ファイル 0 エラー → ビルド成功'
+    },
+    {
+      id: 'dist', no: '07', nm: 'dist/', sub: '静的ファイル',
+      title: '出力', machine: 'あとは置くだけ',
+      body: 'HTML・OG画像・graph.json・RSS・sitemap・llms.txt・Pagefind 索引がすべて dist に入ります。ホスティングはファイルを配るだけで、サーバーサイドの処理はありません。',
+      files: ['dist/**'],
+      in: 'ビルド成果物', out: '公開サイト',
+      log: 'dist/ に HTML 50・OG 38 枚・索引 37 ページ（記事のみ）を書き出し'
+    }
+  ];
+
+  var pipeEl = document.getElementById('pipe');
+  var detailEl = document.getElementById('pipe-detail');
+  var logEl = document.getElementById('pipe-log');
+  var stationEls = [];
+
+  STATIONS.forEach(function (st, i) {
+    var b = document.createElement('button');
+    b.className = 'station';
+    b.setAttribute('role', 'tab');
+    b.innerHTML = '<span class="no">' + st.no + '</span><span class="nm">' + st.nm + '</span><span class="sub">' + st.sub + '</span>';
+    b.addEventListener('click', function () { selectStation(i); });
+    pipeEl.appendChild(b);
+    stationEls.push(b);
+  });
+
+  function renderDetail(i) {
+    var st = STATIONS[i];
+    detailEl.innerHTML =
+      '<h3>' + st.title + ' <span class="mono">— ' + st.machine + '</span></h3>' +
+      '<p>' + st.body + '</p>' +
+      '<dl class="io"><dt>IN</dt><dd>' + st.in + '</dd><dt>OUT</dt><dd>' + st.out + '</dd></dl>' +
+      '<div class="chips">' + st.files.map(function (f) { return '<span class="chip">' + f + '</span>'; }).join('') + '</div>';
+  }
+
+  var currentStation = 0;
+  function selectStation(i) {
+    currentStation = i;
+    stationEls.forEach(function (el, j) { el.classList.toggle('active', j === i); });
+    renderDetail(i);
+  }
+  selectStation(0);
+
+  function appendLog(text, ok) {
+    var d = document.createElement('div');
+    d.className = 'line' + (ok ? ' ok' : '');
+    d.textContent = text;
+    logEl.appendChild(d);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  var running = false;
+  var runBtn = document.getElementById('pipe-run');
+  runBtn.addEventListener('click', function () {
+    if (running) return;
+    running = true;
+    runBtn.disabled = true;
+    logEl.innerHTML = '<div class="line dim">$ romophic build（流れの再現）</div>';
+    stationEls.forEach(function (el) { el.classList.remove('done', 'lit'); });
+    var i = 0;
+    (function step() {
+      if (i >= STATIONS.length) {
+        running = false;
+        runBtn.disabled = false;
+        stationEls.forEach(function (el) { el.classList.add('done'); });
+        appendLog('公開準備完了 — dist/ はそのまま配信できます', true);
+        return;
+      }
+      var el = stationEls[i];
+      el.classList.add('lit');
+      selectStation(i);
+      appendLog(STATIONS[i].log);
+      setTimeout(function () {
+        el.classList.remove('lit');
+        el.classList.add('done');
+        i += 1;
+        step();
+      }, 780);
+    })();
+  });
+
+  /* ---------------- recipe stepper ---------------- */
+  var STEPS = [
+    {
+      title: '1. 書く',
+      lede: 'src/content/blog/romophic-library/lib/ に MDX ファイルを1枚置くだけ。',
+      file: 'src/content/blog/romophic-library/lib/scc.mdx',
+      code: '---\ntitle: \'強連結成分分解(SCC)\'\ndate: 2024-07-30T22:01:37+09:00\ndescription: \'romophic-library\'\ntags: [\'c++\', \'competitive programming\']\nauthors: [\'romophic\']\norder: 23\n---\n\n## 用途\n強連結成分分解をする. 巡回可能な部分ごとにグラフを分けてまとめ, それらのDAGを作る.',
+      note: 'parent フィールドは書いていません。親子関係は「lib/ の下にある」というパス構造から自動で推論されます。order がシリーズ内の並び順を決めます。'
+    },
+    {
+      title: '2. ローダーが拾う',
+      lede: 'glob ローダーがファイルを1つのエントリに変換します。',
+      file: 'src/content.config.ts',
+      code: 'loader: glob({\n  pattern: [\'**/*.{md,mdx}\', \'!**/_*\'],\n  base: \'./src/content/blog\',\n})',
+      note: 'エントリの ID はパスから自動生成され、この記事は romophic-library/lib/scc になります。先頭が _ のファイル（_template.mdx など）はここで除外されます。'
+    },
+    {
+      title: '3. Zod が検証する',
+      lede: 'frontmatter の形はスキーマで強制されます。間違えばビルドが止まります。',
+      file: 'src/content.config.ts',
+      code: 'z.object({\n  title: z.string(),\n  description: z.string(),\n  date: z.coerce.date(),\n  parent: reference(\'blog\').optional(),\n  order: z.number().optional(),\n  tags: z.array(z.string()).optional(),\n  authors: z.array(reference(\'authors\')).optional(),\n  draft: z.boolean().default(false),\n})',
+      note: 'date は文字列でも自動で Date に変換（coerce）。authors は reference なので、存在しない著者名を書くとここで検出されます。'
+    },
+    {
+      title: '4. クエリが整える',
+      lede: '表示前に draft を外し、ID を正規化し、並び順を決めます。',
+      file: 'src/lib/content/posts.ts',
+      code: 'export function normalizePostId(id: string): string {\n  return id.endsWith(\'/index\') ? id.replace(/\\/index$/, \'\') : id\n}\n\n// 一覧は日付の降順（同着は ID で安定化）\nexport async function getAllPosts() {\n  const posts = await getNormalizedPosts()\n  return [...posts].sort(\n    (a, b) =>\n      b.data.date.valueOf() - a.data.date.valueOf() ||\n      a.id.localeCompare(b.id),\n  )\n}',
+      note: 'getCollection はビルド中に1回だけ呼ばれ、モジュールキャッシュに乗ります。ID 正規化は normalizePostId が唯一の正規化源。isSubpost は「parent がある、または ID に / を含む」で判定。'
+    },
+    {
+      title: '5. ページ用データを束ねる',
+      lede: '1ページに必要な情報を、並列で一気に集めます。',
+      file: 'src/lib/data-utils.ts — getPostPageData()',
+      code: 'const [\n  authors,        // 著者情報\n  navigation,     // 前後の記事 + 親\n  parentPost,     // 親記事（子の場合）\n  hasChildPosts,  // 子を持つか\n  subpostCount,\n  postReadingTime,// 読了時間\n  tocSections,    // 目次\n  backlinks,      // 被リンク\n] = await Promise.all([...])',
+      note: 'Promise.all で直列待ちを避けています。目次やバックリンクは本文（Markdown）を解析して生成される派生物です。'
+    },
+    {
+      title: '6. 描画する',
+      lede: 'BlogPost.astro がページ全体を組み立てます。',
+      file: 'src/components/BlogPost.astro',
+      code: '&lt;PageHead slot="head" post={post} image={ogImageUrl} /&gt;\n\n&lt;article class="prose col-start-2 max-w-none"&gt;\n  &lt;Content components={{ img: MdxImageCaption }} /&gt;\n&lt;/article&gt;\n\n&lt;Backlinks backlinks={backlinks} /&gt;\n&lt;GiscusComments /&gt;',
+      note: 'Layout.astro がヘッダ・フッタ・本文枠を提供し、記事本文の article 要素（BlogPost.astro）の data-pagefind-body が「検索対象は記事本文だけ」という Pagefind への指示になります。'
+    },
+    {
+      title: '7. 派生物が生まれる',
+      lede: 'この1記事から、見えない成果物がいくつも生成されます。',
+      file: 'src/pages/og/[...slug].png.ts ほか',
+      code: '// 1) OG 画像: satori で SVG → resvg で PNG\n//    /og/romophic-library-lib-scc.png\n// 2) graph.json: ノード + タグ + 内部リンクのエッジ\n// 3) rss.xml / sitemap / llms.txt に URL が載る\n// 4) pagefind の検索索引に本文が入る',
+      note: 'OG 画像は md5 キャッシュ付き。文章を変えなければ再生成されません。既定の /og/default.png は記事以外のページ用です。'
+    },
+    {
+      title: '8. 公開',
+      lede: 'dist/ に書き出された静的ファイルを配るだけで公開完了。',
+      file: 'dist/blog/romophic-library/lib/scc/index.html',
+      code: '$ pnpm build\n$ # → dist/ 完成（HTML 50 / OG 38 / 索引 37ページ・記事のみ）',
+      note: '実行時にサーバーは不要。ユーザーのブラウザには、テーマ・検索・グラフといった小さな JavaScript だけが届きます。'
+    }
+  ];
+
+  var dotsEl = document.getElementById('step-dots');
+  var stepBody = document.getElementById('step-body');
+  var stepBtns = [];
+  STEPS.forEach(function (s, i) {
+    var b = document.createElement('button');
+    b.className = 'dot-btn';
+    b.textContent = String(i + 1);
+    b.addEventListener('click', function () { showStep(i); });
+    dotsEl.appendChild(b);
+    stepBtns.push(b);
+  });
+
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  var currentStep = 0;
+  function showStep(i) {
+    currentStep = i;
+    var s = STEPS[i];
+    stepBtns.forEach(function (b, j) {
+      b.classList.toggle('active', j === i);
+      b.classList.toggle('done', j < i);
+    });
+    stepBody.innerHTML =
+      '<h3>' + esc(s.title) + '</h3>' +
+      '<p class="step-lede">' + esc(s.lede) + '</p>' +
+      '<div class="chips" style="margin-bottom:10px"><span class="chip">' + esc(s.file) + '</span></div>' +
+      '<pre class="code">' + esc(s.code) + '</pre>' +
+      '<div class="note">' + esc(s.note) + '</div>' +
+      '<div class="step-foot">' +
+        '<span class="step-count">' + (i + 1) + ' / ' + STEPS.length + '</span>' +
+        '<span>' +
+          '<button class="btn" id="step-prev"' + (i === 0 ? ' disabled' : '') + '>← 前へ</button> ' +
+          '<button class="btn" id="step-next"' + (i === STEPS.length - 1 ? ' disabled' : '') + '>次へ →</button>' +
+        '</span>' +
+      '</div>';
+    var prev = document.getElementById('step-prev');
+    var next = document.getElementById('step-next');
+    prev.addEventListener('click', function () { if (currentStep > 0) showStep(currentStep - 1); });
+    next.addEventListener('click', function () { if (currentStep < STEPS.length - 1) showStep(currentStep + 1); });
+  }
+  showStep(0);
+
+  /* ---------------- graph demo ---------------- */
+  (function graphDemo() {
+    var canvas = document.getElementById('demo-graph');
+    if (!canvas) return;
+    var stage = canvas.parentElement;
+    var ctx = canvas.getContext('2d');
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    /* 実データの縮小サンプル */
+    var sample = {
+      nodes: [
+        { id: 'romophic-library', name: 'romophic-library', group: 'post' },
+        { id: 'epsilon-ball', name: 'epsilon-ball', group: 'post' },
+        { id: 'palimpsest', name: 'palimpsest', group: 'post' },
+        { id: 'nn-scratch', name: 'nn-scratch', group: 'post' },
+        { id: 'joined-howtv', name: 'joined-howtv', group: 'post' },
+        { id: 'stl-stream', name: 'stl-data-structure-istream-ostream', group: 'post' },
+        { id: 'romophic-library/lib/scc', name: '強連結成分分解(SCC)', group: 'post', sub: true },
+        { id: 'romophic-library/lib/union-find', name: 'Union-Find', group: 'post', sub: true },
+        { id: 'romophic-library/lib/segment-tree', name: 'Segment Tree', group: 'post', sub: true },
+        { id: 'romophic-library/lib/modint', name: 'ModInt', group: 'post', sub: true },
+        { id: 'romophic-library/lib/dijkstra', name: 'Dijkstra', group: 'post', sub: true },
+        { id: 'tag-c++', name: '#c++', group: 'tag' },
+        { id: 'tag-competitive programming', name: '#competitive programming', group: 'tag' },
+        { id: 'tag-astro', name: '#astro', group: 'tag' }
+      ],
+      links: [
+        ['romophic-library', 'romophic-library/lib/scc'],
+        ['romophic-library', 'romophic-library/lib/union-find'],
+        ['romophic-library', 'romophic-library/lib/segment-tree'],
+        ['romophic-library', 'romophic-library/lib/modint'],
+        ['romophic-library', 'romophic-library/lib/dijkstra'],
+        ['romophic-library/lib/scc', 'tag-c++'],
+        ['romophic-library/lib/union-find', 'tag-c++'],
+        ['romophic-library/lib/segment-tree', 'tag-c++'],
+        ['romophic-library/lib/modint', 'tag-c++'],
+        ['romophic-library/lib/dijkstra', 'tag-competitive programming'],
+        ['romophic-library', 'tag-competitive programming'],
+        ['epsilon-ball', 'romophic-library'],
+        ['palimpsest', 'epsilon-ball'],
+        ['nn-scratch', 'palimpsest'],
+        ['joined-howtv', 'tag-astro'],
+        ['stl-stream', 'tag-c++'],
+        ['joined-howtv', 'stl-stream']
+      ]
+    };
+
+    var readPalette = function () {
+      return ['--c1', '--c2', '--c3', '--c4', '--c5', '--c6', '--c7'].map(function (v) {
+        return getComputedStyle(root).getPropertyValue(v).trim();
+      });
+    };
+    var PALETTE = readPalette();
+    new MutationObserver(function () { PALETTE = readPalette(); })
+      .observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    var linkDistance = 60, charge = -150, centerStrength = 0.15, collideRadius = 15;
+    var hitRadius = 12, LOD = 1.2;
+
+    var nodes = [], links = [], nodeById = {};
+    var tagIndex = 0;
+    sample.nodes.forEach(function (n) {
+      var node = {
+        id: n.id, name: n.name, group: n.group, sub: !!n.sub,
+        x: (Math.random() - 0.5) * 80, y: (Math.random() - 0.5) * 80,
+        vx: 0, vy: 0, fx: null, fy: null, degree: 0
+      };
+      if (n.group === 'tag') { node.cat = tagIndex % PALETTE.length; tagIndex += 1; }
+      nodes.push(node);
+      nodeById[node.id] = node;
+    });
+    sample.links.forEach(function (l) {
+      var a = nodeById[l[0]], b = nodeById[l[1]];
+      if (!a || !b) return;
+      links.push({ source: a, target: b });
+      a.degree += 1; b.degree += 1;
+    });
+
+    var alpha = 1;
+    var view = { k: 1, tx: 0, ty: 0 };
+    var hover = null, neighbors = {};
+    var dragNode = null, panning = false, lastX = 0, lastY = 0, moved = 0;
+
+    function resize() {
+      var w = stage.clientWidth, h = stage.clientHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (view.tx === 0 && view.ty === 0) { view.tx = w / 2; view.ty = h / 2; }
+    }
+    new ResizeObserver(resize).observe(stage);
+    resize();
+
+    function tick() {
+      if (alpha > 0.005) {
+        var i, j, n, a, b, dx, dy, d, f;
+        for (i = 0; i < nodes.length; i++) {
+          n = nodes[i];
+          if (n.fx !== null) { n.x = n.fx; n.vx = 0; }
+          if (n.fy !== null) { n.y = n.fy; n.vy = 0; }
+          n.vx += -n.x * centerStrength * alpha * 0.06;
+          n.vy += -n.y * centerStrength * alpha * 0.06;
+        }
+        for (i = 0; i < links.length; i++) {
+          a = links[i].source; b = links[i].target;
+          dx = b.x - a.x; dy = b.y - a.y;
+          d = Math.sqrt(dx * dx + dy * dy) || 1;
+          f = ((d - linkDistance) / d) * alpha * 0.045;
+          a.vx += dx * f; a.vy += dy * f;
+          b.vx -= dx * f; b.vy -= dy * f;
+        }
+        for (i = 0; i < nodes.length; i++) {
+          for (j = i + 1; j < nodes.length; j++) {
+            a = nodes[i]; b = nodes[j];
+            dx = b.x - a.x; dy = b.y - a.y;
+            d = Math.sqrt(dx * dx + dy * dy) || 1;
+            if (d < collideRadius * 2.4) {
+              f = (collideRadius * 2.4 - d) / d * alpha * 0.5;
+              a.vx -= dx * f; a.vy -= dy * f;
+              b.vx += dx * f; b.vy += dy * f;
+            }
+            f = charge * alpha * 0.55 / (d * d + 40);
+            a.vx += dx * f; a.vy += dy * f;
+            b.vx -= dx * f; b.vy -= dy * f;
+          }
+        }
+        for (i = 0; i < nodes.length; i++) {
+          n = nodes[i];
+          n.vx *= 0.82; n.vy *= 0.82;
+          if (n.fx === null) n.x += n.vx;
+          if (n.fy === null) n.y += n.vy;
+        }
+        alpha *= 0.985;
+      }
+    }
+
+    function draw() {
+      var w = canvas.width / dpr, h = canvas.height / dpr;
+      var cs = getComputedStyle(root);
+      var panel = cs.getPropertyValue('--panel').trim();
+      var grid = cs.getPropertyValue('--border').trim();
+      var nodeFill = cs.getPropertyValue('--node').trim();
+      var linkColor = cs.getPropertyValue('--border-strong').trim();
+      var textColor = cs.getPropertyValue('--muted').trim();
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = panel; ctx.fillRect(0, 0, w, h);
+
+      /* grid（本物と同じ控えめな方眼） */
+      if (view.k > 0.3) {
+        ctx.strokeStyle = grid; ctx.globalAlpha = 0.35; ctx.lineWidth = 1;
+        var step = 48 * view.k;
+        var ox = view.tx % step, oy = view.ty % step;
+        ctx.beginPath();
+        for (var x = ox; x < w; x += step) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
+        for (var y = oy; y < h; y += step) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
+        ctx.stroke(); ctx.globalAlpha = 1;
+      }
+
+      function sx(n) { return n.x * view.k + view.tx; }
+      function sy(n) { return n.y * view.k + view.ty; }
+
+      /* links */
+      links.forEach(function (l) {
+        var hi = hover && (l.source.id === hover.id || l.target.id === hover.id ||
+          (neighbors[l.source.id] && l.target.id === hover.id) ||
+          (neighbors[l.target.id] && l.source.id === hover.id));
+        ctx.strokeStyle = hi ? cs.getPropertyValue('--accent').trim() : linkColor;
+        ctx.globalAlpha = hover ? (hi ? 0.9 : 0.15) : 0.55;
+        ctx.lineWidth = hi ? 1.5 : 1;
+        ctx.beginPath();
+        ctx.moveTo(sx(l.source), sy(l.source));
+        ctx.lineTo(sx(l.target), sy(l.target));
+        ctx.stroke();
+      });
+      ctx.globalAlpha = 1;
+
+      /* nodes */
+      nodes.forEach(function (n) {
+        var r = n.group === 'tag' ? 8 : (n.sub ? 4.5 : 6);
+        var isHover = hover && n.id === hover.id;
+        var dim = hover && !isHover && !neighbors[n.id];
+        if (isHover) r += 2;
+        ctx.globalAlpha = dim ? 0.25 : 1;
+        ctx.beginPath();
+        ctx.arc(sx(n), sy(n), Math.max(2, r * Math.min(view.k, 2)), 0, Math.PI * 2);
+        if (n.group === 'tag') {
+          ctx.fillStyle = PALETTE[n.cat];
+          ctx.shadowColor = PALETTE[n.cat];
+          ctx.shadowBlur = isHover ? 18 : 8;
+        } else {
+          ctx.fillStyle = nodeFill;
+          ctx.shadowColor = nodeFill;
+          ctx.shadowBlur = isHover ? 12 : 0;
+        }
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        var showLabel = n.group === 'tag' || isHover || view.k >= LOD;
+        if (showLabel) {
+          ctx.font = '10px ui-monospace, Consolas, monospace';
+          ctx.fillStyle = isHover ? cs.getPropertyValue('--text').trim() : textColor;
+          ctx.fillText(n.name, sx(n) + 11 * Math.min(view.k, 1.6), sy(n) + 3);
+        }
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    (function loop() {
+      tick();
+      draw();
+      requestAnimationFrame(loop);
+    })();
+
+    /* ------- interaction: node hit → drag, otherwise → pan ------- */
+    function toWorld(e) {
+      var rect = canvas.getBoundingClientRect();
+      return {
+        x: ((e.clientX - rect.left) - view.tx) / view.k,
+        y: ((e.clientY - rect.top) - view.ty) / view.k,
+        sx: e.clientX - rect.left,
+        sy: e.clientY - rect.top
+      };
+    }
+    function nodeAt(p) {
+      var r = hitRadius / view.k;
+      var best = null, bestD = r;
+      nodes.forEach(function (n) {
+        var d = Math.hypot(n.x - p.x, n.y - p.y);
+        if (d < bestD) { best = n; bestD = d; }
+      });
+      return best;
+    }
+
+    canvas.addEventListener('pointerdown', function (e) {
+      canvas.setPointerCapture(e.pointerId);
+      var p = toWorld(e);
+      var n = nodeAt(p);
+      moved = 0; lastX = e.clientX; lastY = e.clientY;
+      if (n) {
+        dragNode = n; n.fx = n.x; n.fy = n.y; alpha = Math.max(alpha, 0.3);
+        canvas.classList.add('dragging');
+      } else {
+        panning = true;
+        canvas.classList.add('dragging');
+      }
+    });
+    var panLast = null;
+    canvas.addEventListener('pointerdown', function (e) { panLast = { x: e.clientX, y: e.clientY }; });
+    canvas.addEventListener('pointermove', function (e) {
+      var p = toWorld(e);
+      moved += Math.abs(e.clientX - lastX) + Math.abs(e.clientY - lastY);
+      lastX = e.clientX; lastY = e.clientY;
+      if (dragNode) {
+        dragNode.fx = p.x; dragNode.fy = p.y; alpha = Math.max(alpha, 0.25);
+      } else if (panning && panLast) {
+        view.tx += e.clientX - panLast.x;
+        view.ty += e.clientY - panLast.y;
+      }
+      if (panLast) { panLast.x = e.clientX; panLast.y = e.clientY; }
+      hoverTest(p);
+    });
+
+    function hoverTest(p) {
+      if (dragNode || panning) return;
+      var n = nodeAt(p);
+      if ((n && n.id) !== (hover && hover.id)) {
+        hover = n;
+        neighbors = {};
+        if (n) links.forEach(function (l) {
+          if (l.source.id === n.id) neighbors[l.target.id] = true;
+          if (l.target.id === n.id) neighbors[l.source.id] = true;
+        });
+      }
+    }
+
+    canvas.addEventListener('pointerleave', function () { hover = null; neighbors = {}; });
+
+    canvas.addEventListener('pointerup', function (e) {
+      canvas.classList.remove('dragging');
+      if (dragNode) {
+        var n = dragNode;
+        dragNode.fx = null; dragNode.fy = null;
+        dragNode = null;
+        if (moved < 6) announce(n);
+      } else if (panning && moved < 6) {
+        announce(nodeAt(toWorld(e)));
+      }
+      panning = false; panLast = null;
+    });
+
+    var actionEl = document.getElementById('g-action');
+    function announce(n) {
+      if (!n) { actionEl.innerHTML = '何もない場所をクリックしました（本番でもパンに使われます）'; return; }
+      if (n.group === 'post') {
+        actionEl.innerHTML = '<b>' + n.name + '</b> → 実行時は <b>/blog/' + n.id + '</b> へ遷移します';
+      } else {
+        var tag = n.name.replace(/^#/, '');
+        actionEl.innerHTML = '<b>' + n.name + '</b> → 実行時は <b>/tags/' + encodeURIComponent(tag) + '/</b> へ遷移します';
+      }
+    }
+
+    canvas.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      var rect = canvas.getBoundingClientRect();
+      var mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      var factor = Math.exp(-e.deltaY * 0.0015);
+      var newK = Math.min(8, Math.max(0.1, view.k * factor));
+      var wx = (mx - view.tx) / view.k, wy = (my - view.ty) / view.k;
+      view.k = newK;
+      view.tx = mx - wx * newK; view.ty = my - wy * newK;
+    }, { passive: false });
+
+    function zoomBy(f) {
+      var w = canvas.clientWidth / 2, h = canvas.clientHeight / 2;
+      var newK = Math.min(8, Math.max(0.1, view.k * f));
+      var wx = (w - view.tx) / view.k, wy = (h - view.ty) / view.k;
+      view.k = newK;
+      view.tx = w - wx * newK; view.ty = h - wy * newK;
+    }
+    document.getElementById('g-zoom-in').addEventListener('click', function () { zoomBy(1.25); });
+    document.getElementById('g-zoom-out').addEventListener('click', function () { zoomBy(0.8); });
+    document.getElementById('g-reset').addEventListener('click', function () {
+      nodes.forEach(function (n) {
+        n.x = (Math.random() - 0.5) * 80; n.y = (Math.random() - 0.5) * 80;
+        n.vx = 0; n.vy = 0; n.fx = null; n.fy = null;
+      });
+      view.k = 1; view.tx = canvas.clientWidth / 2; view.ty = canvas.clientHeight / 2;
+      alpha = 1;
+      actionEl.textContent = 'ノードをクリックすると、本番での遷移先がここに表示されます';
+    });
+  })();
+
+  /* ---------------- build runner ---------------- */
+  (function buildRunner() {
+    var stagesEl = document.getElementById('stages');
+    var artifactsEl = document.getElementById('artifacts');
+    var runBtn = document.getElementById('build-run');
+    var running = false;
+
+    var STAGES = [
+      {
+        name: 'astro check', cmd: 'astro check', ms: 850,
+        lines: ['132 ファイルを型検査', '0 errors / 0 warnings / 0 hints']
+      },
+      {
+        name: 'content sync', cmd: '（astro build の内部）', ms: 900,
+        lines: ['39 Markdown → 38 エントリ', 'Zod スキーマ検証 OK', 'draft 1 件を除外 → 37 記事を公開']
+      },
+      {
+        name: 'astro build', cmd: 'astro build', ms: 1500,
+        lines: ['ページ生成: / ・ /blog ・ /tags ・ /about ・ 404 …', 'OG 画像 38 枚を生成（satori → resvg）', 'graph.json / rss.xml / llms.txt / sitemap を出力', '50 個の HTML を dist/ に書き出し']
+      },
+      {
+        name: 'pagefind (integration)', cmd: 'astro-pagefind integration', ms: 800,
+        lines: ['言語: ja を検出', '37 ページ / 1,487 語を索引化', '対象は記事本文のみ（data-pagefind-body）']
+      }
+    ];
+
+    runBtn.addEventListener('click', function () {
+      if (running) return;
+      running = true;
+      runBtn.disabled = true;
+      stagesEl.innerHTML = '';
+      artifactsEl.style.display = 'none';
+      var i = 0;
+      function nextStage() {
+        if (i >= STAGES.length) {
+          running = false;
+          runBtn.disabled = false;
+          artifactsEl.style.display = 'flex';
+          return;
+        }
+        var st = STAGES[i];
+        var el = document.createElement('div');
+        el.className = 'stage running show';
+        el.innerHTML = '<div class="stage-top"><span class="stage-icon"></span>' +
+          '<span class="stage-name">' + st.name + '</span>' +
+          '<span class="stage-cmd">$ ' + st.cmd + '</span></div>' +
+          '<div class="stage-out"></div>';
+        stagesEl.appendChild(el);
+        var out = el.querySelector('.stage-out');
+        var li = 0;
+        var lineTimer = setInterval(function () {
+          if (li >= st.lines.length) return;
+          var d = document.createElement('div');
+          d.textContent = st.lines[li];
+          out.appendChild(d);
+          li += 1;
+        }, Math.max(120, st.ms / (st.lines.length + 1)));
+        setTimeout(function () {
+          clearInterval(lineTimer);
+          el.classList.remove('running');
+          el.classList.add('done');
+          i += 1;
+          nextStage();
+        }, st.ms + st.lines.length * 140);
+      }
+      nextStage();
+    });
+  })();
+
+  /* ---------------- file tree ---------------- */
+  (function fileTree() {
+    var INFO = {
+      'src': { path: 'src/', title: 'ソースコード全体', body: 'Astro プロジェクトのすべて。コンテンツ・表示・ロジック・スタイルがここにあります。' },
+      'content-config': { path: 'src/content.config.ts', title: 'コレクション定義', body: 'blog / authors / projects の3つのコレクションと、それぞれの Zod スキーマを定義。glob ローダーのパターンもここ。壊れた frontmatter をビルド時に検出する門番です。' },
+      'content': { path: 'src/content/', title: 'コンテンツ', body: '人が直接編集する唯一の領域。ここを書き換えるとサイトの中身が変わります。' },
+      'content-blog': { path: 'src/content/blog/', title: '記事（39 md/mdx）', body: '37 公開記事 + draft 1 + テンプレート 1。ディレクトリ構造が親子関係を表し、_ 始まりのファイルはローダーが無視します。' },
+      'content-authors': { path: 'src/content/authors/', title: '著者（1名）', body: '名前・アバター・SNS。記事からは reference で参照され、存在しない名前はスキーマ検証で弾かれます。' },
+      'content-projects': { path: 'src/content/projects/', title: 'プロジェクト（6件）', body: 'トップページに並ぶ作品カード。名前・説明・タグ・画像・リンク・期間を持ちます。' },
+      'pages': { path: 'src/pages/', title: 'ルーティング（14ファイル）', body: 'ファイル名がそのまま URL になります。動的ルート（[...id] や [tag]）は getStaticPaths で全件展開され、ビルド時に静的ファイルになります。' },
+      'page-index': { path: 'src/pages/index.astro', title: 'トップページ', body: 'ヒーロー・知識グラフ・最近の記事を表示。グラフはここで初めて登場します。' },
+      'page-blog-id': { path: 'src/pages/blog/[...id].astro', title: '記事ページ', body: '全記事の個別ページを生成。BlogPost.astro に描画を任せ、存在しない ID は 404 にします。' },
+      'page-blog-page': { path: 'src/pages/blog/[...page].astro', title: '記事一覧', body: 'ページネーション付きの一覧。1ページ20件（postsPerPage）。' },
+      'page-tags': { path: 'src/pages/tags/…', title: 'タグページ', body: 'タグ一覧と、タグごとの記事一覧。グラフのタグノードをクリックしたときの遷移先でもあります。' },
+      'page-og': { path: 'src/pages/og/[...slug].png.ts', title: 'OG画像の生成', body: 'satori でタイトルを SVG 化し resvg で PNG に。記事ごとに1枚（37）+ 既定1枚（default.png）= 38 枚をビルド時に生成。md5 キャッシュ付き。' },
+      'page-graphjson': { path: 'src/pages/graph.json.ts', title: 'グラフデータAPI', body: '全記事をノードに、タグと内部リンクをエッジに変換して JSON で出力。クライアントのグラフはこれを fetch します。' },
+      'page-feeds': { path: 'rss.xml.ts / robots.txt.ts / llms.txt.ts', title: 'メタ出力', body: 'RSS フィード、クローラー向け robots、AI 向け llms.txt / llms-full.txt。すべてビルド時の静的ファイルです。' },
+      'layouts': { path: 'src/layouts/', title: 'レイアウト', body: 'ページの骨格。全ページ共通のヘッダ・フッタ・head を提供します。' },
+      'layout-base': { path: 'src/layouts/BaseLayout.astro', title: 'HTMLの骨格', body: 'html / head / body の外枠。Head（メタ・ClientRouter）・検索ダイアログ・液体ガラスの SVG フィルタを読み込みます。' },
+      'layout-main': { path: 'src/layouts/Layout.astro', title: 'サイトの枠', body: 'ヘッダ・フッタ・main を配置。Pagefind の索引対象（data-pagefind-body）は記事本文の article 要素側（BlogPost.astro）に付いています。' },
+      'components': { path: 'src/components/', title: 'コンポーネント（約40+）', body: '表示部品のフラットな集合体。Header・Footer・SearchDialog・TOC・グラフ・カード類など、1ファイル1責務で並んでいます。' },
+      'lib': { path: 'src/lib/', title: 'ロジック', body: '表示を含まない純粋なロジック。コンテンツの検索・整形と、グラフの物理・描画がここに集まっています。' },
+      'lib-datautils': { path: 'src/lib/data-utils.ts', title: 'データ集約', body: 'getPostPageData() が1記事分の全情報（著者・前後・目次・バックリンク・読了時間）を並列で集めて束ねる、ページとデータの橋渡し。' },
+      'lib-content': { path: 'src/lib/content/', title: 'コンテンツクエリ', body: 'posts（正規化・並び・親子）、toc（目次）、links（内部リンク・バックリンク）、authors、subposts-data。すべて純関数に近く、テストしやすい形です。' },
+      'lib-graph': { path: 'src/lib/graph/', title: 'グラフ本体', body: 'data（データ整形・タグ色割当の純関数）・geometry（当たり判定）・manager（全体の指揮）・physics + worker（d3-force を別スレッドで）・renderer（Canvas 描画）・interaction（drag/zoom/hover/click）。このサイトで一番複雑な部分です。' },
+      'styles': { path: 'src/styles/', title: 'スタイル', body: 'global.css にデザイントークン（oklch）と液体ガラス（.liquid-glass）の定義。typography.css が本文の組版を担当します。' },
+      'public': { path: 'public/', title: '静的アセット', body: 'favicon・フォント・icon.webp・.well-known。ビルドを通さずそのまま dist にコピーされます。' },
+      'docs': { path: 'docs/', title: 'ドキュメント', body: 'リファクタリング計画とこの文書。どちらも単一ファイルで完結しています。' }
+    };
+
+    var treeEl = document.getElementById('tree');
+    var infoEl = document.getElementById('tree-info');
+    var buttons = treeEl.querySelectorAll('button[data-node]');
+
+    buttons.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var key = b.getAttribute('data-node');
+        var info = INFO[key] || { path: key, title: key, body: '' };
+        buttons.forEach(function (x) { x.classList.remove('active'); });
+        b.classList.add('active');
+        infoEl.innerHTML = '<h3>' + info.title + '</h3>' +
+          '<div class="path">' + info.path + '</div>' +
+          '<p>' + info.body + '</p>';
+      });
+    });
+  })();
+
+  /* ---------------- tests ---------------- */
+  (function testsSection() {
+    var CASES = [
+      {
+        tab: 'PageHead.test.ts', title: 'OGメタタグの既定値まで固定',
+        where: 'src/components/PageHead.test.ts',
+        body: '記事がないページでは og:image が /og/default.png になること、記事には title・description・JSON-LD が正しく出ることを検証。メタタグの「うっかり壊れ」を防ぎます。',
+        code: 'expect(html).toContain(\n  \'<meta property="og:image" content="https://romophic.com/og/default.png">\'\n)'
+      },
+      {
+        tab: 'posts.test.ts', title: 'ID正規化と親子判定の仕様',
+        where: 'src/lib/content/posts.test.ts',
+        body: '40 のテストで、/index の除去・draft 除外・日付降順・order 順の子記事・前後ナビゲーションといった「記事の並べ方のルール」を固定しています。テスト内には小さな疑似ファイル構成が定義されています。',
+        code: '// テスト内の疑似ファイル構成\n{ id: \'series/index\',  date: 2024-01-01 }  → 正規化で \'series\'\n{ id: \'series/part-1\', order: 1 }         → 親はパスから推論\n{ id: \'draft-post\', draft: true }          → 常に除外'
+      },
+      {
+        tab: '_og.test.ts', title: 'OG画像ルートの分岐',
+        where: 'src/pages/og/_og.test.ts',
+        body: 'パス生成が「記事ぶん + default 1枚」になること、キャッシュヒット・読み込みエラー・フォント取得失敗などの分岐を検証。ネットワークに触れないよう fetch と fs をモックします。',
+        code: 'const paths = await getStaticPaths()\nexpect(paths).toHaveLength(3)\nexpect(paths[2].params.slug).toBe(\'default\')'
+      },
+      {
+        tab: 'renderer.test.ts', title: '配色の分岐と描画のスモークテスト',
+        where: 'src/lib/graph/renderer.test.ts',
+        body: 'getNodeColor の配色分岐（category なし → 既定色 / ダーク・ライトでパレット切替）と、モックした Canvas コンテキストで renderGraph がクラッシュせず走ることを検証します。',
+        code: 'it(\'returns nodeDefault when category is undefined\', () => {\n  expect(getNodeColor(makeNode(), true, mockTheme)).toBe(\'#aaa\')\n})'
+      }
+    ];
+
+    var tabsEl = document.getElementById('test-tabs');
+    var caseEl = document.getElementById('test-case');
+    var btns = [];
+    CASES.forEach(function (c, i) {
+      var b = document.createElement('button');
+      b.textContent = c.tab;
+      b.addEventListener('click', function () { show(i); });
+      tabsEl.appendChild(b);
+      btns.push(b);
+    });
+    function show(i) {
+      var c = CASES[i];
+      btns.forEach(function (b, j) { b.classList.toggle('active', j === i); });
+      caseEl.innerHTML = '<h3>' + c.title + '</h3>' +
+        '<span class="where">' + c.where + '</span>' +
+        '<p>' + c.body + '</p>' +
+        '<pre class="code">' + esc(c.code) + '</pre>';
+    }
+    show(0);
+  })();
+
+  /* ---------------- command palette（この文書内の簡易検索） ---------------- */
+  (function palette() {
+    var backdrop = document.getElementById('palette');
+    var input = document.getElementById('pal-input');
+    var list = document.getElementById('pal-list');
+    var openBtn = document.getElementById('palette-open');
+
+    var ITEMS = [
+      { id: 'overview', label: '全体像 — 7つの駅', keys: 'pipeline content schema query view route build dist 流れ' },
+      { id: 'recipe', label: '記事の一生 — Markdown から公開まで', keys: 'markdown frontmatter zod loader id 正規化 og' },
+      { id: 'graph', label: '知識グラフ — 触れるデモ', keys: 'graph d3 force worker canvas drag zoom hover' },
+      { id: 'build', label: 'ビルド — pnpm build の流れ', keys: 'astro check build pagefind dist ci' },
+      { id: 'files', label: 'ファイル地図', keys: 'src lib pages components layouts content' },
+      { id: 'runtime', label: 'ランタイム — ブラウザで起きること', keys: 'theme fouc view transition toc search giscus' },
+      { id: 'tests', label: 'テスト — 生きた仕様書', keys: 'vitest astrocontainer 210' }
+    ];
+
+    var sel = 0, filtered = ITEMS.slice();
+
+    function render() {
+      if (!filtered.length) {
+        list.innerHTML = '<div class="pal-empty">該当するセクションがありません</div>';
+        return;
+      }
+      list.innerHTML = filtered.map(function (it, i) {
+        return '<button class="pal-item' + (i === sel ? ' sel' : '') + '" data-id="' + it.id + '">' +
+          it.label + '<small>#' + it.id + '</small></button>';
+      }).join('');
+      Array.prototype.forEach.call(list.querySelectorAll('.pal-item'), function (b) {
+        b.addEventListener('click', function () { go(b.getAttribute('data-id')); });
+      });
+    }
+    function filter() {
+      var q = input.value.trim().toLowerCase();
+      filtered = ITEMS.filter(function (it) {
+        return !q || (it.label + ' ' + it.keys + ' ' + it.id).toLowerCase().indexOf(q) !== -1;
+      });
+      sel = 0;
+      render();
+    }
+    function open() {
+      backdrop.hidden = false;
+      input.value = '';
+      filtered = ITEMS.slice();
+      sel = 0;
+      render();
+      input.focus();
+    }
+    function close() { backdrop.hidden = true; }
+    function go(id) {
+      close();
+      var el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    openBtn.addEventListener('click', open);
+    backdrop.addEventListener('click', function (e) { if (e.target === backdrop) close(); });
+    input.addEventListener('input', filter);
+    document.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (backdrop.hidden) open(); else close();
+      } else if (!backdrop.hidden) {
+        if (e.key === 'Escape') close();
+        else if (e.key === 'ArrowDown') { sel = Math.min(sel + 1, filtered.length - 1); render(); e.preventDefault(); }
+        else if (e.key === 'ArrowUp') { sel = Math.max(sel - 1, 0); render(); e.preventDefault(); }
+        else if (e.key === 'Enter' && filtered[sel]) go(filtered[sel].id);
+      }
+    });
+    render();
+  })();
+})();
+</script>
+</body>
+</html>
