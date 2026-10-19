@@ -1,55 +1,50 @@
----
-import { GISCUS_CONFIG } from '@/consts'
----
-
 <div id="comments-section" class="mt-10">
-  <giscus-widget
-    id="comments"
-    repo={GISCUS_CONFIG.repo}
-    repoid={GISCUS_CONFIG.repoId}
-    category={GISCUS_CONFIG.category}
-    categoryid={GISCUS_CONFIG.categoryId}
-    mapping={GISCUS_CONFIG.mapping}
-    strict={GISCUS_CONFIG.strict}
-    reactionsenabled={GISCUS_CONFIG.reactionsEnabled}
-    emitmetadata={GISCUS_CONFIG.emitMetadata}
-    inputposition={GISCUS_CONFIG.inputPosition}
-    lang={GISCUS_CONFIG.lang}
-    loading={GISCUS_CONFIG.loading}
-    crossorigin="anonymous"
-    async></giscus-widget>
-
-  <script is:inline>
-    // Pin the initial theme before the giscus-widget custom element upgrades.
-    // The widget snapshots its theme when it first renders. Waiting for
-    // astro:page-load (window.load) loses the race: the lazy iframe boots with
-    // the default "light" theme and the later theme-change message is dropped
-    // because the iframe content is not loaded yet.
-    const widget = document.querySelector('giscus-widget')
-    if (widget) {
-      const isDark = document.documentElement.classList.contains('dark')
-      widget.setAttribute('theme', isDark ? 'transparent_dark' : 'light')
-    }
-  </script>
+  <div id="comments" class="giscus"></div>
 </div>
 
 <script>
-  interface GiscusWidget extends HTMLElement {
-    theme: string
-  }
+  import {
+    GISCUS_IFRAME_ORIGIN,
+    GISCUS_SCRIPT_URL,
+    giscusEmbedAttributes,
+    giscusSetConfigMessage,
+    giscusTheme,
+  } from '@/lib/giscus'
 
-  function updateGiscusTheme() {
-    const giscus = document.querySelector('giscus-widget') as GiscusWidget
-    if (!giscus) return
+  const currentTheme = () =>
+    giscusTheme(document.documentElement.classList.contains('dark'))
 
-    const isDark = document.documentElement.classList.contains('dark')
-    const theme = isDark ? 'transparent_dark' : 'light'
-    giscus.theme = theme
-  }
-
+  // Re-inject the official embed after every navigation: astro:page-load runs
+  // on first load and after each swap. The script derives the discussion term
+  // from location.pathname and reads data-theme when it executes, so mounting
+  // it here - when the URL and the swapped DOM are final - is what keeps the
+  // thread and the theme correct on client-side navigation. The embed fills
+  // the .giscus container (and removes the injected script element).
   document.addEventListener('astro:page-load', () => {
-    updateGiscusTheme()
-    window.removeEventListener('theme-change', updateGiscusTheme)
-    window.addEventListener('theme-change', updateGiscusTheme)
+    const container = document.querySelector<HTMLElement>('.giscus')
+    if (!container) return
+    if (container.querySelector('script, iframe')) return
+
+    const script = document.createElement('script')
+    script.src = GISCUS_SCRIPT_URL
+    script.async = true
+    script.crossOrigin = 'anonymous'
+    for (const [key, value] of Object.entries(
+      giscusEmbedAttributes(currentTheme()),
+    )) {
+      script.dataset[key] = value
+    }
+    container.appendChild(script)
+  })
+
+  // Live theme toggles use the documented setConfig message.
+  window.addEventListener('theme-change', () => {
+    const iframe = document.querySelector<HTMLIFrameElement>(
+      'iframe.giscus-frame',
+    )
+    iframe?.contentWindow?.postMessage(
+      giscusSetConfigMessage(currentTheme()),
+      GISCUS_IFRAME_ORIGIN,
+    )
   })
 </script>

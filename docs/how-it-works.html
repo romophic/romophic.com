@@ -648,7 +648,7 @@
       <details class="rt">
         <summary>その他の小物 <span class="tag">ScrollProgress / ScrollToTop / Giscus</span></summary>
         <div class="body">
-          <p><b>ScrollProgress</b> — ページ上端の細いバーで読書位置を表示。<b>ScrollToTop</b> — 記事末の「上へ」ボタン。<b>Giscus</b> — GitHub Discussions をコメント欄にする iframe（lazy 読み込み）。テーマはウィジェットのアップグレード前に、マークアップ直後のインラインスクリプトで <code>theme</code> 属性として固定する（lazy iframe がデフォルトの light で起動してしまう競合を回避）。すべて小さな独立コンポーネントで、必要なページだけに載ります。</p>
+          <p><b>ScrollProgress</b> — ページ上端の細いバーで読書位置を表示。<b>ScrollToTop</b> — 記事末の「上へ」ボタン。<b>Giscus</b> — GitHub Discussions をコメント欄にする iframe（lazy 読み込み）。カスタム要素ではなく公式の client.js を <code>astro:page-load</code>（初回ロード＋全ナビゲーション後）で毎回注入し、discussion の term はスクリプト実行時の <code>location.pathname</code> から、テーマは注入時の <code>data-theme</code> から決まる（クライアント遷移で前の記事のスレッド・テーマになる競合を構造的に回避）。閲覧中のテーマ切替は公式の <code>setConfig</code> メッセージで live 更新。すべて小さな独立コンポーネントで、必要なページだけに載ります。</p>
           <div class="chips"><span class="chip">ScrollProgress.astro</span><span class="chip">ScrollToTop.astro</span><span class="chip">GiscusComments.astro</span></div>
         </div>
       </details>
