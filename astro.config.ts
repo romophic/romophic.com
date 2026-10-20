@@ -27,6 +27,10 @@ export default defineConfig({
       options: {
         package: '@fontsource-variable/noto-sans-jp',
       },
+      // The metric-matched fallback Astro generates for this CJK font scales
+      // the local sans-serif (Arial) to ~197%: text renders huge until the
+      // woff2 swaps in. Use the plain fallback instead.
+      optimizedFallbacks: false,
     },
   ],
   prefetch: {
