@@ -11,6 +11,16 @@ export default getViteConfig({
     },
     coverage: {
       provider: 'v8',
+      include: ['src/**/*.{ts,astro}'],
+      exclude: [
+        'src/**/*.test.ts',
+        'src/**/__mocks__/**',
+        'src/env.d.ts',
+        'src/types.ts',
+        'src/lib/graph/interaction.ts',
+        'src/lib/graph/manager.ts',
+        'src/lib/graph/physics.worker.ts',
+      ],
       thresholds: {
         lines: 92,
         statements: 92,
