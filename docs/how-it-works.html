@@ -433,7 +433,7 @@
       </p>
       <div class="facts">
         <div class="fact"><b>37</b><span>公開記事（親6 + 子31）</span></div>
-        <div class="fact"><b>210</b><span>テスト（60ファイル / Vitest）</span></div>
+        <div class="fact"><b>233</b><span>テスト（63ファイル / Vitest）</span></div>
         <div class="fact"><b>38</b><span>OG画像（記事37 + default）</span></div>
         <div class="fact"><b>0</b><span>実行時のDB・サーバー処理</span></div>
       </div>
@@ -639,7 +639,7 @@
       <details class="rt">
         <summary>検索（Pagefind のコマンドパレット） <span class="tag">SearchDialog.astro</span></summary>
         <div class="body">
-          <p>検索は <code>Ctrl/Cmd + K</code>。ネイティブの <code>&lt;dialog&gt;</code> の中に Pagefind の UI を載せています。索引はビルド時に <code>dist/pagefind/</code> として静的生成され、サーバー不要で動きます。</p>
+          <p>検索は <code>Ctrl/Cmd + K</code>。ネイティブの <code>&lt;dialog&gt;</code> の中に Pagefind の UI を載せています。索引はビルド時に <code>dist/pagefind/</code> として静的生成され、サーバー不要で動きます。UI 本体（<code>pagefind-component-ui.js</code> / <code>.css</code>）は初回にダイアログを開いたときだけ読み込むので、記事ページの初期表示では Pagefind の JavaScript は走りません。UI アセットはビルド生成物なので、開発サーバーで検索を試す前に一度 <code>pnpm build</code> が必要です（dev は <code>dist/pagefind/</code> を配信）。</p>
           <p style="margin-top:8px"><b>この文書でも似たものを実装しています。</b> <kbd>Ctrl</kbd>+<kbd>K</kbd> を押すと、この1ページ内を移動できるパレットが開きます。</p>
           <div class="chips"><span class="chip">Pagefind</span><span class="chip">native dialog</span><span class="chip">Ctrl+K</span></div>
         </div>
@@ -648,7 +648,7 @@
       <details class="rt">
         <summary>その他の小物 <span class="tag">ScrollProgress / ScrollToTop / Giscus</span></summary>
         <div class="body">
-          <p><b>ScrollProgress</b> — ページ上端の細いバーで読書位置を表示。<b>ScrollToTop</b> — 記事末の「上へ」ボタン。<b>Giscus</b> — GitHub Discussions をコメント欄にする iframe（lazy 読み込み）。カスタム要素ではなく公式の client.js を <code>astro:page-load</code>（初回ロード＋全ナビゲーション後）で毎回注入し、discussion の term はスクリプト実行時の <code>location.pathname</code> から、テーマは注入時の <code>data-theme</code> から決まる（クライアント遷移で前の記事のスレッド・テーマになる競合を構造的に回避）。閲覧中のテーマ切替は公式の <code>setConfig</code> メッセージで live 更新。すべて小さな独立コンポーネントで、必要なページだけに載ります。</p>
+          <p><b>ScrollProgress</b> — ページ上端の細いバーで読書位置を表示。<b>ScrollToTop</b> — 記事末の「上へ」ボタン。<b>Giscus</b> — GitHub Discussions をコメント欄にする iframe（lazy 読み込み）。カスタム要素ではなく公式の client.js を <code>astro:page-load</code>（初回ロード＋全ナビゲーション後）で毎回注入し、discussion の term はスクリプト実行時の <code>location.pathname</code> から、テーマは注入時の <code>data-theme</code> から決まる（クライアント遷移で前の記事のスレッド・テーマになる競合を構造的に回避）。閲覧中のテーマ切替は、読み込み済みなら公式の <code>setConfig</code> メッセージ、lazy iframe の起動前なら iframe URL の <code>theme</code> パラメータ、iframe 生成前なら注入待ちスクリプトの <code>data-theme</code> を更新して反映。すべて小さな独立コンポーネントで、必要なページだけに載ります。</p>
           <div class="chips"><span class="chip">ScrollProgress.astro</span><span class="chip">ScrollToTop.astro</span><span class="chip">GiscusComments.astro</span></div>
         </div>
       </details>
@@ -659,7 +659,7 @@
       <div class="sec-head">
         <p class="sec-kicker">7 / テスト</p>
         <h2>テストは「生きた仕様書」</h2>
-        <p>210 のテストが、コンポーネントの振る舞いを実行可能な形で文書化しています。<code>AstroContainer</code> で実際の <code>.astro</code> をレンダリングして検証します。</p>
+        <p>233 のテストが、コンポーネントの振る舞いを実行可能な形で文書化しています。<code>AstroContainer</code> で実際の <code>.astro</code> をレンダリングして検証します。</p>
       </div>
       <div class="test-grid">
         <div class="test-tabs" id="test-tabs"></div>
@@ -1458,7 +1458,7 @@
       { id: 'build', label: 'ビルド — pnpm build の流れ', keys: 'astro check build pagefind dist ci' },
       { id: 'files', label: 'ファイル地図', keys: 'src lib pages components layouts content' },
       { id: 'runtime', label: 'ランタイム — ブラウザで起きること', keys: 'theme fouc view transition toc search giscus' },
-      { id: 'tests', label: 'テスト — 生きた仕様書', keys: 'vitest astrocontainer 210' }
+      { id: 'tests', label: 'テスト — 生きた仕様書', keys: 'vitest astrocontainer 233' }
     ];
 
     var sel = 0, filtered = ITEMS.slice();
