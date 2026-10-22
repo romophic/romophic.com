@@ -11,12 +11,19 @@ export async function GET(context: APIContext) {
   try {
     const posts = await getAllPosts()
     const site = context.site ?? new URL(SITE.href)
+    const latestDate =
+      posts[0]?.data.updatedDate ?? posts[0]?.data.date ?? new Date()
 
     const items = await Promise.all(
       posts.map(async (post) => {
+        const postUrl = new URL(`/blog/${post.id}/`, site)
         let content: string | null = null
         try {
-          content = sanitizeFeedHtml(await renderPostContentHtml(post), site)
+          content = sanitizeFeedHtml(
+            await renderPostContentHtml(post),
+            site,
+            postUrl,
+          )
         } catch (error) {
           console.warn(`RSS: skipped full content for ${post.id}`, error)
         }
@@ -32,7 +39,7 @@ export async function GET(context: APIContext) {
           title: post.data.title,
           description: post.data.description,
           pubDate: post.data.date,
-          link: new URL(`/blog/${post.id}/`, site).href,
+          link: postUrl.href,
           ...(content && { content }),
           ...(customData.length > 0 && { customData: customData.join('') }),
         }
@@ -46,7 +53,13 @@ export async function GET(context: APIContext) {
       xmlns: {
         atom: 'http://www.w3.org/2005/Atom',
       },
-      customData: `<language>${SITE.locale}</language>`,
+      customData: [
+        `<language>${SITE.locale}</language>`,
+        `<lastBuildDate>${latestDate.toUTCString()}</lastBuildDate>`,
+        `<generator>Astro</generator>`,
+        `<copyright>${new Date().getFullYear()} ${SITE.author}</copyright>`,
+        `<atom:link href="${new URL('/rss.xml', site).href}" rel="self" type="application/rss+xml" />`,
+      ].join(''),
       items,
     })
   } catch (error) {

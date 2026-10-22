@@ -1,10 +1,16 @@
 import type { CollectionEntry } from 'astro:content'
 
 const SCRIPT_TAG = /<script[\s\S]*?<\/script>/gi
+const STYLE_TAG = /<style[\s\S]*?<\/style>/gi
+const STYLESHEET_LINK = /<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi
 const SPAN_TAG = /<span[\s>]|<\/span>/g
 
 export function stripScripts(html: string): string {
   return html.replace(SCRIPT_TAG, '')
+}
+
+export function stripStyles(html: string): string {
+  return html.replace(STYLE_TAG, '').replace(STYLESHEET_LINK, '')
 }
 
 export function stripKatexHtml(html: string): string {
@@ -41,22 +47,50 @@ export function stripKatexHtml(html: string): string {
   }
 }
 
-export function absolutizeUrls(html: string, site: URL): string {
-  const origin = site.origin
+function resolveUrl(value: string, site: URL, baseUrl?: URL): string {
+  const url = value.trim()
+  if (!url) return url
+  if (url.startsWith('#')) {
+    return baseUrl ? new URL(url, baseUrl).href : url
+  }
+  if (/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(url)) return url
+  if (url.startsWith('/')) return `${site.origin}${url}`
+  return baseUrl ? new URL(url, baseUrl).href : url
+}
+
+export function absolutizeUrls(
+  html: string,
+  site: URL,
+  baseUrl?: URL,
+): string {
   return html
-    .replace(/(\s(?:src|href))="\/(?!\/)/g, `$1="${origin}/`)
+    .replace(
+      /(\s(?:src|href))="([^"]*)"/g,
+      (_match, attribute: string, value: string) =>
+        `${attribute}="${resolveUrl(value, site, baseUrl)}"`,
+    )
     .replace(/\ssrcset="([^"]*)"/g, (_match, value: string) => {
       const rewritten = value
         .split(',')
-        .map((part) => part.trim())
-        .map((part) => (part.startsWith('/') ? origin + part : part))
+        .map((part) => {
+          const [url, ...descriptor] = part.trim().split(/\s+/)
+          return [resolveUrl(url, site, baseUrl), ...descriptor].join(' ')
+        })
         .join(', ')
       return ` srcset="${rewritten}"`
     })
 }
 
-export function sanitizeFeedHtml(html: string, site: URL): string {
-  return absolutizeUrls(stripKatexHtml(stripScripts(html)), site)
+export function sanitizeFeedHtml(
+  html: string,
+  site: URL,
+  baseUrl?: URL,
+): string {
+  return absolutizeUrls(
+    stripKatexHtml(stripStyles(stripScripts(html))),
+    site,
+    baseUrl,
+  )
 }
 
 export async function renderPostContentHtml(

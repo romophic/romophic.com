@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   stripScripts,
+  stripStyles,
   stripKatexHtml,
   absolutizeUrls,
   sanitizeFeedHtml,
@@ -26,6 +27,16 @@ describe('stripScripts', () => {
 
   it('removes multiline script bodies', () => {
     expect(stripScripts('x<script>\nvar a = 1\n</script>y')).toBe('xy')
+  })
+})
+
+describe('stripStyles', () => {
+  it('removes inline styles and stylesheet links', () => {
+    expect(
+      stripStyles(
+        '<style>.x{color:red}</style><link rel="stylesheet" href="/x.css"><p>x</p>',
+      ),
+    ).toBe('<p>x</p>')
   })
 })
 
@@ -72,15 +83,30 @@ describe('absolutizeUrls', () => {
       '<a href="#sec">s</a><a href="https://x.dev/a">e</a><img src="data:image/png;base64,AA">'
     expect(absolutizeUrls(html, SITE)).toBe(html)
   })
+
+  it('resolves fragment and relative URLs against the post URL', () => {
+    const base = new URL('https://romophic.com/blog/example/')
+    const html = '<a href="#sec">s</a><img src="img/a.png">'
+    expect(absolutizeUrls(html, SITE, base)).toBe(
+      '<a href="https://romophic.com/blog/example/#sec">s</a>' +
+        '<img src="https://romophic.com/blog/example/img/a.png">',
+    )
+  })
 })
 
 describe('sanitizeFeedHtml', () => {
   it('composes stripping and absolutizing for feed output', () => {
-    const html = '<script>x</script>' + KATEX_INLINE + '<img src="/i.png">'
-    const result = sanitizeFeedHtml(html, SITE)
+    const base = new URL('https://romophic.com/blog/example/')
+    const html =
+      '<script>x</script><style>.x{}</style>' +
+      KATEX_INLINE +
+      '<img src="/i.png"><a href="#sec">s</a>'
+    const result = sanitizeFeedHtml(html, SITE, base)
     expect(result).not.toContain('<script')
+    expect(result).not.toContain('<style')
     expect(result).not.toContain('katex-html')
     expect(result).toContain('<span class="katex-mathml">')
     expect(result).toContain('src="https://romophic.com/i.png"')
+    expect(result).toContain('href="https://romophic.com/blog/example/#sec"')
   })
 })

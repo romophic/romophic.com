@@ -64,6 +64,11 @@ describe('rss.xml endpoint', () => {
     const text = await response.text()
 
     expect(text).toContain(`<language>${SITE.locale}</language>`)
+    expect(text).toContain('<lastBuildDate>')
+    expect(text).toContain('<generator>Astro</generator>')
+    expect(text).toContain(
+      '<atom:link href="https://romophic.com/rss.xml" rel="self" type="application/rss+xml"/>',
+    )
     expect(text).toContain(
       '<atom:updated>2026-01-02T00:00:00.000Z</atom:updated>',
     )
