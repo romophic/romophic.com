@@ -433,7 +433,7 @@
       </p>
       <div class="facts">
         <div class="fact"><b>37</b><span>公開記事（親6 + 子31）</span></div>
-        <div class="fact"><b>233</b><span>テスト（63ファイル / Vitest）</span></div>
+        <div class="fact"><b>239</b><span>テスト（65ファイル / Vitest）</span></div>
         <div class="fact"><b>38</b><span>OG画像（記事37 + default）</span></div>
         <div class="fact"><b>0</b><span>実行時のDB・サーバー処理</span></div>
       </div>
@@ -659,7 +659,7 @@
       <div class="sec-head">
         <p class="sec-kicker">7 / テスト</p>
         <h2>テストは「生きた仕様書」</h2>
-        <p>233 のテストが、コンポーネントの振る舞いを実行可能な形で文書化しています。<code>AstroContainer</code> で実際の <code>.astro</code> をレンダリングして検証します。</p>
+        <p>239 のテストが、コンポーネントの振る舞いを実行可能な形で文書化しています。<code>AstroContainer</code> で実際の <code>.astro</code> をレンダリングして検証します。</p>
       </div>
       <div class="test-grid">
         <div class="test-tabs" id="test-tabs"></div>
@@ -851,7 +851,7 @@
       title: '1. 書く',
       lede: 'src/content/blog/romophic-library/lib/ に MDX ファイルを1枚置くだけ。',
       file: 'src/content/blog/romophic-library/lib/scc.mdx',
-      code: '---\ntitle: \'強連結成分分解(SCC)\'\ndate: 2024-07-30T22:01:37+09:00\ndescription: \'romophic-library\'\ntags: [\'c++\', \'competitive programming\']\nauthors: [\'romophic\']\norder: 23\n---\n\n## 用途\n強連結成分分解をする. 巡回可能な部分ごとにグラフを分けてまとめ, それらのDAGを作る.',
+      code: '---\ntitle: \'強連結成分分解(SCC)\'\ndate: 2024-07-30T22:01:37+09:00\ndescription: \'Find strongly connected components in a directed graph.\'\ntags: [\'c++\', \'competitive programming\']\nauthors: [\'romophic\']\norder: 23\n---\n\n## 用途\n強連結成分分解をする. 巡回可能な部分ごとにグラフを分けてまとめ, それらのDAGを作る.',
       note: 'parent フィールドは書いていません。親子関係は「lib/ の下にある」というパス構造から自動で推論されます。order がシリーズ内の並び順を決めます。'
     },
     {
@@ -1458,7 +1458,7 @@
       { id: 'build', label: 'ビルド — pnpm build の流れ', keys: 'astro check build pagefind dist ci' },
       { id: 'files', label: 'ファイル地図', keys: 'src lib pages components layouts content' },
       { id: 'runtime', label: 'ランタイム — ブラウザで起きること', keys: 'theme fouc view transition toc search giscus' },
-      { id: 'tests', label: 'テスト — 生きた仕様書', keys: 'vitest astrocontainer 233' }
+      { id: 'tests', label: 'テスト — 生きた仕様書', keys: 'vitest astrocontainer 239' }
     ];
 
     var sel = 0, filtered = ITEMS.slice();
