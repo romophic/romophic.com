@@ -1,19 +1,25 @@
 ---
-import Search from 'astro-pagefind/components/Search.astro'
+const pagefindBase = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}pagefind/`
 ---
 
 <dialog
   id="search-dialog"
+  aria-label="Search"
   class="liquid-glass text-foreground m-auto w-[calc(100%-2rem)] max-w-lg rounded-xl p-0 shadow-lg outline-none overflow-visible backdrop:bg-transparent backdrop:backdrop-blur-sm"
 >
   <div class="w-full relative">
-    <Search
-      className="pagefind-ui w-full"
-      searchboxOptions={{
-        'show-sub-results': true,
-        'show-images': false,
-      }}
-    />
+    <pagefind-config bundle-path={pagefindBase}></pagefind-config>
+    <pagefind-searchbox
+      class="pagefind-ui w-full"
+      show-sub-results="true"
+    ></pagefind-searchbox>
+    <p
+      id="search-status"
+      role="status"
+      aria-live="polite"
+      class="text-muted-foreground px-4 pb-3 text-sm"
+      hidden
+    ></p>
   </div>
 </dialog>
 
@@ -24,31 +30,178 @@ import Search from 'astro-pagefind/components/Search.astro'
     ) as HTMLDialogElement | null
     if (!dialog) return
 
+    const pagefindBase = (
+      dialog.querySelector('pagefind-config')?.getAttribute('bundle-path') ??
+      '/pagefind/'
+    ).replace(/\/?$/, '/')
+    const status = dialog.querySelector<HTMLElement>('#search-status')
+    let loadPromise: Promise<void> | null = null
+
+    const setStatus = (message: string | null) => {
+      if (!status) return
+      status.textContent = message ?? ''
+      status.hidden = message === null
+    }
+
+    const ensureStylesheet = () => {
+      if (document.querySelector('link[data-pagefind-ui]')) return
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = `${pagefindBase}pagefind-component-ui.css`
+      link.dataset.pagefindUi = ''
+      document.head.append(link)
+    }
+
+    const syncTheme = () => {
+      const searchbox = dialog.querySelector('pagefind-searchbox')
+      if (!searchbox) return
+      if (document.documentElement.classList.contains('dark')) {
+        searchbox.setAttribute('data-pf-theme', 'dark')
+      } else {
+        searchbox.removeAttribute('data-pf-theme')
+      }
+    }
+
+    const focusInput = (attempts = 0) => {
+      if (!dialog.open) return
+      const input =
+        dialog.querySelector<HTMLInputElement>('pagefind-searchbox input') ??
+        dialog.querySelector<HTMLInputElement>('input')
+      if (input) {
+        if (
+          !input.hasAttribute('aria-label') &&
+          !input.hasAttribute('aria-labelledby')
+        ) {
+          input.setAttribute('aria-label', 'Search')
+        }
+        input.focus()
+        return
+      }
+      if (attempts < 40) setTimeout(() => focusInput(attempts + 1), 50)
+    }
+
+    const waitForUpgrade = (timeoutMs: number) =>
+      new Promise<void>((resolve, reject) => {
+        const timer = window.setTimeout(
+          () => reject(new Error('Pagefind UI timed out')),
+          timeoutMs,
+        )
+        customElements.whenDefined('pagefind-searchbox').then(
+          () => {
+            window.clearTimeout(timer)
+            resolve()
+          },
+          (error) => {
+            window.clearTimeout(timer)
+            reject(error)
+          },
+        )
+      })
+
+    const loadPagefind = (): Promise<void> => {
+      ensureStylesheet()
+      if (customElements.get('pagefind-searchbox')) return Promise.resolve()
+      if (loadPromise) return loadPromise
+
+      const existing = document.querySelector<HTMLScriptElement>(
+        'script[data-pagefind-ui]',
+      )
+      if (existing) {
+        loadPromise = waitForUpgrade(10000).catch((error) => {
+          existing.remove()
+          loadPromise = null
+          throw error
+        })
+        return loadPromise
+      }
+
+      loadPromise = new Promise<void>((resolve, reject) => {
+        const script = document.createElement('script')
+        script.type = 'module'
+        script.src = `${pagefindBase}pagefind-component-ui.js`
+        script.dataset.pagefindUi = ''
+        const timer = window.setTimeout(() => {
+          script.remove()
+          reject(new Error('Pagefind UI timed out'))
+        }, 10000)
+        script.addEventListener(
+          'load',
+          () => {
+            window.clearTimeout(timer)
+            waitForUpgrade(10000).then(resolve, (error) => {
+              script.remove()
+              reject(error)
+            })
+          },
+          { once: true },
+        )
+        script.addEventListener(
+          'error',
+          () => {
+            window.clearTimeout(timer)
+            script.remove()
+            reject(new Error('Pagefind UI failed to load'))
+          },
+          { once: true },
+        )
+        document.head.append(script)
+      }).catch((error) => {
+        loadPromise = null
+        throw error
+      })
+
+      return loadPromise
+    }
+
     window.toggleCommandMenu = () => {
       if (dialog.open) {
         dialog.close()
-      } else {
-        dialog.showModal()
-        // Focus input
-        setTimeout(() => {
-          const input = dialog.querySelector('input')
-          if (input) input.focus()
-        }, 50)
+        return
       }
+
+      ensureStylesheet()
+      syncTheme()
+      dialog.showModal()
+
+      if (customElements.get('pagefind-searchbox')) {
+        setStatus(null)
+        focusInput()
+        return
+      }
+
+      setStatus('検索を読み込み中…')
+      void loadPagefind()
+        .then(() => {
+          if (!dialog.open) return
+          setStatus(null)
+          focusInput()
+        })
+        .catch(() => {
+          if (!dialog.open) return
+          setStatus(
+            import.meta.env.DEV
+              ? '検索 UI はビルド後に有効になります。先に pnpm build を実行してください。'
+              : '検索を読み込めませんでした。閉じてからもう一度開いてください。',
+          )
+        })
     }
 
     const handleKeydown = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
-        if (window.toggleCommandMenu) window.toggleCommandMenu()
+        window.toggleCommandMenu?.()
       }
     }
     document.addEventListener('keydown', handleKeydown)
+
+    const handleThemeChange = () => syncTheme()
+    window.addEventListener('theme-change', handleThemeChange)
 
     document.addEventListener(
       'astro:before-swap',
       () => {
         document.removeEventListener('keydown', handleKeydown)
+        window.removeEventListener('theme-change', handleThemeChange)
       },
       { once: true },
     )
@@ -63,63 +216,26 @@ import Search from 'astro-pagefind/components/Search.astro'
 </script>
 
 <style is:global>
-  /* Customizing pagefind to match dark mode and typography */
-  .pagefind-ui {
+  #search-dialog .pagefind-ui {
     width: 100%;
-    --pagefind-ui-scale: 0.85;
-    --pagefind-ui-primary: color-mix(
-      in oklab,
-      var(--primary) 50%,
-      var(--foreground) 50%
-    );
-    --pagefind-ui-text: var(--foreground);
-    --pagefind-ui-background: var(--background);
-    --pagefind-ui-border: var(--border);
-    --pagefind-ui-tag: color-mix(in oklab, var(--primary) 20%, transparent);
-    --pagefind-ui-border-width: 1px;
-    --pagefind-ui-border-radius: 6px;
-    --pagefind-ui-image-border-radius: 6px;
-    --pagefind-ui-font: var(--font-sans);
+    --pf-font: var(--font-sans);
+    --pf-text: var(--foreground);
+    --pf-text-secondary: var(--foreground);
+    --pf-text-muted: var(--foreground);
+    --pf-background: var(--background);
+    --pf-border: var(--border);
+    --pf-border-focus: var(--ring);
+    --pf-hover: var(--accent);
+    --pf-mark: var(--foreground);
+    --pf-border-radius: var(--radius);
+    --pf-outline-focus: var(--ring);
+    --pf-searchbox-max-width: 100%;
+    --pf-searchbox-dropdown-max-height: 60vh;
   }
 
-  .pagefind-ui .pagefind-ui__search-input {
-    font-weight: normal;
-    background-color: var(--background);
-    border-radius: var(--radius);
-  }
-
-  .pagefind-ui .pagefind-ui__drawer {
-    position: absolute !important;
-    top: 100%;
-    left: 0;
-    right: 0;
-    z-index: 9999 !important;
-    margin-top: 0.5rem;
-    background-color: var(--background);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow:
-      0 10px 25px -5px rgba(0, 0, 0, 0.1),
-      0 8px 10px -6px rgba(0, 0, 0, 0.1);
-    max-height: 60vh;
-    overflow-y: auto !important;
-    padding: 1rem;
-  }
-
-  /* 検索結果がない時や初期状態のボーダーやパディングを微調整 */
-  .pagefind-ui .pagefind-ui__drawer:empty {
-    display: none;
-  }
-
-  .pagefind-ui .pagefind-ui__result-excerpt mark {
+  #search-dialog .pf-searchbox-result-excerpt mark {
     background-color: color-mix(in oklab, var(--primary) 20%, transparent);
     color: var(--foreground);
     font-weight: 600;
-  }
-
-  .pagefind-ui .pagefind-ui__result-title,
-  .pagefind-ui .pagefind-ui__result-link {
-    color: var(--foreground);
-    font-weight: 500;
   }
 </style>
