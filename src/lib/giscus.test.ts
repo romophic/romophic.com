@@ -6,6 +6,7 @@ import {
   giscusEmbedAttributes,
   giscusSetConfigMessage,
   giscusTheme,
+  giscusThemeUrl,
 } from './giscus'
 
 describe('giscus (Test as Documentation)', () => {
@@ -53,6 +54,21 @@ describe('giscus (Test as Documentation)', () => {
       expect(giscusSetConfigMessage('transparent_dark')).toEqual({
         giscus: { setConfig: { theme: 'transparent_dark' } },
       })
+    })
+  })
+
+  describe('giscusThemeUrl', () => {
+    it('replaces the theme before the lazy iframe boots and keeps other parameters', () => {
+      const url = new URL(
+        giscusThemeUrl(
+          'https://giscus.app/widget?repo=romophic%2Fromophic.com&theme=transparent_dark&lang=ja',
+          'light',
+        ),
+      )
+
+      expect(url.searchParams.get('theme')).toBe('light')
+      expect(url.searchParams.get('lang')).toBe('ja')
+      expect(url.searchParams.get('repo')).toBe('romophic/romophic.com')
     })
   })
 

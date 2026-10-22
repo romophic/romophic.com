@@ -55,3 +55,15 @@ export function giscusEmbedAttributes(
 export function giscusSetConfigMessage(theme: GiscusTheme) {
   return { giscus: { setConfig: { theme } } }
 }
+
+/**
+ * Rewrites the `theme` query parameter of an embed URL. While the lazy iframe
+ * is still booting, setConfig messages are dropped because the embed has not
+ * attached its listener yet; the URL is read at boot, so this is the reliable
+ * way to apply a theme chosen before the iframe finished loading.
+ */
+export function giscusThemeUrl(src: string, theme: GiscusTheme): string {
+  const url = new URL(src)
+  url.searchParams.set('theme', theme)
+  return url.href
+}

@@ -9,6 +9,7 @@
     giscusEmbedAttributes,
     giscusSetConfigMessage,
     giscusTheme,
+    giscusThemeUrl,
   } from '@/lib/giscus'
 
   const currentTheme = () =>
@@ -25,6 +26,19 @@
     if (!container) return
     if (container.querySelector('script, iframe')) return
 
+    container.addEventListener(
+      'load',
+      (event) => {
+        if (
+          event.target instanceof HTMLIFrameElement &&
+          event.target.classList.contains('giscus-frame')
+        ) {
+          event.target.dataset.giscusLoaded = 'true'
+        }
+      },
+      true,
+    )
+
     const script = document.createElement('script')
     script.src = GISCUS_SCRIPT_URL
     script.async = true
@@ -37,14 +51,32 @@
     container.appendChild(script)
   })
 
-  // Live theme toggles use the documented setConfig message.
+  // Live theme toggles use the documented setConfig message. While the lazy
+  // iframe is still loading, setConfig is lost because the embed has not
+  // attached its listener yet, so rewrite the theme query parameter instead:
+  // the embed reads it when it boots. Before the iframe exists, the pending
+  // script's data-theme is the value the embed will read.
   window.addEventListener('theme-change', () => {
+    const theme = currentTheme()
     const iframe = document.querySelector<HTMLIFrameElement>(
       'iframe.giscus-frame',
     )
-    iframe?.contentWindow?.postMessage(
-      giscusSetConfigMessage(currentTheme()),
-      GISCUS_IFRAME_ORIGIN,
+
+    if (iframe) {
+      if (iframe.dataset.giscusLoaded !== 'true' && iframe.getAttribute('src')) {
+        iframe.src = giscusThemeUrl(iframe.src, theme)
+      } else {
+        iframe.contentWindow?.postMessage(
+          giscusSetConfigMessage(theme),
+          GISCUS_IFRAME_ORIGIN,
+        )
+      }
+      return
+    }
+
+    const script = document.querySelector<HTMLScriptElement>(
+      `script[src="${GISCUS_SCRIPT_URL}"]`,
     )
+    if (script) script.dataset.theme = theme
   })
 </script>
