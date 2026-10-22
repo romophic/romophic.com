@@ -2,6 +2,25 @@ import { glob } from 'astro/loaders'
 import { defineCollection, reference } from 'astro:content'
 import { z } from 'astro/zod'
 
+const httpUrl = z.url().refine(
+  (value) => {
+    try {
+      return /^https?:$/.test(new URL(value).protocol)
+    } catch {
+      return false
+    }
+  },
+  {
+    message: 'URL must use http or https',
+  },
+)
+
+const validDate = z
+  .coerce.date()
+  .refine((value) => !Number.isNaN(value.getTime()), {
+    message: 'Invalid date',
+  })
+
 const blog = defineCollection({
   loader: glob({
     pattern: ['**/*.{md,mdx}', '!**/_*'],
@@ -11,14 +30,14 @@ const blog = defineCollection({
     z.object({
       title: z.string(),
       description: z.string(),
-      date: z.coerce.date(),
+      date: validDate,
       parent: reference('blog').optional(),
       order: z.number().optional(),
       image: image().optional(),
       tags: z.array(z.string()).optional(),
       authors: z.array(reference('authors')).optional(),
       draft: z.boolean().default(false),
-      updatedDate: z.coerce.date().optional(),
+      updatedDate: validDate.optional(),
     }),
 })
 
@@ -27,14 +46,14 @@ const authors = defineCollection({
   schema: z.object({
     name: z.string(),
     pronouns: z.string().optional(),
-    avatar: z.url().or(z.string().startsWith('/')),
+    avatar: httpUrl.or(z.string().startsWith('/')),
     bio: z.string().optional(),
     mail: z.email().optional(),
-    website: z.url().optional(),
-    twitter: z.url().optional(),
-    github: z.url().optional(),
-    linkedin: z.url().optional(),
-    discord: z.url().optional(),
+    website: httpUrl.optional(),
+    twitter: httpUrl.optional(),
+    github: httpUrl.optional(),
+    linkedin: httpUrl.optional(),
+    discord: httpUrl.optional(),
   }),
 })
 
@@ -47,7 +66,7 @@ const projects = defineCollection({
 
       tags: z.array(z.string()),
       image: image(),
-      link: z.url(),
+      link: httpUrl,
       startDate: z.coerce.date().optional(),
       endDate: z.coerce.date().optional(),
     }),
