@@ -50,7 +50,7 @@ const parentId =
                       const isH2 = [1, 2].includes(heading.depth)
                       const isH3 = heading.depth === 3
                       const baseColor = isCurrentSubpost
-                        ? 'text-foreground/40'
+                        ? 'text-muted-foreground'
                         : isH2
                           ? 'text-foreground/90'
                           : 'text-muted-foreground hover:text-foreground'
@@ -91,7 +91,7 @@ const parentId =
                         class={`text-xs font-medium ${
                           section.subpostId === currentPostId
                             ? 'text-foreground'
-                            : 'text-foreground/60'
+                            : 'text-muted-foreground'
                         }`}
                       >
                         <a
@@ -130,7 +130,7 @@ const parentId =
                                   ? `#${heading.slug}`
                                   : `/blog/${section.subpostId}#${heading.slug}`
                               }
-                              class="marker:text-foreground/30 hover:text-foreground/60 list-none underline decoration-transparent underline-offset-[3px] transition-colors duration-200 hover:decoration-inherit"
+                              class="marker:text-foreground/30 hover:text-foreground list-none underline decoration-transparent underline-offset-[3px] transition-colors duration-200 hover:decoration-inherit"
                               data-heading-link={
                                 section.subpostId === currentPostId
                                   ? heading.slug

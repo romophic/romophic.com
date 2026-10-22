@@ -19,7 +19,7 @@
   --destructive-foreground: oklch(0.577 0.245 27.325);
   --border: oklch(0.92 0.004 286.32);
   --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.705 0.015 286.067);
+  --ring: oklch(0.62 0.015 286.067);
   --radius: 0.625rem;
 }
 
@@ -40,7 +40,7 @@
   --destructive-foreground: oklch(0.637 0.237 25.331);
   --border: oklch(0.274 0.006 286.033);
   --input: oklch(0.274 0.006 286.033);
-  --ring: oklch(0.442 0.017 285.786);
+  --ring: oklch(0.55 0.017 285.786);
 }
 
 @theme inline {

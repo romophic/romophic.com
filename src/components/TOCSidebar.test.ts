@@ -114,8 +114,8 @@ describe('TOCSidebar.astro', () => {
       props: { sections: mockSections, currentPostId: 'series/part-1' },
     })
 
-    // Because it's a subpost, baseColor for parent headings becomes text-foreground/40
-    expect(html).toContain('text-foreground/40')
+    // Because it's a subpost, parent headings use the muted foreground token
+    expect(html).toContain('text-muted-foreground')
     // Parent H2 gets subpost prefix link
     expect(html).toContain('href="/blog/series#h2"')
   })
