@@ -94,7 +94,7 @@ describe('TOCSidebar.astro', () => {
   it('renders correctly when the current post is a subpost', async () => {
     vi.mocked(postsUtils.getPostById).mockResolvedValue({
       id: 'series/part-1',
-      data: { parent: { id: 'series' } },
+      data: {},
     } as any)
     vi.mocked(dataUtils.isSubpost).mockReturnValue(true)
 

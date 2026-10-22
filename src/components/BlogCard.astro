@@ -16,9 +16,11 @@ import type { CollectionEntry } from 'astro:content'
 
 interface Props {
   entry: CollectionEntry<'blog'>
+  headingLevel?: 2 | 3
 }
 
-const { entry } = Astro.props
+const { entry, headingLevel = 3 } = Astro.props
+const Heading = `h${headingLevel}` as 'h2' | 'h3'
 const formattedDate = formatDate(entry.data.date)
 const readTimeMinutes = await getCombinedReadingTime(entry.id)
 const readTime = formatReadingTime(readTimeMinutes)
@@ -42,8 +44,8 @@ const entryImage = normalizeImage(entry.data.image)
           <Image
             src={entryImage}
             alt={entry.data.title}
-            widths={[400, 800, 1200]}
-            sizes="(max-width: 640px) 400px, (max-width: 1024px) 800px, 1200px"
+            widths={[320, 640]}
+            sizes="(max-width: 640px) 100vw, 320px"
             width={1200}
             height={630}
             class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -53,7 +55,7 @@ const entryImage = normalizeImage(entry.data.image)
     }
 
     <div class="grow">
-      <h3 class="mb-1 text-lg font-medium">{entry.data.title}</h3>
+      <Heading class="mb-1 text-lg font-medium">{entry.data.title}</Heading>
       <p class="text-muted-foreground mb-2 text-sm">{entry.data.description}</p>
 
       <div
@@ -99,7 +101,7 @@ const entryImage = normalizeImage(entry.data.image)
           <div class="flex flex-wrap gap-2">
             {entry.data.tags.map((tag) => (
               <a
-                href={`/tags/${tag}/`}
+                href={`/tags/${encodeURIComponent(tag)}/`}
                 class="border-primary/10 dark:border-primary/20 bg-primary/5 dark:bg-primary/10 text-primary hover:bg-primary/10 dark:hover:bg-primary/20 relative z-20 flex items-center gap-x-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors"
               >
                 <Icon name={ICONS.hash} class="size-3" />

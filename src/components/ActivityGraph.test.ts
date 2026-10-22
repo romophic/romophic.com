@@ -64,10 +64,27 @@ describe('ActivityGraph.astro', () => {
 
     // Just verifying it renders without errors, which means all branches were hit.
     expect(html).toContain('class="grid w-fit grid-flow-col grid-rows-7 gap-1"')
-    // Should have title tooltips with counts 1, 2, 3, 5
-    expect(html).toContain('1 posts on')
+    // Should have title tooltips with correctly pluralized counts
+    expect(html).toContain('1 post on')
     expect(html).toContain('2 posts on')
     expect(html).toContain('3 posts on')
     expect(html).toContain('5 posts on')
+    expect(html).toContain('11 contributions in the last year')
+  })
+
+  it('counts only contributions inside the displayed 365-day window', async () => {
+    const today = new Date()
+    const oldPostDate = new Date(today)
+    oldPostDate.setFullYear(oldPostDate.getFullYear() - 2)
+    vi.mocked(dataUtils.getAllPosts).mockResolvedValue([
+      { data: { date: today } },
+      { data: { date: oldPostDate } },
+    ] as CollectionEntry<'blog'>[])
+
+    const container = await AstroContainer.create()
+    const html = await container.renderToString(ActivityGraph)
+
+    expect(html).toContain('1 contribution in the last year')
+    expect(html).not.toContain('2 contributions in the last year')
   })
 })

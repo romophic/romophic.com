@@ -22,10 +22,14 @@ const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
 <Layout class="max-w-3xl">
   <PageHead
     slot="head"
-    title={currentTag ? `Tag: ${currentTag}` : 'Blog'}
+    title={currentTag
+      ? `Tag: ${currentTag}${page.currentPage > 1 ? ` - Page ${page.currentPage}` : ''}`
+      : page.currentPage > 1
+        ? `Blog - Page ${page.currentPage}`
+        : 'Blog'}
     description={currentTag
-      ? `Posts tagged with ${currentTag}`
-      : 'All blog posts'}
+      ? `Page ${page.currentPage} of posts tagged with ${currentTag}`
+      : `Page ${page.currentPage} of all blog posts`}
   />
 
   <div
@@ -60,7 +64,7 @@ const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
                 class="blog-post-item"
                 data-tags={post.data.tags?.join(',') || ''}
               >
-                <BlogCard entry={post} />
+                <BlogCard entry={post} headingLevel={2} />
               </li>
             ))}
           </ul>

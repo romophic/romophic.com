@@ -101,7 +101,7 @@ const formattedCombinedReadingTime = formatReadingTime(combinedReadingTime)
           post.data.tags.length > 0 &&
           post.data.tags.map((tag) => (
             <a
-              href={`/tags/${tag}/`}
+              href={`/tags/${encodeURIComponent(tag)}/`}
               class={getBadgeStyles({ variant: 'muted' })}
             >
               <Icon name={ICONS.hash} class="size-3" />

@@ -47,6 +47,27 @@ describe('BlogCard.astro', () => {
     expect(html).toContain('test')
     expect(html).toContain('vitest')
     expect(html).toContain('href="/blog/test-post"')
+    expect(html).toMatch(/<h3[^>]*>Test Post Title<\/h3>/)
+  })
+
+  it('uses an h2 heading when requested by a listing page', async () => {
+    const mockEntry = {
+      id: 'test-post',
+      collection: 'blog',
+      data: {
+        title: 'Test Post Title',
+        description: 'This is a test description',
+        date: new Date('2026-05-27'),
+      },
+    } as any
+
+    const container = await AstroContainer.create()
+    const html = await container.renderToString(BlogCard, {
+      props: { entry: mockEntry, headingLevel: 2 },
+    })
+
+    expect(html).toMatch(/<h2[^>]*>Test Post Title<\/h2>/)
+    expect(html).not.toMatch(/<h3[^>]*>Test Post Title<\/h3>/)
   })
 
   it('renders correctly with 1 subpost', async () => {

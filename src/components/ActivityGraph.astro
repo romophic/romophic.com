@@ -1,6 +1,6 @@
 ---
 import { getAllPosts } from '@/lib/data-utils'
-import { dateKey } from '@/lib/utils'
+import { dateKey, pluralize } from '@/lib/utils'
 import type { CollectionEntry } from 'astro:content'
 
 const INTENSITY_COLORS = [
@@ -22,6 +22,7 @@ const posts = await getAllPosts()
 // 1. Create a map of JST date string (YYYY-MM-DD) -> count
 const activityMap = new Map<string, number>()
 posts.forEach((post: CollectionEntry<'blog'>) => {
+  if (Number.isNaN(post.data.date.getTime())) return
   const dateStr = dateKey(post.data.date)
   activityMap.set(dateStr, (activityMap.get(dateStr) || 0) + 1)
 })
@@ -44,14 +45,21 @@ const getLevel = (count: number) => {
   if (count >= LEVEL_THRESHOLDS[1]) return 1
   return 0
 }
+
+const recentContributionCount = days.reduce(
+  (total, date) => total + (activityMap.get(dateKey(date)) || 0),
+  0,
+)
+const contributionLabel = `${recentContributionCount} ${pluralize(
+  recentContributionCount,
+  'contribution',
+)} in the last year`
 ---
 
 <div class="flex h-full w-full flex-col">
   <div class="mb-4 flex items-center justify-between">
     <h3 class="text-lg font-medium">Activity</h3>
-    <span class="text-muted-foreground text-xs"
-      >{posts.length} contributions in the last year</span
-    >
+    <span class="text-muted-foreground text-xs">{contributionLabel}</span>
   </div>
 
   <div class="overflow-x-auto pb-2">
@@ -66,7 +74,7 @@ const getLevel = (count: number) => {
             return (
               <div
                 class={`size-2.5 rounded-xs ring-1 ring-white/5 dark:ring-white/10 ${getIntensityColor(level)}`}
-                title={`${count} posts on ${dateStr}`}
+                title={`${count} ${pluralize(count, 'post')} on ${dateStr}`}
               />
             )
           })

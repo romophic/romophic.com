@@ -87,6 +87,8 @@ const ogImageUrl = `/og/${getOgImageSlug(post.id)}.png`
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 800px, 1200px"
           width={1200}
           height={630}
+          loading="eager"
+          fetchpriority="high"
           class="col-span-full mx-auto w-full max-w-5xl object-cover"
         />
       )

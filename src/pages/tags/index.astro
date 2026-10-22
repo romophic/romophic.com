@@ -9,7 +9,11 @@ const tags = await getSortedTags()
 ---
 
 <Layout class="max-w-3xl">
-  <PageHead slot="head" title="Tags" description="Browse all tags" />
+  <PageHead
+    slot="head"
+    title="Tags"
+    description="ブログ記事で使用されているタグの一覧です。"
+  />
 
   <div class="flex flex-col gap-y-8 min-h-[calc(100vh-18rem)]">
     <header class="flex flex-col gap-4">
@@ -21,7 +25,7 @@ const tags = await getSortedTags()
       {
         tags.map(({ tag, count }) => (
           <a
-            href={`/tags/${tag}/`}
+            href={`/tags/${encodeURIComponent(tag)}/`}
             class="border-primary/20 bg-primary/5 hover:bg-primary/10 flex items-center gap-x-2 rounded-full border px-4 py-2 transition-colors"
           >
             <div class="text-primary flex items-center gap-x-1 font-semibold">

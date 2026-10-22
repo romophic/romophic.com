@@ -16,7 +16,7 @@ const { headings } = Astro.props
     data-toc-details
   >
     <summary
-      class="flex h-12 cursor-pointer items-center justify-between px-4 outline-none"
+      class="focus-visible:ring-ring flex h-12 cursor-pointer items-center justify-between px-4 outline-none focus-visible:ring-2 focus-visible:ring-inset"
     >
       <div class="flex items-center gap-2 overflow-hidden">
         <svg class="h-4 w-4" viewBox="0 0 24 24">
@@ -57,7 +57,7 @@ const { headings } = Astro.props
       </span>
     </summary>
     <div
-      class="mx-auto max-w-3xl overflow-x-hidden overflow-y-auto"
+      class="mx-auto max-w-3xl overflow-x-hidden overflow-y-auto overscroll-contain"
       data-toc-header-scroll
     >
       <div class="max-h-[30vh]">
@@ -107,6 +107,9 @@ const { headings } = Astro.props
           ) as HTMLElement
           const detailsElement = this.querySelector('details')
           const scrollArea = this.querySelector('[data-toc-header-scroll]')
+          const prefersReducedMotion = window.matchMedia(
+            '(prefers-reduced-motion: reduce)',
+          ).matches
 
           if (progressCircle) {
             progressCircle.style.strokeDasharray =
@@ -154,10 +157,12 @@ const { headings } = Astro.props
                 ) as HTMLElement
                 if (!link) return
 
-                this.querySelectorAll('[data-heading-id]').forEach((el) =>
-                  el.classList.remove('text-foreground'),
-                )
+                this.querySelectorAll('[data-heading-id]').forEach((el) => {
+                  el.classList.remove('text-foreground')
+                  el.removeAttribute('aria-current')
+                })
                 link.classList.add('text-foreground')
+                link.setAttribute('aria-current', 'location')
 
                 if (currentSectionText) {
                   currentSectionText.textContent =
@@ -171,7 +176,7 @@ const { headings } = Astro.props
                     link.clientHeight / 2
                   scrollArea.scrollTo({
                     top: Math.max(0, top),
-                    behavior: 'smooth',
+                    behavior: prefersReducedMotion ? 'auto' : 'smooth',
                   })
                 }
               })
