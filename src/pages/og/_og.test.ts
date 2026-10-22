@@ -221,7 +221,7 @@ describe('OG Image Generation ([...slug].png.ts)', () => {
     } as any
 
     await expect(freshGET({ props: { post: mockPost } })).rejects.toThrow(
-      'Failed to load Inter font for OG images',
+      'Failed to load a font for OG images',
     )
   })
 
@@ -241,7 +241,7 @@ describe('OG Image Generation ([...slug].png.ts)', () => {
     } as any
 
     await expect(freshGET({ props: { post: mockPost } })).rejects.toThrow(
-      'Failed to load Inter font for OG images',
+      'Failed to load a font for OG images',
     )
   })
 })

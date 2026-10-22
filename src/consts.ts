@@ -7,6 +7,7 @@ export const SITE: Site = {
   href: 'https://romophic.com',
   author: 'romophic',
   locale: 'ja-JP',
+  version: '1',
   featuredPostCount: 2,
   postsPerPage: 20,
 }

@@ -44,7 +44,7 @@ async function getFonts() {
         const cached = await readFile(cachePath)
         return new Uint8Array(cached).buffer as ArrayBuffer
       }
-      const res = await fetch(url)
+      const res = await fetch(url, { signal: AbortSignal.timeout(10_000) })
       if (!res.ok) {
         console.warn(`Failed to fetch font ${cacheName}: ${res.statusText}`)
         return null
@@ -68,9 +68,13 @@ async function getFonts() {
     'https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/SubsetOTF/JP/NotoSansJP-Bold.otf',
   )
 
-  if (!inter) throw new Error('Failed to load Inter font for OG images')
+  const primaryFont = inter ?? notoSansJP
+  if (!primaryFont) throw new Error('Failed to load a font for OG images')
 
-  fontsCache = { inter, notoSansJP }
+  fontsCache = {
+    inter: primaryFont,
+    notoSansJP: inter ? notoSansJP : null,
+  }
   return fontsCache
 }
 
