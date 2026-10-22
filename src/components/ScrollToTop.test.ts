@@ -11,6 +11,11 @@ describe('ScrollToTop.astro (Test as Documentation)', () => {
     expect(html).toContain('aria-label="Scroll to top"')
     expect(html).toContain('opacity-0')
     expect(html).toContain('pointer-events-none')
+    expect(html).toContain('tabindex="-1"')
+    expect(html).toContain('aria-hidden="true"')
+    // The button is kept out of the tab order without the disabled attribute;
+    // `disabled:opacity-50` from Button would otherwise beat `opacity-0`.
+    expect(html).not.toMatch(/\sdisabled[\s>]/)
     expect(html).toContain('SCROLL_TO_TOP_THRESHOLD')
   })
 })

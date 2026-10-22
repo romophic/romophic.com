@@ -22,6 +22,12 @@ describe('Layout.astro', () => {
     expect(html).toContain('<footer')
     expect(html).toContain('<dialog') // SearchDialog
 
+    // Skip link targets a programmatically focusable main landmark
+    expect(html).toContain('href="#main-content"')
+    expect(html).toContain('id="main-content"')
+    expect(html).toContain('Skip to content')
+    expect(html).toContain('tabindex="-1"')
+
     // Check if basic HTML structure exists
     expect(html).toContain('<html')
     expect(html).toContain('<body')

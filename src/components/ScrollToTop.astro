@@ -11,6 +11,8 @@ const SCROLL_TO_TOP_THRESHOLD = 300
   type="button"
   title="Scroll to top"
   aria-label="Scroll to top"
+  tabindex="-1"
+  aria-hidden="true"
   class={`${getButtonStyles({ variant: 'outline', size: 'icon' })} fixed bottom-8 right-8 z-50 rounded-full opacity-0 pointer-events-none shadow-md transition-all duration-300 hover:-translate-y-1`}
 >
   <Icon
@@ -38,6 +40,12 @@ const SCROLL_TO_TOP_THRESHOLD = 300
           footer.getBoundingClientRect().top <= window.innerHeight
         const shouldHide =
           window.scrollY <= SCROLL_TO_TOP_THRESHOLD || isFooterVisible
+        btn.tabIndex = shouldHide ? -1 : 0
+        if (shouldHide) {
+          btn.setAttribute('aria-hidden', 'true')
+        } else {
+          btn.removeAttribute('aria-hidden')
+        }
         btn.classList.toggle('opacity-0', shouldHide)
         btn.classList.toggle('pointer-events-none', shouldHide)
       }

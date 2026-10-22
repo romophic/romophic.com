@@ -9,8 +9,21 @@ describe('Home.astro', () => {
     const request = new Request('https://romophic.com/')
     const html = await container.renderToString(Home, { request })
 
-    // Check for the dashboard content
+    // The dashboard still drives the graph scroll logic.
     expect(html).toContain('id="dashboard-content"')
+
+    // The skip link must land after the sticky header, otherwise the next Tab
+    // returns to the header nav instead of the page content.
+    expect(html).toContain('href="#main-content"')
+    const targetIndex = html.indexOf('id="main-content"')
+    expect(targetIndex).toBeGreaterThan(html.indexOf('<header'))
+    expect(html.slice(targetIndex, targetIndex + 200)).toContain('tabindex="-1"')
+
+    // The exit button is hidden and out of the tab order until the graph is
+    // reachable; without this it becomes the first focus stop on the page.
+    expect(html).toMatch(
+      /id="exit-graph-btn"[^>]*tabindex="-1"[^>]*aria-hidden="true"/,
+    )
 
     // Check for the author name in the hero section
     expect(html).toContain('romophic')
