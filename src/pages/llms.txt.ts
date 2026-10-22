@@ -21,6 +21,8 @@ export const GET: APIRoute = async ({ site }) => {
   content += `- [About](${new URL('/about', site)})
 `
   content += `- [RSS Feed](${new URL('/rss.xml', site)})
+`
+  content += `- [Full Content](${new URL('/llms-full.txt', site)})
 
 `
 

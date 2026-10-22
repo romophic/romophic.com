@@ -30,6 +30,9 @@ describe('llms.txt endpoint', () => {
     expect(text).toContain(`# ${SITE.title}`)
     expect(text).toContain('Core Pages')
     expect(text).toContain('Latest Blog Posts')
+    expect(text).toContain(
+      '[Full Content](https://romophic.com/llms-full.txt)',
+    )
   })
 
   it('renders correctly with more than 20 posts', async () => {
