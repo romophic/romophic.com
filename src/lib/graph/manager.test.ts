@@ -30,6 +30,15 @@ vi.mock('./data', () => ({
 
 import { GraphViewManager } from './manager'
 
+/** Typed view of the DOM/browser globals installed by makeDom(). */
+const g = () =>
+  globalThis as unknown as {
+    fetch: ReturnType<typeof vi.fn>
+    console: { error: ReturnType<typeof vi.fn> }
+    window: { location: { href: string } }
+    cancelAnimationFrame: ReturnType<typeof vi.fn>
+  }
+
 function makeNodes(): D3GraphNode[] {
   return [
     { id: 'post-1', name: 'Post 1', group: 'post', val: 2 },
@@ -37,8 +46,8 @@ function makeNodes(): D3GraphNode[] {
   ]
 }
 
-function makeLinks(): D3GraphLink[] {
-  return [{ source: 'post-1', target: 'tag-ml' }]
+function makeLinks() {
+  return [{ source: 'post-1', target: 'tag-ml' }] as unknown as D3GraphLink[]
 }
 
 function makeDom(graph?: { nodes: D3GraphNode[]; links: D3GraphLink[] }) {
@@ -54,7 +63,7 @@ function makeDom(graph?: { nodes: D3GraphNode[]; links: D3GraphLink[] }) {
     clientHeight: 300,
     getAttribute: vi.fn(() => 'true'),
     classList: { add: vi.fn(), remove: vi.fn() },
-    closest: vi.fn(() => null),
+    closest: vi.fn((): unknown => null),
     parentElement: null,
     style: {},
   }
@@ -114,7 +123,7 @@ function makeDom(graph?: { nodes: D3GraphNode[]; links: D3GraphLink[] }) {
     },
   )
   ;(globalThis as unknown as Record<string, unknown>).cancelAnimationFrame = vi.fn()
-  ;(globalThis as unknown as Record<string, unknown>).fetch = vi
+  ;g().fetch = vi
     .fn()
     .mockResolvedValue({ ok: true, json: async () => ({ nodes: [], links: [] }) })
   ;(globalThis as unknown as Record<string, unknown>).console = { ...console, error: vi.fn() }
@@ -184,7 +193,7 @@ describe('GraphViewManager (Test as Documentation)', () => {
   it('fetches /graph.json and wires physics, interaction, and the first render', async () => {
     const manager = await createManager(dom)
 
-    expect((globalThis as unknown as Record<string, unknown>).fetch).toHaveBeenCalledWith(
+    expect(g().fetch).toHaveBeenCalledWith(
       '/graph.json',
       expect.objectContaining({ signal: expect.anything() }),
     )
@@ -226,15 +235,15 @@ describe('GraphViewManager (Test as Documentation)', () => {
     const onClick = h.interactionSetup.mock.calls[0][8]
 
     onClick({ id: 'post-1', group: 'post' })
-    expect((globalThis as unknown as Record<string, unknown>).window.location.href).toBe('/blog/post-1')
+    expect(g().window.location.href).toBe('/blog/post-1')
 
     onClick({ id: 'tag-ml', group: 'tag' })
-    expect((globalThis as unknown as Record<string, unknown>).window.location.href).toBe('/tags/ml/')
+    expect(g().window.location.href).toBe('/tags/ml/')
 
     // Unknown groups and empty clicks stay put
     onClick(null)
     onClick({ id: 'x', group: 'other' } as unknown as D3GraphNode)
-    expect((globalThis as unknown as Record<string, unknown>).window.location.href).toBe('/tags/ml/')
+    expect(g().window.location.href).toBe('/tags/ml/')
 
     manager.destroy()
   })
@@ -268,12 +277,15 @@ describe('GraphViewManager (Test as Documentation)', () => {
   })
 
   it('bails out before any setup when the canvas or context is missing', async () => {
-    ;(globalThis as unknown as Record<string, unknown>).document.getElementById = vi.fn(() => null)
+    const doc = globalThis as unknown as {
+      document: { getElementById: unknown }
+    }
+    doc.document.getElementById = vi.fn(() => null)
 
     const manager = new GraphViewManager('graph-container', 'graph-canvas')
     await dom.flush()
 
-    expect((globalThis as unknown as Record<string, unknown>).fetch).not.toHaveBeenCalled()
+    expect(g().fetch).not.toHaveBeenCalled()
     // Defensive guard: initializing without data is a no-op
     expect(() =>
       (manager as unknown as { initVisualization: () => void }).initVisualization(),
@@ -371,10 +383,10 @@ describe('GraphViewManager (Test as Documentation)', () => {
   })
 
   it('does not initialize when the graph data cannot be fetched', async () => {
-    ;(globalThis as unknown as Record<string, unknown>).fetch = vi
+    ;g().fetch = vi
       .fn()
       .mockResolvedValue({ ok: false, status: 500 })
-    const consoleError = (globalThis as unknown as Record<string, unknown>).console.error
+    const consoleError = g().console.error
     const manager = await createManager(dom)
 
     expect(consoleError).toHaveBeenCalled()
@@ -385,7 +397,7 @@ describe('GraphViewManager (Test as Documentation)', () => {
 
   it('aborts initialization when destroyed before data arrives', async () => {
     let resolveFetch: (value: unknown) => void = () => {}
-    ;(globalThis as unknown as Record<string, unknown>).fetch = vi.fn(
+    ;g().fetch = vi.fn(
       () =>
         new Promise((resolve) => {
           resolveFetch = resolve
@@ -398,7 +410,7 @@ describe('GraphViewManager (Test as Documentation)', () => {
     await dom.flush()
 
     expect(h.physicsSetup).not.toHaveBeenCalled()
-    expect((globalThis as unknown as Record<string, unknown>).console.error).not.toHaveBeenCalled()
+    expect(g().console.error).not.toHaveBeenCalled()
   })
 
   it('throttles background rendering to ~30fps', async () => {
@@ -430,7 +442,7 @@ describe('GraphViewManager (Test as Documentation)', () => {
 
     expect(h.interactionCleanup).toHaveBeenCalled()
     expect(h.physicsDestroy).toHaveBeenCalled()
-    expect((globalThis as unknown as Record<string, unknown>).cancelAnimationFrame).toHaveBeenCalled()
+    expect(g().cancelAnimationFrame).toHaveBeenCalled()
     // Destroy is idempotent
     expect(() => manager.destroy()).not.toThrow()
   })

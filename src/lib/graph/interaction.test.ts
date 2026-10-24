@@ -63,10 +63,10 @@ function makeNode(overrides: Partial<D3GraphNode> = {}): D3GraphNode {
 const NODE = makeNode({ id: 'a', x: 200, y: 150 })
 const OTHER = makeNode({ id: 'b', name: 'B', x: 900, y: 900 })
 
-const LINKS: D3GraphLink[] = [
+const LINKS = [
   { source: 'a', target: 'b' },
   { source: { id: 'b' }, target: 'a' },
-]
+] as unknown as D3GraphLink[]
 
 function makeCanvas() {
   const listeners = new Map<string, (e: Record<string, unknown>) => void>()
@@ -134,7 +134,7 @@ describe('setupInteraction (Test as Documentation)', () => {
       canvas as unknown as HTMLCanvasElement,
       [NODE],
       LINKS,
-      makePhysics(),
+      makePhysics() as unknown as PhysicsController,
       400,
       300,
       vi.fn(),
