@@ -15,9 +15,9 @@
     "lint": "eslint .",
     "typecheck": "astro check",
     "prettier": "prettier --write **/*.{ts,tsx,css,astro} --ignore-path .gitignore",
-    "test": "vitest",
-    "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test": "astro sync && vitest",
+    "test:run": "astro sync && vitest run",
+    "test:coverage": "astro sync && vitest run --coverage"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.4",
