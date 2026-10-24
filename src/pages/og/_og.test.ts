@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, test, expect, vi, beforeEach } from 'vitest'
 import satori from 'satori'
 import { GET, getStaticPaths } from './[...slug].png'
-import type { CollectionEntry } from 'astro:content'
+import { makeBlogPost } from '@/test-utils/make-post'
 
 vi.mock('satori', () => ({
   default: vi.fn().mockResolvedValue('<svg></svg>'),
@@ -28,27 +27,6 @@ vi.mock('astro:content', () => {
   }
 })
 
-function makePost(overrides: Record<string, unknown> = {}) {
-  return {
-    id: 'test-post',
-    slug: 'test-post',
-    body: 'Test content',
-    collection: 'blog',
-    data: {
-      title: 'Test Blog Post',
-      date: new Date(),
-      description: 'Test description',
-      tags: ['test'],
-    },
-    render: async () => ({
-      Content: () => null,
-      headings: [],
-      remarkPluginFrontmatter: {},
-    }),
-    ...overrides,
-  } as any as CollectionEntry<'blog'>
-}
-
 describe('OG Image Generation ([...slug].png)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -63,7 +41,7 @@ describe('OG Image Generation ([...slug].png)', () => {
   })
 
   test('generates a valid PNG image for a blog post', async () => {
-    const response = await GET({ props: { post: makePost() } })
+    const response = await GET({ props: { post: makeBlogPost() } })
 
     expect(response).toBeInstanceOf(Response)
     expect(response.headers.get('Content-Type')).toBe('image/png')
@@ -84,7 +62,7 @@ describe('OG Image Generation ([...slug].png)', () => {
   })
 
   test('renders at 1200x630 with the bundled Noto Sans JP Bold font', async () => {
-    await GET({ props: { post: makePost({ id: 'test-font-spec' }) } })
+    await GET({ props: { post: makeBlogPost({ id: 'test-font-spec' }) } })
 
     expect(satori).toHaveBeenCalledWith(
       expect.anything(),
@@ -111,7 +89,7 @@ describe('OG Image Generation ([...slug].png)', () => {
     const { GET: freshGET } = await import('./[...slug].png')
 
     await expect(
-      freshGET({ props: { post: makePost({ id: 'test-font-missing' }) } }),
+      freshGET({ props: { post: makeBlogPost({ id: 'test-font-missing' }) } }),
     ).rejects.toThrow('font file missing')
 
     vi.doUnmock('node:fs/promises')

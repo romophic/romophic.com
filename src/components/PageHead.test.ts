@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { experimental_AstroContainer as AstroContainer } from 'astro/container'
 import { describe, it, expect } from 'vitest'
 import PageHead from './PageHead.astro'
+import { makeBlogPost } from '@/test-utils/make-post'
 import { SITE } from '@/consts'
 
 describe('PageHead.astro', () => {
@@ -60,8 +60,7 @@ describe('PageHead.astro', () => {
     const request = new Request('https://romophic.com/blog/test')
 
     // Mock blog post entry
-    const mockPost = {
-      id: 'test-post',
+    const mockPost = makeBlogPost({      id: 'test-post',
       slug: 'test-post',
       collection: 'blog',
       data: {
@@ -78,7 +77,7 @@ describe('PageHead.astro', () => {
           format: 'png',
         },
       },
-    } as any
+    })
 
     const html = await container.renderToString(PageHead, {
       request,
@@ -114,15 +113,14 @@ describe('PageHead.astro', () => {
     const request = new Request('https://romophic.com/blog/test2')
 
     // Mock minimal blog post
-    const mockPost = {
-      id: 'test-post-minimal',
+    const mockPost = makeBlogPost({      id: 'test-post-minimal',
       slug: 'test-post-minimal',
       collection: 'blog',
       data: {
         title: 'Minimal Post',
         date: new Date('2024-01-01T00:00:00Z'),
       },
-    } as any
+    })
 
     const html = await container.renderToString(PageHead, {
       request,
@@ -139,14 +137,13 @@ describe('PageHead.astro', () => {
     const container = await AstroContainer.create()
     const request = new Request('https://romophic.com/blog/test3')
 
-    const mockPost = {
-      id: 'test-post-escape',
+    const mockPost = makeBlogPost({      id: 'test-post-escape',
       collection: 'blog',
       data: {
         title: '</script><script>alert(1)</script>',
         date: new Date('2024-01-01T00:00:00Z'),
       },
-    } as any
+    })
 
     const html = await container.renderToString(PageHead, {
       request,

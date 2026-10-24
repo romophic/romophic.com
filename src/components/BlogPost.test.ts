@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi } from 'vitest'
 import { experimental_AstroContainer as AstroContainer } from 'astro/container'
 import BlogPost from './BlogPost.astro'
+import { makeBlogPost } from '@/test-utils/make-post'
 import * as dataUtils from '@/lib/data-utils'
 vi.mock('@/lib/data-utils')
 vi.mock('astro:content', async (importOriginal) => {
@@ -18,7 +18,9 @@ vi.mock(
 
 describe('BlogPost.astro', () => {
   it('renders a blog post without crashing', async () => {
-    vi.mocked(dataUtils.getParentId).mockReturnValue(undefined as any)
+    vi.mocked(dataUtils.getParentId).mockReturnValue(
+      undefined as unknown as string,
+    )
     vi.mocked(dataUtils.getPostPageData).mockResolvedValue({
       authors: [],
       isCurrentSubpost: false,
@@ -29,9 +31,9 @@ describe('BlogPost.astro', () => {
       combinedReadingTime: '5 min',
       tocSections: [],
       backlinks: [],
-    } as any)
+    } as never)
 
-    const mockPost = {
+    const mockPost = makeBlogPost({
       id: 'test-post',
       collection: 'blog',
       data: {
@@ -39,7 +41,7 @@ describe('BlogPost.astro', () => {
         description: 'Test Desc',
         date: new Date(),
       },
-    } as any
+    })
 
     const container = await AstroContainer.create()
     const html = await container.renderToString(BlogPost, {

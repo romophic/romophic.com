@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { GET } from './rss.xml'
 import { SITE } from '@/consts'
@@ -34,7 +33,7 @@ describe('rss.xml endpoint', () => {
 
   it('returns a valid RSS XML response', async () => {
     // Omitting site to cover the context.site ?? SITE.href fallback
-    const mockContext = {} as any
+    const mockContext = {} as never
 
     const response = await GET(mockContext)
     expect(response.status).toBe(200)
@@ -56,11 +55,11 @@ describe('rss.xml endpoint', () => {
           updatedDate: new Date('2026-01-02T00:00:00Z'),
         },
       },
-    ] as any)
+    ] as never)
 
     const response = await GET({
       site: new URL('https://romophic.com/'),
-    } as any)
+    } as never)
     const text = await response.text()
 
     expect(text).toContain(`<language>${SITE.locale}</language>`)
@@ -84,14 +83,14 @@ describe('rss.xml endpoint', () => {
           date: new Date('2026-01-01T00:00:00Z'),
         },
       },
-    ] as any)
+    ] as never)
     vi.mocked(feedHtml.renderPostContentHtml).mockResolvedValue(
       '<p>Body</p><script>evil()</script>',
     )
 
     const response = await GET({
       site: new URL('https://romophic.com/'),
-    } as any)
+    } as never)
     const text = await response.text()
 
     expect(text).toContain(
@@ -114,7 +113,7 @@ describe('rss.xml endpoint', () => {
           date: new Date('2026-01-01T00:00:00Z'),
         },
       },
-    ] as any)
+    ] as never)
     vi.mocked(feedHtml.renderPostContentHtml).mockRejectedValueOnce(
       new Error('boom'),
     )
@@ -122,7 +121,7 @@ describe('rss.xml endpoint', () => {
 
     const response = await GET({
       site: new URL('https://romophic.com/'),
-    } as any)
+    } as never)
     const text = await response.text()
 
     expect(response.status).toBe(200)
@@ -135,7 +134,7 @@ describe('rss.xml endpoint', () => {
     // We mock getAllPosts to throw an error
     const mockContext = {
       site: new URL('https://romophic.com/'),
-    } as any
+    } as never
 
     vi.mocked(dataUtils.getAllPosts).mockRejectedValue(
       new Error('Simulated Error'),

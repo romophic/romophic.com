@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi } from 'vitest'
 import { GET } from './llms-full.txt'
 import * as dataUtils from '@/lib/data-utils'
@@ -24,11 +23,11 @@ describe('llms-full.txt endpoint', () => {
           tags: [],
         },
       },
-    ] as any)
+    ] as never)
 
     const response = await GET({
       site: new URL('https://romophic.com/'),
-    } as any)
+    } as never)
     const text = await response.text()
 
     expect(response.headers.get('Content-Type')).toBe(

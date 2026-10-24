@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { experimental_AstroContainer as AstroContainer } from 'astro/container'
 import BlogCard from './BlogCard.astro'
+import { makeBlogPost } from '@/test-utils/make-post'
 import * as dataUtils from '@/lib/data-utils'
 
 vi.mock('@/lib/data-utils', async (importOriginal) => {
@@ -26,7 +26,7 @@ describe('BlogCard.astro', () => {
     vi.restoreAllMocks()
   })
   it('renders a blog card given an entry', async () => {
-    const mockEntry = {
+    const mockEntry = makeBlogPost({
       id: 'test-post',
       collection: 'blog',
       data: {
@@ -35,7 +35,7 @@ describe('BlogCard.astro', () => {
         date: new Date('2026-05-27'),
         tags: ['test', 'vitest'],
       },
-    } as any
+    })
 
     const container = await AstroContainer.create()
     const html = await container.renderToString(BlogCard, {
@@ -51,7 +51,7 @@ describe('BlogCard.astro', () => {
   })
 
   it('uses an h2 heading when requested by a listing page', async () => {
-    const mockEntry = {
+    const mockEntry = makeBlogPost({
       id: 'test-post',
       collection: 'blog',
       data: {
@@ -59,7 +59,7 @@ describe('BlogCard.astro', () => {
         description: 'This is a test description',
         date: new Date('2026-05-27'),
       },
-    } as any
+    })
 
     const container = await AstroContainer.create()
     const html = await container.renderToString(BlogCard, {
@@ -73,7 +73,7 @@ describe('BlogCard.astro', () => {
   it('renders correctly with 1 subpost', async () => {
     vi.mocked(dataUtils.getSubpostCount).mockResolvedValue(1)
 
-    const mockEntry = {
+    const mockEntry = makeBlogPost({
       id: 'test-post',
       collection: 'blog',
       data: {
@@ -81,7 +81,7 @@ describe('BlogCard.astro', () => {
         description: 'This is a test description',
         date: new Date('2026-05-27'),
       },
-    } as any
+    })
 
     const container = await AstroContainer.create()
     const html = await container.renderToString(BlogCard, {
@@ -95,7 +95,7 @@ describe('BlogCard.astro', () => {
   it('renders correctly with multiple subposts', async () => {
     vi.mocked(dataUtils.getSubpostCount).mockResolvedValue(3)
 
-    const mockEntry = {
+    const mockEntry = makeBlogPost({
       id: 'test-post',
       collection: 'blog',
       data: {
@@ -103,7 +103,7 @@ describe('BlogCard.astro', () => {
         description: 'This is a test description',
         date: new Date('2026-05-27'),
       },
-    } as any
+    })
 
     const container = await AstroContainer.create()
     const html = await container.renderToString(BlogCard, {
@@ -117,7 +117,7 @@ describe('BlogCard.astro', () => {
     vi.mocked(dataUtils.isSubpost).mockReturnValue(true)
     vi.mocked(dataUtils.getSubpostCount).mockResolvedValue(5) // Should not be called or used
 
-    const mockEntry = {
+    const mockEntry = makeBlogPost({
       id: 'test-post',
       collection: 'blog',
       data: {
@@ -126,7 +126,7 @@ describe('BlogCard.astro', () => {
         date: new Date('2026-05-27'),
         parent: { id: 'parent' },
       },
-    } as any
+    })
 
     const container = await AstroContainer.create()
     const html = await container.renderToString(BlogCard, {

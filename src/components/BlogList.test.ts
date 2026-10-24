@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi } from 'vitest'
 import { experimental_AstroContainer as AstroContainer } from 'astro/container'
 import BlogList from './BlogList.astro'
+import { makeBlogPost } from '@/test-utils/make-post'
 vi.mock(
   '@/components/PageHead.astro',
   async () => await import('./__mocks__/Mock.astro'),
@@ -19,25 +19,23 @@ describe('BlogList.astro', () => {
   it('renders a list of blog posts grouped by year', async () => {
     const mockPage = {
       data: [
-        {
+        makeBlogPost({
           id: 'post-1',
-          collection: 'blog',
           data: {
             title: 'Post 1',
             date: new Date('2026-05-27'),
             tags: ['test'],
           },
-        },
-        {
+        }),
+        makeBlogPost({
           id: 'post-2',
-          collection: 'blog',
           data: { title: 'Post 2', date: new Date('2025-01-01') },
-        },
+        }),
       ],
       currentPage: 1,
       lastPage: 2,
       url: { next: '/blog/2', prev: undefined },
-    } as any
+    }
 
     const container = await AstroContainer.create()
     const html = await container.renderToString(BlogList, {
@@ -55,20 +53,19 @@ describe('BlogList.astro', () => {
   it('renders the tag heading when currentTag is set', async () => {
     const mockPage = {
       data: [
-        {
+        makeBlogPost({
           id: 'post-1',
-          collection: 'blog',
           data: {
             title: 'Post 1',
             date: new Date('2026-05-27'),
             tags: ['test'],
           },
-        },
+        }),
       ],
       currentPage: 1,
       lastPage: 1,
       url: { next: undefined, prev: undefined },
-    } as any
+    }
 
     const container = await AstroContainer.create()
     const html = await container.renderToString(BlogList, {

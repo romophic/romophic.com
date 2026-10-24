@@ -1,9 +1,16 @@
-/// <reference types="vitest" />
 import { getViteConfig } from 'astro/config'
+import type { InlineConfig } from 'vitest/node'
+
+// getViteConfig's own type predates the `test` key, so extend its parameter
+// type instead of casting the whole object to `any`.
+type AstroVitestConfig = Parameters<typeof getViteConfig>[0] & {
+  test: InlineConfig
+}
 
 export default getViteConfig({
   test: {
     css: false,
+    setupFiles: ['src/test-utils/setup.ts'],
     server: {
       deps: {
         inline: [/@pagefind/, /astro-pagefind/],
@@ -20,8 +27,6 @@ export default getViteConfig({
         // The glob loaders only execute during astro sync/build, never in
         // tests, so counting them drags function coverage below the gate.
         'src/content.config.ts',
-        'src/lib/graph/interaction.ts',
-        'src/lib/graph/manager.ts',
         'src/lib/graph/physics.worker.ts',
       ],
       thresholds: {
@@ -31,7 +36,5 @@ export default getViteConfig({
         branches: 85,
       },
     },
-    // globals: true,
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-} as any)
+} as AstroVitestConfig)

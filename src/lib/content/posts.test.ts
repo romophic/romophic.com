@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi } from 'vitest'
 import {
   isSubpost,
@@ -169,15 +168,15 @@ vi.mock('astro:content', () => {
 
   return {
     getCollection: vi.fn(
-      async (collection: string, filterFn?: (entry: any) => boolean) => {
+      async (collection: string, filterFn?: (entry: unknown) => boolean) => {
         const items = getMockItems(collection)
-        return filterFn ? items.filter(filterFn) : items
+        return filterFn ? items.filter((i) => filterFn(i)) : items
       },
     ),
     getEntry: vi.fn(
       async ({ collection, id }: { collection: string; id: string }) => {
         const items = getMockItems(collection)
-        return items.find((item: any) => item.id === id) ?? null
+        return items.find((item: { id?: string }) => item.id === id) ?? null
       },
     ),
   }

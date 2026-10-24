@@ -1,7 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi } from 'vitest'
 import { experimental_AstroContainer as AstroContainer } from 'astro/container'
 import TOCSidebar from './TOCSidebar.astro'
+import type { CollectionEntry } from 'astro:content'
+import type { TOCSection } from '@/types'
 import * as postsUtils from '@/lib/content/posts'
 import * as dataUtils from '@/lib/data-utils'
 
@@ -59,7 +60,7 @@ describe('TOCSidebar.astro', () => {
           { depth: 4, slug: 'h4', text: 'Current H4' },
         ],
       },
-    ] as any
+    ] as unknown as TOCSection[]
 
     const container = await AstroContainer.create()
     const html = await container.renderToString(TOCSidebar, {
@@ -95,7 +96,7 @@ describe('TOCSidebar.astro', () => {
     vi.mocked(postsUtils.getPostById).mockResolvedValue({
       id: 'series/part-1',
       data: {},
-    } as any)
+    } as unknown as CollectionEntry<'blog'>)
     vi.mocked(dataUtils.isSubpost).mockReturnValue(true)
 
     const mockSections = [
@@ -107,7 +108,7 @@ describe('TOCSidebar.astro', () => {
           { depth: 4, slug: 'h4', text: 'Parent H4' },
         ],
       },
-    ] as any
+    ] as unknown as TOCSection[]
 
     const container = await AstroContainer.create()
     const html = await container.renderToString(TOCSidebar, {

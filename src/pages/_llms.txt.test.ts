@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi } from 'vitest'
 import { GET } from './llms.txt'
 import { SITE } from '@/consts'
@@ -18,7 +17,7 @@ describe('llms.txt endpoint', () => {
   it('returns text content containing site title and core pages', async () => {
     const mockContext = {
       site: new URL('https://romophic.com/'),
-    } as any
+    } as never
 
     const response = await GET(mockContext)
     expect(response.status).toBe(200)
@@ -42,7 +41,7 @@ describe('llms.txt endpoint', () => {
       data: { title: `Post ${i}`, description: 'Desc' },
     }))
 
-    vi.mocked(dataUtils.getAllPosts).mockResolvedValue(mockPosts as any)
+    vi.mocked(dataUtils.getAllPosts).mockResolvedValue(mockPosts as never)
     vi.mocked(dataUtils.getAllProjects).mockResolvedValue([])
     vi.mocked(dataUtils.getAllAuthors).mockResolvedValue([])
 
@@ -51,7 +50,7 @@ describe('llms.txt endpoint', () => {
       request,
       url: new URL(request.url),
       site: new URL('https://romophic.com/'),
-    } as any
+    } as never
 
     const result = await GET(context)
     const text = await result.text()
@@ -64,11 +63,11 @@ describe('llms.txt endpoint', () => {
     vi.mocked(dataUtils.getAllProjects).mockResolvedValue([])
     vi.mocked(dataUtils.getAllAuthors).mockResolvedValue([
       { id: 'romophic', data: { name: 'romophic' } },
-    ] as any)
+    ] as never)
 
     const response = await GET({
       site: new URL('https://romophic.com/'),
-    } as any)
+    } as never)
     const text = await response.text()
 
     expect(text).toContain('- romophic\n')

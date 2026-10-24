@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi } from 'vitest'
 import { experimental_AstroContainer as AstroContainer } from 'astro/container'
 import PostNavigation from './PostNavigation.astro'
@@ -22,7 +21,7 @@ describe('PostNavigation.astro', () => {
           data: { title: 'Older Post' },
           collection: 'blog',
         },
-      } as any,
+      },
     })
 
     expect(html).toContain('Newer Post')
@@ -40,7 +39,7 @@ describe('PostNavigation.astro', () => {
           data: { title: 'Parent Post' },
           collection: 'blog',
         },
-      } as any,
+      },
     })
 
     expect(html).toContain('Parent Post')

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi } from 'vitest'
 import { getAllAuthors, parseAuthors } from './authors'
 import { getCollection, getEntries } from 'astro:content'
@@ -10,7 +9,7 @@ vi.mock('astro:content', () => ({
 
 describe('authors', () => {
   it('getAllAuthors calls getCollection', async () => {
-    vi.mocked(getCollection).mockResolvedValue(['author1'] as any)
+    vi.mocked(getCollection).mockResolvedValue(['author1'] as never)
     const authors = await getAllAuthors()
     expect(authors).toEqual(['author1'])
     expect(getCollection).toHaveBeenCalledWith('authors')
@@ -25,11 +24,11 @@ describe('authors', () => {
     const mockRefs = [
       { collection: 'authors', id: 'a1' },
       { collection: 'authors', id: 'a2' },
-    ] as any
+    ] as never
     vi.mocked(getEntries).mockResolvedValue([
       { data: { name: 'Author One', avatar: '/avatar1.png' } },
       null, // test fallback
-    ] as any)
+    ] as never)
 
     const parsed = await parseAuthors(mockRefs)
 

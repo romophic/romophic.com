@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect } from 'vitest'
 import { GET } from './graph.json'
+import type { APIContext } from 'astro'
 
 describe('graph.json endpoint', () => {
   it('returns valid JSON with nodes and links arrays', async () => {
-    const response = await GET({} as any)
+    const response = await GET({} as unknown as APIContext)
     expect(response.status).toBe(200)
     expect(response.headers.get('Content-Type')).toBe('application/json')
 
