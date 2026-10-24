@@ -90,6 +90,8 @@ const { headings } = Astro.props
       </div>
     </div>
     <script>
+      import { getPageScrollProgress, observeActiveHeadings } from '@/lib/scroll-utils'
+
       const INITIAL_OVERVIEW_TEXT = 'Overview'
       const PROGRESS_CIRCLE_RADIUS = 10
       const PROGRESS_CIRCLE_CIRCUMFERENCE = 2 * Math.PI * PROGRESS_CIRCLE_RADIUS
@@ -106,10 +108,9 @@ const { headings } = Astro.props
             '#mobile-toc-current-section',
           ) as HTMLElement
           const detailsElement = this.querySelector('details')
-          const scrollArea = this.querySelector('[data-toc-header-scroll]')
-          const prefersReducedMotion = window.matchMedia(
-            '(prefers-reduced-motion: reduce)',
-          ).matches
+          const scrollArea = this.querySelector(
+            '[data-toc-header-scroll]',
+          ) as HTMLElement | null
 
           if (progressCircle) {
             progressCircle.style.strokeDasharray =
@@ -121,18 +122,9 @@ const { headings } = Astro.props
           // Progress circle update
           this.onScroll = () => {
             if (!progressCircle) return
-            const scrollProgress =
-              document.documentElement.scrollTop || document.body.scrollTop
-            const scrollableDistance =
-              document.documentElement.scrollHeight -
-              document.documentElement.clientHeight
-            const progress =
-              scrollableDistance > 0
-                ? Math.min(Math.max(scrollProgress / scrollableDistance, 0), 1)
-                : 0
             progressCircle.style.strokeDashoffset = (
-              PROGRESS_CIRCLE_CIRCUMFERENCE -
-              progress * PROGRESS_CIRCLE_CIRCUMFERENCE
+              PROGRESS_CIRCLE_CIRCUMFERENCE *
+              (1 - getPageScrollProgress())
             ).toString()
           }
           window.addEventListener('scroll', this.onScroll, { passive: true })
@@ -145,50 +137,17 @@ const { headings } = Astro.props
           })
 
           // Intersection Observer for active heading
-          this.observer = new IntersectionObserver(
-            (entries) => {
-              entries.forEach((entry) => {
-                if (!entry.isIntersecting) return
-                const id = entry.target.id
-                if (!id) return
-
-                const link = this.querySelector(
-                  `[data-heading-id="${id}"]`,
-                ) as HTMLElement
-                if (!link) return
-
-                this.querySelectorAll('[data-heading-id]').forEach((el) => {
-                  el.classList.remove('text-foreground')
-                  el.removeAttribute('aria-current')
-                })
-                link.classList.add('text-foreground')
-                link.setAttribute('aria-current', 'location')
-
-                if (currentSectionText) {
-                  currentSectionText.textContent =
-                    link.textContent?.trim() || INITIAL_OVERVIEW_TEXT
-                }
-
-                if (scrollArea) {
-                  const top =
-                    link.offsetTop -
-                    scrollArea.clientHeight / 2 +
-                    link.clientHeight / 2
-                  scrollArea.scrollTo({
-                    top: Math.max(0, top),
-                    behavior: prefersReducedMotion ? 'auto' : 'smooth',
-                  })
-                }
-              })
+          this.observer = observeActiveHeadings({
+            linkAttribute: 'data-heading-id',
+            scrollArea,
+            scope: this,
+            onActive: (link) => {
+              if (currentSectionText) {
+                currentSectionText.textContent =
+                  link.textContent?.trim() || INITIAL_OVERVIEW_TEXT
+              }
             },
-            { rootMargin: '-100px 0px -66% 0px' },
-          )
-
-          document
-            .querySelectorAll(
-              '.prose h2, .prose h3, .prose h4, .prose h5, .prose h6',
-            )
-            .forEach((el) => this.observer?.observe(el))
+          })
         }
 
         disconnectedCallback() {

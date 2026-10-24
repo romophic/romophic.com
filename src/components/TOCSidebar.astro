@@ -154,45 +154,18 @@ const parentId = isCurrentSubpost && post ? getParentId(post) : currentPostId
 }
 
 <script>
+  import { observeActiveHeadings } from '@/lib/scroll-utils'
+
   document.addEventListener('astro:page-load', () => {
-    const scrollArea = document.querySelector('[data-toc-scroll-area]')
-    if (!scrollArea) return
-    const prefersReducedMotion = window.matchMedia(
-      '(prefers-reduced-motion: reduce)',
-    ).matches
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const id = entry.target.id
-          if (!id) return
-          const link = document.querySelector(`[data-heading-link="${id}"]`)
-          if (!link) return
-
-          if (entry.isIntersecting) {
-            document
-              .querySelectorAll('[data-heading-link]')
-              .forEach((el) => el.classList.remove('text-foreground'))
-            link.classList.add('text-foreground')
-
-            const linkElement = link as HTMLElement
-            const top =
-              linkElement.offsetTop -
-              scrollArea.clientHeight / 2 +
-              linkElement.clientHeight / 2
-            scrollArea.scrollTo({
-              top: Math.max(0, top),
-              behavior: prefersReducedMotion ? 'auto' : 'smooth',
-            })
-          }
-        })
-      },
-      { rootMargin: '-100px 0px -66% 0px' },
+    const scrollArea = document.querySelector<HTMLElement>(
+      '[data-toc-scroll-area]',
     )
+    if (!scrollArea) return
 
-    document
-      .querySelectorAll('.prose h2, .prose h3, .prose h4, .prose h5, .prose h6')
-      .forEach((el) => observer.observe(el))
+    const observer = observeActiveHeadings({
+      linkAttribute: 'data-heading-link',
+      scrollArea,
+    })
 
     document.addEventListener(
       'astro:before-swap',

@@ -13,6 +13,8 @@
 </scroll-progress>
 
 <script>
+  import { getPageScrollProgress } from '@/lib/scroll-utils'
+
   class ScrollProgress extends HTMLElement {
     private _handleScroll: (() => void) | null = null
 
@@ -21,12 +23,7 @@
       if (!progressBar) return
 
       this._handleScroll = () => {
-        const scrollTop = window.scrollY || document.documentElement.scrollTop
-        const height =
-          document.documentElement.scrollHeight -
-          document.documentElement.clientHeight
-        const scrolled = height > 0 ? (scrollTop / height) * 100 : 0
-        progressBar.style.width = `${scrolled}%`
+        progressBar.style.width = `${getPageScrollProgress() * 100}%`
       }
 
       window.addEventListener('scroll', this._handleScroll, { passive: true })
