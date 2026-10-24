@@ -16,7 +16,7 @@ romophic.com は、シンプルさ、パフォーマンス、そして純正機�
 シンプルに保ち、純正機能を使い、コードの正しさはテストに語らせること。
 
 ## 3. コマンド
-- `pnpm test:run` — テスト（Vitest、1回実行）。実行前に `astro sync` でコンテンツストア（`.astro/`）を生成する。ストアがないとコレクションが空扱いになり function カバレッジが閾値を割る（CI のクリーンチェックアウトで発生）。
+- `pnpm test:run` — テスト（Vitest、1回実行）。実行前に `astro sync` を挟む。カバレッジ対象から `src/content.config.ts` は除外（ローダー関数は sync/build 時にしか走らず、テストでは 0% のまま function 閾値を割るため）。
 - `pnpm test:coverage` — テスト + カバレッジ（閾値: lines/statements 92, functions 95, branches 85。CI はこちらを使用）
 - `pnpm lint` — ESLint
 - `pnpm typecheck` — astro check（型検査）

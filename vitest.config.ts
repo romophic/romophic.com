@@ -17,6 +17,9 @@ export default getViteConfig({
         'src/**/__mocks__/**',
         'src/env.d.ts',
         'src/types.ts',
+        // The glob loaders only execute during astro sync/build, never in
+        // tests, so counting them drags function coverage below the gate.
+        'src/content.config.ts',
         'src/lib/graph/interaction.ts',
         'src/lib/graph/manager.ts',
         'src/lib/graph/physics.worker.ts',
