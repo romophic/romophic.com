@@ -49,18 +49,16 @@ jobs:
           else
             # Raw logs require sign-in; surface the failure lines as
             # annotations, which stay readable for anonymous visitors.
-            grep -nE "FAIL|Failed|failed|AssertionError|Error:|✕|×|crash|worker" /tmp/vitest.log | head -30 > /tmp/hits.txt || true
+            grep -inE "threshold|error|fail|✕|×" /tmp/vitest.log | head -8 > /tmp/hits.txt || true
             n=0
             while IFS= read -r line; do
               n=$((n+1))
               short="${line:0:400}"
               echo "::error title=vitest-${n}::${short}"
             done < /tmp/hits.txt
-            if [ "$n" -eq 0 ]; then
-              tail -n 20 /tmp/vitest.log | while IFS= read -r line; do
-                echo "::error title=vitest-tail::${line:0:400}"
-              done
-            fi
+            while IFS= read -r line; do
+              echo "::error title=vitest-tail::${line:0:400}"
+            done < <(tail -n 2 /tmp/vitest.log)
             exit 1
           fi
 
