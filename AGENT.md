@@ -30,6 +30,6 @@ romophic.com は、シンプルさ、パフォーマンス、そして純正機�
 - `pnpm astro build --timings` — ビルド内訳レポート（遅い箇所の特定）。
 
 ### 環境メモ
-- Node は nvm-windows 管理（22.23.3。astro 7.4 の要件は ≥ 22.22.0）。`.nvmrc` と `engines` に固定済みで `nvm use` だけで揃う。
+- Node は nvm-windows 管理（22.23.4。astro 7.4.2 以降の要件は ≥ 22.23.4）。`.nvmrc` と `engines` に固定済みで `nvm use` だけで揃う。
 - KaTeX CSS は `KatexStyles.astro` 経由で数式を含む記事のみに読み込む（`hasMathContent` で判定）。`BaseLayout` へのグローバル import はしない。
 - Web フォントは Astro Fonts API（`astro.config.ts` の `fonts` + Head の `<Font>`）で管理し、`global.css` は `var(--font-noto-sans-jp)` を参照する。`@fontsource-variable/noto-sans-jp` の直接 import はしない。preload は 124 チャンク構成のため意図的に未設定。
