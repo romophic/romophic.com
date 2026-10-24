@@ -2,9 +2,7 @@ import { SITE } from '@/consts'
 import { Resvg } from '@resvg/resvg-js'
 import { getOgImageSlug } from '@/lib/data-utils'
 import { getCollection, type CollectionEntry } from 'astro:content'
-import { createHash } from 'node:crypto'
-import { existsSync } from 'node:fs'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import satori, { type SatoriNode } from 'satori'
 
@@ -20,110 +18,23 @@ export async function getStaticPaths() {
   ]
 }
 
-// In-memory cache for the font data.
-let fontsCache: { inter: ArrayBuffer; notoSansJP: ArrayBuffer | null } | null =
-  null
-
-const FONT_CACHE_DIR = path.join(
+// Noto Sans JP Bold covers both Japanese and Latin glyphs, so this single
+// bundled font is enough and the build never needs network access.
+const FONT_PATH = path.join(
   process.cwd(),
-  'node_modules',
-  '.cache',
-  'og-fonts',
+  'public',
+  'fonts',
+  'NotoSansJP-Bold.otf',
 )
 
-async function getFonts() {
-  if (fontsCache) return fontsCache
+let fontData: ArrayBuffer | null = null
 
-  async function fetchAndCache(
-    cacheName: string,
-    url: string,
-  ): Promise<ArrayBuffer | null> {
-    const cachePath = path.join(FONT_CACHE_DIR, cacheName)
-    try {
-      if (existsSync(cachePath)) {
-        const cached = await readFile(cachePath)
-        return new Uint8Array(cached).buffer as ArrayBuffer
-      }
-      const res = await fetch(url, { signal: AbortSignal.timeout(10_000) })
-      if (!res.ok) {
-        console.warn(`Failed to fetch font ${cacheName}: ${res.statusText}`)
-        return null
-      }
-      const buf = await res.arrayBuffer()
-      await mkdir(FONT_CACHE_DIR, { recursive: true })
-      await writeFile(cachePath, new Uint8Array(buf))
-      return buf
-    } catch (e) {
-      console.warn(`Failed to load font ${cacheName}:`, e)
-      return null
-    }
+async function getFont(): Promise<ArrayBuffer> {
+  if (!fontData) {
+    const file = await readFile(FONT_PATH)
+    fontData = new Uint8Array(file).buffer as ArrayBuffer
   }
-
-  const inter = await fetchAndCache(
-    'Inter-Bold.ttf',
-    'https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf',
-  )
-  const notoSansJP = await fetchAndCache(
-    'NotoSansJP-Bold.otf',
-    'https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/SubsetOTF/JP/NotoSansJP-Bold.otf',
-  )
-
-  const primaryFont = inter ?? notoSansJP
-  if (!primaryFont) throw new Error('Failed to load a font for OG images')
-
-  fontsCache = {
-    inter: primaryFont,
-    notoSansJP: inter ? notoSansJP : null,
-  }
-  return fontsCache
-}
-
-const CACHE_DIR = path.join(
-  process.cwd(),
-  'node_modules',
-  '.cache',
-  'og-images',
-)
-
-async function getCacheFilePath(
-  slug: string,
-  hashKey: string,
-): Promise<string> {
-  if (!existsSync(CACHE_DIR)) {
-    await mkdir(CACHE_DIR, { recursive: true })
-  }
-  const hash = createHash('md5').update(hashKey).digest('hex')
-  const safeSlug = slug.replace(/[^a-z0-9]/gi, '_')
-  return path.join(CACHE_DIR, `${safeSlug}-${hash}.png`)
-}
-
-async function getCachedImage(
-  slug: string,
-  hashKey: string,
-): Promise<Buffer | null> {
-  try {
-    const filePath = await getCacheFilePath(slug, hashKey)
-    if (existsSync(filePath)) {
-      return await readFile(filePath)
-    }
-    return null
-  } catch (e) {
-    console.warn('Cache read error:', e)
-    return null
-  }
-}
-
-async function saveCachedImage(
-  slug: string,
-  hashKey: string,
-  buffer: Uint8Array,
-) {
-  try {
-    const filePath = await getCacheFilePath(slug, hashKey)
-    await writeFile(filePath, buffer)
-  } catch (e) {
-    console.warn('Cache write error:', e)
-  }
+  return fontData
 }
 
 export const GET = async ({
@@ -132,7 +43,6 @@ export const GET = async ({
   props: { post?: CollectionEntry<'blog'> }
 }) => {
   const { post } = props
-  const cacheKey = post?.id ?? 'default'
   const title = post?.data.title ?? SITE.description
   const footerText = post
     ? post.data.date.toLocaleDateString('en-US', {
@@ -143,48 +53,7 @@ export const GET = async ({
       })
     : SITE.href.replace(/^https?:\/\//, '')
 
-  const hashKey = JSON.stringify({
-    title,
-    date: post?.data.date.toISOString(),
-    siteTitle: SITE.title,
-    version: SITE.version ?? '1', // Cache buster: update via SITE config
-  })
-
-  // Try cache
-  const cachedBuffer = await getCachedImage(cacheKey, hashKey)
-  if (cachedBuffer) {
-    return new Response(new Uint8Array(cachedBuffer), {
-      headers: {
-        'Content-Type': 'image/png',
-      },
-    })
-  }
-
-  const fonts = await getFonts()
-  if (!fonts) throw new Error('Failed to load fonts')
-
-  const fontConfig: {
-    name: string
-    data: ArrayBuffer
-    weight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
-    style: 'normal' | 'italic'
-  }[] = [
-    {
-      name: 'Inter',
-      data: fonts.inter,
-      weight: 700,
-      style: 'normal',
-    },
-  ]
-
-  if (fonts.notoSansJP) {
-    fontConfig.push({
-      name: 'Noto Sans JP',
-      data: fonts.notoSansJP,
-      weight: 700,
-      style: 'normal',
-    })
-  }
+  const font = await getFont()
 
   const svg = await satori(
     {
@@ -192,12 +61,14 @@ export const GET = async ({
       props: {
         style: {
           display: 'flex',
+          flexDirection: 'column',
           height: '100%',
           width: '100%',
+          // satori >= 0.4x (Taffy) defaults to content-box, which would add
+          // the padding outside the 1200x630 canvas and clip the layout.
+          boxSizing: 'border-box',
           backgroundColor: '#121212',
           color: '#ffffff',
-          flexDirection: 'column',
-          justifyContent: 'center',
           padding: '80px',
         },
         children: [
@@ -206,52 +77,57 @@ export const GET = async ({
             props: {
               style: {
                 display: 'flex',
-                fontSize: '24px',
-                opacity: 0.8,
-                marginBottom: '20px',
-                textTransform: 'uppercase',
-                letterSpacing: '2px',
-                fontFamily: 'Inter',
-              },
-              children: SITE.title,
-            },
-          },
-          {
-            type: 'div',
-            props: {
-              style: {
-                display: 'flex',
-                fontSize: '64px',
-                fontWeight: 'bold',
-                lineHeight: 1.2,
-                fontFamily: 'Noto Sans JP, Inter',
-              },
-              children: title,
-            },
-          },
-          {
-            type: 'div',
-            props: {
-              style: {
-                display: 'flex',
-                marginTop: 'auto',
-                alignItems: 'center',
-                gap: '20px',
-                fontFamily: 'Inter',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                flex: '1',
+                width: '100%',
+                boxSizing: 'border-box',
               },
               children: [
                 {
                   type: 'div',
                   props: {
                     style: {
+                      display: 'flex',
                       fontSize: '24px',
                       opacity: 0.8,
-                      maxWidth: '1000px',
+                      marginBottom: '20px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '2px',
+                      fontFamily: 'Noto Sans JP',
                     },
-                    children: footerText,
+                    children: SITE.title,
+                  },
+                },
+                {
+                  type: 'div',
+                  props: {
+                    style: {
+                      display: 'flex',
+                      fontSize: '64px',
+                      fontWeight: 'bold',
+                      lineHeight: 1.2,
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      fontFamily: 'Noto Sans JP',
+                    },
+                    children: title,
                   },
                 },
               ],
+            },
+          },
+          {
+            type: 'div',
+            props: {
+              style: {
+                display: 'flex',
+                fontSize: '24px',
+                opacity: 0.8,
+                maxWidth: '1000px',
+                fontFamily: 'Noto Sans JP',
+              },
+              children: footerText,
             },
           },
         ],
@@ -260,17 +136,20 @@ export const GET = async ({
     {
       width: 1200,
       height: 630,
-      fonts: fontConfig,
+      fonts: [
+        {
+          name: 'Noto Sans JP',
+          data: font,
+          weight: 700,
+          style: 'normal',
+        },
+      ],
     },
   )
 
-  const resvg = new Resvg(svg)
-  const pngData = resvg.render()
-  const pngBuffer = pngData.asPng()
+  const pngData = new Resvg(svg).render().asPng()
 
-  await saveCachedImage(cacheKey, hashKey, new Uint8Array(pngBuffer))
-
-  return new Response(new Uint8Array(pngBuffer), {
+  return new Response(new Uint8Array(pngData), {
     headers: {
       'Content-Type': 'image/png',
     },

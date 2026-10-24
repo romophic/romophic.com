@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from 'vitest'
+import satori from 'satori'
 import { GET, getStaticPaths } from './[...slug].png'
 import type { CollectionEntry } from 'astro:content'
-import * as fs from 'node:fs'
-import * as fsPromises from 'node:fs/promises'
 
 vi.mock('satori', () => ({
   default: vi.fn().mockResolvedValue('<svg></svg>'),
@@ -29,39 +28,30 @@ vi.mock('astro:content', () => {
   }
 })
 
-// Properly mock node:fs and node:fs/promises for ESM
-vi.mock('node:fs', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('node:fs')>()
+function makePost(overrides: Record<string, unknown> = {}) {
   return {
-    ...actual,
-    existsSync: vi.fn().mockImplementation(actual.existsSync),
-  }
-})
+    id: 'test-post',
+    slug: 'test-post',
+    body: 'Test content',
+    collection: 'blog',
+    data: {
+      title: 'Test Blog Post',
+      date: new Date(),
+      description: 'Test description',
+      tags: ['test'],
+    },
+    render: async () => ({
+      Content: () => null,
+      headings: [],
+      remarkPluginFrontmatter: {},
+    }),
+    ...overrides,
+  } as any as CollectionEntry<'blog'>
+}
 
-vi.mock('node:fs/promises', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('node:fs/promises')>()
-  return {
-    ...actual,
-    readFile: vi.fn().mockImplementation(actual.readFile),
-    writeFile: vi.fn().mockImplementation(actual.writeFile),
-    mkdir: vi.fn().mockImplementation(actual.mkdir),
-  }
-})
-
-describe('OG Image Generation ([...slug].png.ts)', () => {
-  const originalFetch = global.fetch
-
+describe('OG Image Generation ([...slug].png)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    // vi.restoreAllMocks() does not reset vi.fn() implementations, so give the
-    // filesystem mocks a clean default before each test overrides them.
-    vi.mocked(fsPromises.writeFile).mockResolvedValue()
-    vi.mocked(fsPromises.mkdir).mockResolvedValue(undefined)
-  })
-
-  afterEach(() => {
-    global.fetch = originalFetch
-    vi.restoreAllMocks()
   })
 
   test('getStaticPaths returns one path per post plus the default image', async () => {
@@ -72,35 +62,8 @@ describe('OG Image Generation ([...slug].png.ts)', () => {
     expect(paths[2].params.slug).toBe('default')
   })
 
-  test('generates a valid PNG image bypassing cache', async () => {
-    vi.mocked(fs.existsSync).mockReturnValue(false)
-    vi.mocked(fsPromises.readFile).mockRejectedValue(new Error('Cache miss'))
-    vi.mocked(fsPromises.writeFile).mockResolvedValue()
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      arrayBuffer: async () => new Uint8Array([0x00]).buffer,
-    } as any)
-
-    // Mock blog post entry with unique title to bypass cache
-    const mockPost: CollectionEntry<'blog'> = {
-      id: 'test-post-' + Date.now(),
-      slug: 'test-post',
-      body: 'Test content',
-      collection: 'blog',
-      data: {
-        title: 'Test Blog Post ' + Date.now(),
-        date: new Date(),
-        description: 'Test description',
-        tags: ['test'],
-      },
-      render: async () => ({
-        Content: () => null,
-        headings: [],
-        remarkPluginFrontmatter: {},
-      }),
-    } as any
-
-    const response = await GET({ props: { post: mockPost } })
+  test('generates a valid PNG image for a blog post', async () => {
+    const response = await GET({ props: { post: makePost() } })
 
     expect(response).toBeInstanceOf(Response)
     expect(response.headers.get('Content-Type')).toBe('image/png')
@@ -114,134 +77,43 @@ describe('OG Image Generation ([...slug].png.ts)', () => {
   })
 
   test('generates the default image when no post prop is given', async () => {
-    vi.mocked(fs.existsSync).mockReturnValue(false)
-    vi.mocked(fsPromises.readFile).mockRejectedValue(new Error('Cache miss'))
-    vi.mocked(fsPromises.writeFile).mockResolvedValue()
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      arrayBuffer: async () => new Uint8Array([0x00]).buffer,
-    } as any)
-
     const response = await GET({ props: {} })
 
     expect(response).toBeInstanceOf(Response)
     expect(response.headers.get('Content-Type')).toBe('image/png')
   })
 
-  test('handles cache read error gracefully', async () => {
-    vi.mocked(fs.existsSync).mockReturnValue(true)
-    vi.mocked(fsPromises.readFile)
-      .mockRejectedValueOnce(new Error('Simulated read error'))
-      .mockResolvedValue(new Uint8Array([0x00]) as any)
-    vi.mocked(fsPromises.writeFile).mockResolvedValue()
+  test('renders at 1200x630 with the bundled Noto Sans JP Bold font', async () => {
+    await GET({ props: { post: makePost({ id: 'test-font-spec' }) } })
 
-    const mockPost: CollectionEntry<'blog'> = {
-      id: 'test-read-error',
-      data: { title: 'Err', date: new Date() },
-    } as any
-
-    // Should still return response by generating new image
-    const response = await GET({ props: { post: mockPost } })
-    expect(response.status).toBe(200)
-  })
-
-  test('handles font fetch failure', async () => {
-    vi.mocked(fs.existsSync).mockReturnValue(false)
-    vi.mocked(fsPromises.writeFile).mockRejectedValue(
-      new Error('Simulated write error'),
+    expect(satori).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        width: 1200,
+        height: 630,
+        fonts: [
+          expect.objectContaining({
+            name: 'Noto Sans JP',
+            weight: 700,
+            style: 'normal',
+          }),
+        ],
+      }),
     )
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      arrayBuffer: async () => new Uint8Array([0x00]).buffer,
-    } as any)
-
-    const mockPost: CollectionEntry<'blog'> = {
-      id: 'test-write-error',
-      data: { title: 'Write Err ' + Date.now(), date: new Date() },
-    } as any
-
-    const response = await GET({ props: { post: mockPost } })
-    expect(response.status).toBe(200)
   })
 
-  test('hits the image cache and returns the cached response', async () => {
-    // Mock getCachedImage hit
-    vi.mocked(fs.existsSync).mockReturnValue(true) // Cache dir exists, Cache file exists
-    vi.mocked(fsPromises.readFile).mockResolvedValue(
-      new Uint8Array([0x89, 0x50]).buffer as any,
-    )
-
-    const mockPost: CollectionEntry<'blog'> = {
-      id: 'test-cache-hit',
-      data: { title: 'Cache Hit', date: new Date() },
-    } as any
-
-    const response = await GET({ props: { post: mockPost } })
-    expect(response.status).toBe(200)
-    expect(fsPromises.readFile).toHaveBeenCalled()
-  })
-
-  test('fetches fonts when not in cache', async () => {
+  test('rejects when the bundled font cannot be read', async () => {
     vi.resetModules()
+    vi.doMock('node:fs/promises', () => ({
+      readFile: vi.fn().mockRejectedValue(new Error('font file missing')),
+    }))
+
     const { GET: freshGET } = await import('./[...slug].png')
 
-    // Force existsSync to false so it fetches fonts and creates cache dir
-    vi.mocked(fs.existsSync).mockReturnValue(false)
-
-    // Mock fetch to return success
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      arrayBuffer: async () => new Uint8Array([0x00]).buffer,
-    } as any)
-
-    const mockPost: CollectionEntry<'blog'> = {
-      id: 'test-fetch-font',
-      data: { title: 'Fetch Font', date: new Date() },
-    } as any
-
-    // Fresh module means a fresh in-memory font cache, so the fetch path runs.
     await expect(
-      freshGET({ props: { post: mockPost } }),
-    ).resolves.toBeInstanceOf(Response)
+      freshGET({ props: { post: makePost({ id: 'test-font-missing' }) } }),
+    ).rejects.toThrow('font file missing')
 
-    expect(global.fetch).toHaveBeenCalled()
-    expect(fsPromises.mkdir).toHaveBeenCalled()
-  })
-
-  test('handles fetch network error for fonts', async () => {
-    vi.resetModules()
-    const { GET: freshGET } = await import('./[...slug].png')
-
-    vi.mocked(fs.existsSync).mockReturnValue(false)
-    global.fetch = vi.fn().mockRejectedValue(new Error('Network error'))
-
-    const mockPost: CollectionEntry<'blog'> = {
-      id: 'test-fetch-network-error',
-      data: { title: 'Network Err', date: new Date() },
-    } as any
-
-    await expect(freshGET({ props: { post: mockPost } })).rejects.toThrow(
-      'Failed to load a font for OG images',
-    )
-  })
-
-  test('handles fetch non-ok response for fonts', async () => {
-    vi.resetModules()
-    const { GET: freshGET } = await import('./[...slug].png')
-
-    vi.mocked(fs.existsSync).mockReturnValue(false)
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: false,
-      statusText: 'Not Found',
-    } as any)
-
-    const mockPost: CollectionEntry<'blog'> = {
-      id: 'test-fetch-not-found',
-      data: { title: 'Not Found Err', date: new Date() },
-    } as any
-
-    await expect(freshGET({ props: { post: mockPost } })).rejects.toThrow(
-      'Failed to load a font for OG images',
-    )
+    vi.doUnmock('node:fs/promises')
   })
 })

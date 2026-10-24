@@ -9,7 +9,6 @@ export type Site = {
   locale: string
   featuredPostCount: number
   postsPerPage: number
-  version?: string
 }
 
 export type SocialLink = {
