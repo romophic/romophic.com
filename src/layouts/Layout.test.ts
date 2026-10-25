@@ -20,7 +20,6 @@ describe('Layout.astro', () => {
     expect(html).toContain('<header')
     expect(html).toContain('<main')
     expect(html).toContain('<footer')
-    expect(html).toContain('<dialog') // SearchDialog
 
     // Skip link targets a programmatically focusable main landmark
     expect(html).toContain('href="#main-content"')

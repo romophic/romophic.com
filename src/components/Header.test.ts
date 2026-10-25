@@ -17,8 +17,10 @@ describe('Header.astro', () => {
       expect(html).toContain(link.label.toLowerCase())
     }
 
-    // Check if the theme toggle or command menu button exists (search icon)
-    expect(html).toContain('aria-label="Open Command Menu"')
+    // The header offers navigation and the theme toggle; search lives on
+    // the blog list via the official pagefind component
+    expect(html).not.toContain('toggleCommandMenu')
+    expect(html).toContain('data-theme-toggle')
   })
 
   it('marks only the active section with aria-current="page"', async () => {

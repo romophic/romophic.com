@@ -5,7 +5,6 @@ import '@/styles/typography.css'
 
 import Head from '@/components/Head.astro'
 import LiquidGlassFilter from '@/components/LiquidGlassFilter.astro'
-import SearchDialog from '@/components/SearchDialog.astro'
 
 interface Props {
   htmlClass?: string
@@ -25,7 +24,6 @@ const {
   </Head>
   <body class={bodyClass}>
     <slot />
-    <SearchDialog />
     <LiquidGlassFilter />
   </body>
 </html>

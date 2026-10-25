@@ -1,6 +1,7 @@
 ---
 import BlogCard from '@/components/BlogCard.astro'
 import PageHead from '@/components/PageHead.astro'
+import Search from 'astro-pagefind/components/Search.astro'
 
 import Layout from '@/layouts/Layout.astro'
 import { groupPostsByYear } from '@/lib/data-utils'
@@ -31,6 +32,13 @@ const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
       ? `Page ${page.currentPage} of posts tagged with ${currentTag}`
       : `Page ${page.currentPage} of all blog posts`}
   />
+
+  <div class="pagefind-search pt-1">
+    <Search
+      className="pagefind-ui w-full"
+      searchboxOptions={{ 'show-sub-results': true }}
+    />
+  </div>
 
   <div
     class="flex min-h-[calc(100vh-18rem)] flex-col gap-y-8"

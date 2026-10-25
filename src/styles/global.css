@@ -228,3 +228,26 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Pagefind official search UI, themed with the site tokens (light). */
+.pagefind-ui {
+  --pf-font: var(--font-sans);
+  --pf-text: var(--foreground);
+  --pf-text-secondary: var(--foreground);
+  --pf-text-muted: var(--foreground);
+  --pf-background: var(--background);
+  --pf-border: var(--border);
+  --pf-border-focus: var(--ring);
+  --pf-hover: var(--accent);
+  --pf-mark: var(--foreground);
+  --pf-border-radius: var(--radius);
+  --pf-outline-focus: var(--ring);
+  --pf-searchbox-max-width: 100%;
+  --pf-searchbox-dropdown-max-height: min(60dvh, 28rem);
+}
+
+.pagefind-ui .pf-searchbox-result-excerpt mark {
+  background-color: color-mix(in oklab, var(--primary) 20%, transparent);
+  color: var(--foreground);
+  font-weight: 600;
+}
