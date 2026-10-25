@@ -1,7 +1,6 @@
 ---
 import Backlinks from '@/components/Backlinks.astro'
 import GiscusComments from '@/components/GiscusComments.astro'
-import KatexStyles from '@/components/KatexStyles.astro'
 import MdxImageCaption from '@/components/MdxImageCaption.astro'
 import PageHead from '@/components/PageHead.astro'
 import PostHeader from '@/components/PostHeader.astro'
@@ -11,7 +10,6 @@ import SubpostsHeader from '@/components/SubpostsHeader.astro'
 import TOCHeader from '@/components/TOCHeader.astro'
 import TOCSidebar from '@/components/TOCSidebar.astro'
 import Layout from '@/layouts/Layout.astro'
-import { hasMathContent } from '@/lib/content/math'
 import {
   getOgImageSlug,
   getParentId,
@@ -28,7 +26,6 @@ interface Props {
 
 const { post } = Astro.props
 const currentPostId = post.id
-const hasMath = hasMathContent(post.body)
 const inferredParentId = getParentId(post)
 const { Content, headings } = await render(post)
 
@@ -50,7 +47,6 @@ const ogImageUrl = `/og/${getOgImageSlug(post.id)}.png`
 ---
 
 <Layout>
-  {hasMath && <KatexStyles />}
   <PageHead slot="head" post={post} image={ogImageUrl} />
   {
     (hasChildPosts || isCurrentSubpost) && (
